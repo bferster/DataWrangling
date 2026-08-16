@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "double-metaphone": "^2.0.1"
+  }
+}

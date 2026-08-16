@@ -1,0 +1,11 @@
+# Ignore image and asset data folders
+img/
+**/img/
+
+# Large database dumps (>100MB exceeds GitHub limit)
+*.sql
+**/*.sql
+
+# Node modules
+node_modules/
+**/node_modules/

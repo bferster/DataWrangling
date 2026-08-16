@@ -1,0 +1,897 @@
+id,county,report_date,family_id,residence,husband_first_name,husband_last_name,wife_first_name,wife_last_name,husband_age,wife_age,husband_birthplace,wife_birthplace,husband_occupation,number_of_children,original_remarks,created_at,updated_at
+1,augusta,1866-04-24,2,,Henry,Taylor,Jennie,Erdew,,,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+2,augusta,1866-05-29,175,Staunton,Cato,Boyd,Nanneral,Crawford,40,23,"Augusta Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+3,augusta,1866-04-26,13,,Ausellers,Gibson,Eliza,How,39,43,"Rockingham Co., VA","Fauquier Co., VA",Farmer & Laborer,2,"2 girls, Nancy ag 5, Magaureh ag 3",2022-03-04 19:44:19,2022-03-04 19:44:19
+4,augusta,1866-04-27,15,,Joshua,Brojan,Sarah,Spencer,45,,"Rockingham Co., VA","Shenandoah Co., VA",Farmer & Laborer,2,"2 girls, Elizabeth E. 23, Ann Eliza",2022-03-04 19:44:19,2022-03-04 19:44:19
+5,augusta,1866-04-27,16,,Stephen,,Geneffar,,56,,"Nelson Co., VA","Nelson Co., VA",Farmer & Laborer,6,Boy,2022-03-04 19:44:19,2022-03-04 19:44:19
+6,augusta,1866-04-27,17,,Thomas,Cook,Jane,Pena,32,20,"Charles Co., MO","Rockingham Co., VA",Farmer & Laborer,1,Sam Henry 10 Yr.,2022-03-04 19:44:19,2022-03-04 19:44:19
+7,augusta,1866-04-27,18,,St. Clair,Gibson,Lucy J.,Gordon,45,,"Rockingham Co., VA","Rockingham Co., VA",Wagon Maker,1,Boy William 2 years,2022-03-04 19:44:19,2022-03-04 19:44:19
+8,augusta,1866-04-28,19,,Isaac,Pryemus,Eow,Johnson,56,,"Warren Co., VA","Shenandoah Co., VA",Farmer & Laborer,5,6 children,2022-03-04 19:44:19,2022-03-04 19:44:19
+9,augusta,1866-04-29,20,,Malson,Snyder,Francis,Jones,32,,"Madison Co., VA","Augusta Co., VA",Blacksmith,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+10,augusta,1866-04-30,21,,Geo.,Herberons *,Cynthia,,37,,"Albemarle Co., VA","Albemarle Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+11,augusta,1866-04-30,22,,Willis,Caor,,,,,"Madison Co., VA",,Laborer,9,Does not hor with any children *,2022-03-04 19:44:19,2022-03-04 19:44:19
+12,augusta,1866-04-30,23,,Henry,Atkins,,,33,,"Rockingham Co., VA",,Laborer,2,Children,2022-03-04 19:44:19,2022-03-04 19:44:19
+13,augusta,1866-04-30,24,,Chas,Fields,,,30,,"Rockingham Co., VA",,Laborer,6,Children,2022-03-04 19:44:19,2022-03-04 19:44:19
+14,augusta,1866-04-30,26,,Moses,Settlis,Eliza,Snowden,,,"Fauquier Co., VA","Fauquier Co., VA",Mason,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+15,augusta,1866-04-30,30,,Jefferson,Banks,Eveliny W.,Ross,45,,"Augusta Co., VA","Rockingham Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+16,augusta,1866-04-30,31,,Benjamin,Rice,Pleasant,Fields,,,"Rockingham Co., VA","Rockingham Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+17,augusta,1866-04-30,32,,Isaac,Harvey,Evelyn,,,,"Greene Co., VA","Rockingham Co., VA",Laborer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+18,augusta,1866-04-30,35,,John,Napier,Mary,Broch,50,45,"Augusta Co., VA","Augusta Co., VA",Laborer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+19,augusta,1866-04-30,38,,Stephan,Miller,Lucinda,,47,45,"Rockingham Co., VA","Fauquier Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+20,augusta,1866-05-01,39,,Richard,Harvey,Sarah,Jackson,27,25,"Rockingham Co., VA","Highland Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+21,augusta,1866-05-01,43,,Saml.,Temple,Esther,Smith,27,22,"Rockingham Co., VA","Rockingham Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+22,augusta,1866-05-01,44,,Henry,Taylor,Julia,Cave,50,50,"Spotsylvania Co., VA","Rockingham Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+23,augusta,1866-05-01,46,,Abel,Moon,Elizabath,,30,,"Rockingham Co., VA","Rockingham Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+24,augusta,1866-05-01,47,,Gustin,Brown,Georgie,Anna,23,20,"Albemarle Co., VA","Albemarle Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+25,augusta,1866-05-02,48,,Wm.,Branson,Mary,Temple,30,26,"Rockingham Co., VA","Rockingham Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+26,augusta,1866-05-02,50,,Michael,Smith,Mary,Sales,35,23,"Rockingham Co., VA","Rockingham Co., VA",Laborer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+27,augusta,1866-05-02,52,,Geo.,Butler,Louisa,Coor,,,"Rockingham Co., VA",Maryland,Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+28,augusta,1866-05-02,53,,Jerry,Gladval,Reina,,22,21,"New Market, VA","Augusta Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+29,augusta,1866-05-03,54,,Levi,Long,Esther,Walker,46,35,"Greene Co., VA","Greene Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+30,augusta,1866-05-04,55,,Geo.,Blakey,Fanny,Francis,40,38,"Rockingham Co., VA","Rockingham Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+31,augusta,1866-05-05,58,,Archie,Olden,Sophia,,60,60,"Rockingham Co., VA","Rockingham Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+32,augusta,1866-05-05,59,,David,Roads,Catherine,,51,40,Kentucky,"Louisa Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+33,augusta,1866-05-05,60,,Harvey,Skinner,Nancy,Smith,37,31,"Rockingham Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+34,augusta,1866-05-05,62,"Mount Clinton, Rockingham Co.",Edward,Graves,Lucy,Washington,35,35,"Culpeper Co., VA","Fauquier Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+35,augusta,1866-05-05,63,Muddy Creek,James,Washington,F. E.,Reed,45,,"Fauquier Co., VA","Fauquier Co., VA",Laborer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+36,augusta,1866-05-05,65,Muddy Creek,Esquire,Pollard,Celena,,34,39,"Rockingham Co., VA","Augusta Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+37,augusta,1866-05-05,67,Harrisonburg,Wm.,Ervin,Mary,Kenney,,,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+38,augusta,1866-05-05,68,Harrisonburg,Thornton,Watson,Nancy,Eddings,41,40,"Orange Co., VA","Greene Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+39,augusta,1866-05-07,69,Lindlis Green,Lowa,Smith,Ellen,Rice,31,23,"Shenandoah Co., VA","Rockingham Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+40,augusta,1866-05-08,70,Harrisonburg,Jacob,Fisher,Adelia,Randolph,27,20,"Morefield, VA","Clarke Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+41,augusta,1866-05-10,71,Mount Crawford,Thornton,Green,Hannah,,51,51,"Greene Co., VA","Rockingham Co., VA",Shoe Master,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+42,augusta,1866-05-10,72,,Lewis,Hall,Henrietta,,39,22,"Orange Co., VA","Hardy Co., WV",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+43,augusta,1866-05-10,73,Lindlis Green,David,Connolly,Vina,Letterbury,50,31,"Rockingham Co., VA","Rockingham Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+44,augusta,1866-05-10,74,Lindlis Green,Antony,Spears,Feby,,63,50,"Albemarle Co., VA",Maryland,Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+45,augusta,1866-05-10,75,War Branch,Robert,Rice,Sarah,Vena,54,42,"Rockingham Co., VA","Augusta Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+46,augusta,1866-05-10,77,Harrisonburg,Beem *,Jones,,,50,,"Greene Co., VA",,Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+47,augusta,1866-05-11,78,Megagesville *,Wm.,Steimburger,Sarah,Hustrom,52,40,"Loudoun Co., VA","Rockingham Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+48,augusta,1866-05-11,79,Megagesville *,Madison,Harrison,Kezriah,,50,40,"Albemarle Co., VA","Albemarle Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+49,augusta,1866-05-11,80,Coopers Mountain,James,Madison,Sarah,Vena,52,51,"Rockingham Co., VA",Kentucky,Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+50,augusta,1866-05-12,81,Antioch Church,Joseph,Gaines,Jane,Hall,28,,"Rockingham Co., VA","Orange Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+51,augusta,1866-05-12,82,Antioch Church,Ruben,Smith,Rachel,Hall,30,27,"Shenandoah Co., VA","Orange Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+52,augusta,1866-05-12,83,Fellowship Church,Fry*,Oldham,Nancy,Green,40,45,"Rockingham Co., VA","Spotsylvania Co., VA",Laborer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+53,augusta,1866-05-12,86,Muddy Creek,Nathan,Harris,Elizebath,,25,23,"Rockingham Co., VA","Rockingham Co., VA",Blacksmith,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+54,augusta,1866-05-13,88,Connly's Sham,Garland,Green,Catherine,Brookins,26,24,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+55,augusta,1866-05-13,89,Connly's Sham,Harrison S.,Green,Gaberilla,Brookins,22,22,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+56,augusta,1866-05-14,90,New Meghaghesin,Ovid,Williams,Amanda,Stenarp*,55,34,"Fauquier Co., VA","Rockingham Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+57,augusta,1866-05-14,91,Fulriers Township*,Frankain,Murray,Lucy,Smith,55,57,"Greene Co., VA","Madison Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+58,augusta,1866-05-14,92,"Fenriers' Furnace, Rockingham Co.",Willis,Jones,Margaret Ann,,35,29,"Page Co., VA","Shenandoah Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+59,augusta,1866-05-14,94,Free ------- *,George,Barnum,Mary,,30,23,"Rockingham Co., VA","Greene Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+60,augusta,1866-05-14,95,17 miles East,Brown,Fraser,Emily,Olden,30,30,"Rockingham Co., VA","Rockingham Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+61,augusta,1866-05-14,96,Ela Ran Church,Oliver,Ceasar,Estatike*,Jacobs,30,28,"Rockingham Co., VA","Rockingham Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+62,augusta,1866-05-14,97,Ela Ran Church,Thornton,Tolivor,Julia Ann,,52,48,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+63,augusta,1866-05-14,98,Ela Ran Church,Strother,Jacobs,Anna,Becks,41,32,"Rockingham Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+64,augusta,1866-05-14,99,Elk Widow Cridlys*,Shadrack,Butler,Caroline,Miller,54,44,"Rockingham Co., VA","Rockingham Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+65,augusta,1866-05-14,100,Elk Widow Cridlys*,Jno H.,Ware,Evelyn,Connolly,25,20,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+66,augusta,1866-05-14,101,Elk Widow Cridlys*,Robt B.,Tuxen,Mary J.,Beecks,26,21,"Page Co., VA","Rockingham Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+67,augusta,1866-05-14,102,Elk Widow Cridlys*,Jeremiah,Oates,Nellie,,50,40,"Page Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+68,augusta,1866-05-15,105,Conrads Store,Kelison,Jacobs,Caroline,Henderson,38,35,"Rockingham Co., VA","Rockingham Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+69,augusta,1866-05-15,106,Conrads Store,Benj,Henderson,Sylvia,,,,"Rockingham Co., VA","Page Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+70,augusta,1866-05-15,107,Fridens Church,Henry,Johnson,Winnie,Jackson,40,36,"Rockingham Co., VA","Page Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+71,augusta,1866-05-16,108,Elk Run Church,Isaac,Jacobs,Francis,Becks,45,40,"Rockingham Co., VA","Rockingham Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+72,augusta,1866-05-16,109,Elk Run Church,Spencer,Williams,Darcy,,60,58,"Rockingham Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+73,augusta,1866-05-19,110,Macgahesville,Nathaniel,Berry,Ann,,35,32,"Madison Co., VA","Rockingham Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+74,augusta,1866-05-19,111,Macgahesville,Isaac,Maurice,Caroline,Snyder,50,39,"Rockingham Co., VA","Rockingham Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+75,augusta,1866-05-19,112,Macgahesville,Julins,Walker,Mary,Gilmore,39,,"Culpeper Co., VA","Rockingham Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+76,augusta,1866-05-19,113,Mount Crawford,Willis,Wise,Mary Ann,Snowden,45,44,"Rockingham Co., VA","Rockingham Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+77,augusta,1866-05-19,114,Mount Crawford,William,Beals,Ellen,Snowden,35,28,"Rockingham Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+78,augusta,1866-05-28,118,Staunton,James,Payne,Matilda,Lee,39,39,"Gloucester Co., VA","Augusta Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+79,augusta,1866-05-28,119,Staunton,Henry,Brown,Sophia,Pollard,36,25,"Prince George Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+80,augusta,1866-05-28,121,Staunton,Aaron,Shovler,Martha,Burrows,36,35,"Botetourt Co., VA","Fauquier Co., VA",Shoemaker,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+81,augusta,1866-05-28,122,Staunton,Benjamin,Madison,Jane,Boyd,,,"Rockbridge Co., VA","Augusta Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+82,augusta,1866-05-28,123,Staunton,Benjamin,Bragg,Maria,Brown,50,35,"Eastport, VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+83,augusta,1866-05-28,124,Staunton,Jacob,Thornton,Rachel,Mitchell,45,36,"Augusta Co., VA","Augusta Co., VA",Hotel Servant,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+84,augusta,1866-05-28,125,Staunton,Oscar,Maurice,Mary S.,Hawkins,29,18,"Orange Co., VA","Botetourt Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+85,augusta,1866-05-28,126,Fishersville,John,Williams,Milly A.,Henderson,,,"Nelson Co., VA","Nelson Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+86,augusta,1866-05-28,127,Fishersville,Addison,Day,Susan Ann,Hawkin,30,20,"Northumberland Co., VA","Amelia Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+87,augusta,1866-05-28,128,Staunton,Joseph,Walker,Melinda,Walker,29,32,"Augusta Co., VA","Clarke Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+88,augusta,1866-05-28,129,Staunton,William H.,Haines,Mary F.,Bolden,32,22,"Norfolk, VA","Augusta Co., VA",Porter,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+89,augusta,1866-05-28,131,Staunton,Nelson,Irvin,Maria,Harden,60,45,"Augusta Co., VA","Highland Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+90,augusta,1866-05-28,135,Bridgewater,Marvin,Hall,Elizebath,Washington,40,25,"Rockingham Co., VA","Fauquier Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+91,augusta,1866-05-28,136,Staunton,William,Denny,Sarah,Margaret,47,47,"Augusta Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+92,augusta,1866-05-28,138,Staunton,John,Jackson,,,60,,"Alleghany Co., VA",,Chair Maker,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+93,augusta,1866-05-28,139,Willow Spout,Joseph,Black,Betsey,Morris,48,38,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+94,augusta,1866-05-28,141,Staunton,James,Carter,Mary,Jones,27,25,"Henrico Co., VA",Maryland,Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+95,augusta,1866-05-28,143,Staunton,Brayton,Fields,Martha Jane,Smith,44,34,"Henrico Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+96,augusta,1866-05-28,144,Staunton,Henry,Taylor,Sallie,Yancey,26,22,"Albemarle Co., VA","Albemarle Co., VA",Cook,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+97,augusta,1866-05-28,146,Staunton,Conway,Ellis,Margaret,Jones,31,25,"Albemarle Co., VA","Greene Co., VA",Teamster,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+98,augusta,1866-05-28,148,Staunton,Phelan,Raglin,,,40,,"Albemarle Co., VA",,Shoemaker,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+99,augusta,1866-05-28,152,Staunton,Phillip,Roselle,Fanny,Jones,48,40,"Augusta Co., VA","Augusta Co., VA",Butcher,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+100,augusta,1866-05-28,155,Staunton,Thomas,Tucker,Sarah,Washington,49,49,"Augusta Co., VA","Spotsylvania Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+101,augusta,1866-05-28,156,Spring Hill,George,Jams,Ann,Carr,,,"Nashville, TN","Snow Hill, NC",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+102,augusta,1866-05-28,157,Staunton,Shadrack,Irwin,Elsi,Roman,60,35,"Augusta Co., VA","Augusta Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+103,augusta,1866-05-28,158,Staunton,George,Davis,Lynda,Brown,41,47,"Nelson Co., VA","Spotsylvania Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+104,augusta,1866-05-28,159,Staunton,John,Davis,Emily,Jackson,41,36,"Nelson Co., VA","Greenbrier Co., WV",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+105,augusta,1866-05-28,160,Staunton,Alex,Jefferson,Anna,Dickerson,46,46,"Augusta Co., VA","Hanover Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+106,augusta,1866-05-28,164,Staunton,John,Bumgarner,Caroline,Minor,38,38,"Augusta Co., VA","Augusta Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+107,augusta,1866-05-29,165,Staunton,Benjamin,Downing,Francis,Ware,62,54,"Augusta Co., VA","Georgetown, DC",Laborer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+108,augusta,1866-05-29,166,Staunton,Charles,Brown,Sallie,Goodrich,70,59,"Augusta Co., VA","Orange Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+109,augusta,1866-05-29,167,Staunton,William,Monroe,Martha A.,Wayland,48,,"Augusta Co., VA","Augusta Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+110,augusta,1866-05-29,168,Staunton,Patrick,Carter,Sarah,Cerdig,35,60,"Nelson Co., VA","Prince William Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+111,augusta,1866-05-29,169,Staunton,Ralph,Waites,Louisa,Randal,42,48,"Albemarle Co., VA","Albemarle Co., VA",Laborer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+112,augusta,1866-05-29,171,Staunton,Charles,Thompson,Eva,White,42,34,"Augusta Co., VA","Greene Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+113,augusta,1866-05-29,172,Staunton,Fleming,Parish,Fanny,Finley,55,55,"Louisa Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+114,augusta,1866-05-29,173,Staunton,David,Davenport,Sarah,Shelton,45,39,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+115,augusta,1866-05-29,176,Staunton,Samuel,Henry,Jane,Beard,75,75,"Louisa Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+116,augusta,1866-05-29,177,Staunton,Gabriel,Payne,Ann,Page,63,50,"Gloucester Co., VA","Greenbrier Co., WV",Laborer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+117,augusta,1866-05-29,182,Staunton,Wesley,Rhoads,Mary,Grever,28,25,"Albemarle Co., VA","Albemarle Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+118,augusta,1866-05-29,183,Staunton,Robert,Johnson,Sallie,Holmes,36,30,"King William Co., VA","King William Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+119,augusta,1866-05-29,184,Staunton,Elijah,Jones,Betsey,Broolins,47,50,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+120,augusta,1866-05-29,185,Staunton,Thomas,Tunby,Mary,Brooks,26,23,"Spotsylvania Co., VA","Augusta Co., VA",Gardner,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+121,augusta,1866-05-29,186,Staunton,Collins,Scott,Mary,Martin,33,22,"Augusta Co., VA","Rockbridge Co., VA",Barber,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+122,augusta,1866-05-29,187,Staunton,John,Briggs,Fanny,Briggs,,,"Augusta Co., VA","Nelson Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+123,augusta,1866-05-29,188,Staunton,John,Occard,Betsey,Fenly,,,"Augusta Co., VA","Augusta Co., VA",Servant,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+124,augusta,1866-05-29,189,Staunton,John,Bell,Lizzie,Burns,23,20,"Point Pleasant, WV","Bath Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+125,augusta,1865-05-29,191,Staunton,Henry,Brown,Alice,Smith,41,29,"Jefferson Co., WV","Loudoun Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+126,augusta,1866-05-29,192,Staunton,Henry,Lewis,Sarah,Jackson,30,22,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+127,augusta,1866-05-29,193,Harbor Hill,Elick,Bumgarner,Louisa,Davenport,37,39,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+128,augusta,1866-05-29,194,Staunton,Thomas,Crowley,Ann,Watson,36,32,"Clarke Co., VA","Augusta Co., VA",Waiter,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+129,augusta,1866-05-29,195,Staunton,Scott,Woods,Fanny,Lewis,55,32,"Albemarle Co., VA","Buckingham Co., VA",Whitewasher,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+130,augusta,1866-05-29,197,Staunton,John,Napier,Francis,Shelton,49,35,"Augusta Co., VA","Augusta Co., VA",Whitewasher,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+131,augusta,1866-05-29,198,Staunton,Henry,Paris,Aurena,Coston,26,23,"Albemarle Co., VA","Clarke Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+132,augusta,1866-05-29,200,Staunton,Thornton,Burgis,Caroline,Burgis,52,46,"Augusta Co., VA","Augusta Co., VA",Gardner,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+133,augusta,1866-05-29,202,Staunton,John,Ashly,Martha A.,Davis,32,,"Frederick Co., VA","Loudoun Co., VA",Stage Driver,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+134,augusta,1866-05-29,204,Middlebook,George,Pryor,Anna,Warsick,48,35,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+135,augusta,1866-05-29,207,Staunton,Edmun,Mitchel,Fanly,Lewis,26,25,"Grayson Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+136,augusta,1866-05-29,208,Staunton,Charles,Jackson,Serena,Chambers,47,45,"Augusta Co., VA","Augusta Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+137,augusta,1866-05-29,209,Staunton,Clayton,Brown,Francis,Shelton,37,34,"Augusta Co., VA","Augusta Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+138,augusta,1866-05-29,210,Staunton,James,Scott,Esther,Crawford,46,49,"Albemarle Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+139,augusta,1866-05-29,211,Staunton,Edward,Cage,Edith,Brown,48,52,"Augusta Co., VA","Henrico Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+140,augusta,1866-05-29,214,Staunton,James,Smith,Betsy,Woodford,43,42,"Rockbridge Co., VA","Bath Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+141,augusta,1866-05-29,215,Staunton,Richard,Kinney,Lucy,Mitchel,25,20,"Augusta Co., VA","Augusta Co., VA",Gardner,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+142,augusta,1866-05-29,216,Staunton,Philander,Ransom,Sarah,Mims,58,56,"Augusta Co., VA","Fluvanna Co., VA",Laborer,5,Briscoe Baldwin - Staunton,2022-03-04 19:44:19,2022-03-04 19:44:19
+143,augusta,1866-05-29,217,Staunton,Harman,Green,Eliza,Hawkins,26,22,"Albemarle Co., VA","Albemarle Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+144,augusta,1866-05-29,219,Newtown,Addison,Stewart,Eliza J.,Napier,37,36,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+145,augusta,1866-05-29,222,Staunton,Henry,Davis,Becky,Washington,25,22,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+146,augusta,1866-05-29,223,Staunton,Robert,Madison,Martha,Huchs,35,36,"Augusta Co., VA","Rockbridge Co., VA",Servant,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+147,augusta,1866-05-29,224,Staunton,Richard,Bayler,Martha E.,Gains,36,25,"Augusta Co., VA","Augusta Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+148,augusta,1866-05-29,225,Staunton,Henry,Jackson,Emma,Green,31,29,"Augusta Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+149,augusta,1866-05-29,226,Staunton,Washington,Ellis,Ellis,Smith,60,40,"Richmond, VA","Madison Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+150,augusta,1866-05-30,227,Deerfield,Joshua,Nellings,Lilly,Hicks,70,70,"Louisa Co., VA","Prince Edward Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+151,augusta,1866-05-30,229,Staunton,Thomas,Kenny,Rachel,Todd,40,42,"Augusta Co., VA","Rockbridge Co., VA",Wagoner,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+152,augusta,1866-05-30,230,Staunton,Chesterfield,Bolden,Eliza,Jefferson,51,53,"Augusta Co., VA","Augusta Co., VA",Servant,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+153,augusta,1866-05-30,231,Staunton,Jerry,Frite,Malinda,Frite,30,30,"Louisa Co., VA","Fauquier Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+154,augusta,1866-05-30,232,Staunton,Cornelius,Jefferson,Cornelia,Martin,27,30,"Augusta Co., VA","Albemarle Co., VA",Saloon Keeper,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+155,augusta,1866-05-30,234,Staunton,Nathan,Greaver,Lonisa C.,Wilson,40,42,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+156,augusta,1866-05-30,235,Staunton,George,Washington,Charlotte,Cole,50,46,"Campbell Co., VA","Spotsylvania Co., VA",Laborer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+157,augusta,1866-05-30,237,Moss Creek,William,Walker,Sarah,Dodson,48,,"Rappahannock Co., VA","Pendleton Co., WV",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+158,augusta,1866-05-30,238,Moss Creek,Isaac,Miller,Sophia,Muffit,65,69,"Augusta Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+159,augusta,1866-05-30,239,Churchville,Samuel,Jackson,Amy,Whitson,38,35,"Augusta Co., VA","Augusta Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+160,augusta,1866-05-30,242,Staunton,Silky,Dunnings,Fanny,Stewart,26,26,"Franklin Co., VA","Augusta Co., VA",Carpenter,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+161,augusta,1866-05-30,243,Staunton,Edward,Pleasant,Patsey,Spriggs,43,43,"Bath Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+162,augusta,1866-05-30,246,Staunton,Shadrack,Jackson,Louisa,Bryan,40,36,"Spotsylvania Co., VA","Rockbridge Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+163,augusta,1866-05-30,247,Staunton,William,Brown,Betty,Murdy,26,23,"Hanover Co., VA","Prince Edward Co., VA",Wagoner,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+164,augusta,1866-05-30,248,Staunton,David,Lewis,Louisa,,70,50,"Goochland Co., VA",Virginia,Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+165,augusta,1866-05-30,250,Staunton,John W.,Washington,Ann M.,Brookins,25,22,Greenbrier Co. WV,"Augusta Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+166,augusta,1866-05-30,252,Staunton,James W.,Carter,Mary A.,Dillard,36,,"Augusta Co., VA","Amherst Co., VA",Gardner,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+167,augusta,1866-05-30,253,Staunton,Cyrus,Carter,Susan,Bird,,56,"Frederick Co., VA","Frederick Co., VA",Blacksmith,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+168,augusta,1866-05-30,254,Staunton,John,Stripling,Catherine,Boyers,23,22,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+169,augusta,1866-05-30,255,Staunton,Frank,Obleton,Lucinda,Crawford,45,44,"Augusta Co., VA","Augusta Co., VA",Servant,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+170,augusta,1866-05-30,256,Staunton,Crawford,McGuire,Mary,Henderson,32,19,"Spotsylvania Co., VA","Spotsylvania Co., VA",Cook,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+171,augusta,1866-05-30,258,Staunton,James A.,Carter,Ann,Overton,26,,"Henrico Co., VA","Augusta Co., VA",Waiter,2,Put stamp on at his request,2022-03-04 19:44:19,2022-03-04 19:44:19
+172,augusta,1866-05-30,259,Staunton,York,Kid,Martha,Wells,49,35,"Albemarle Co., VA","Albemarle Co., VA",Brick Moulder,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+173,augusta,1866-05-30,260,Staunton,Henry,Braxton,Caroline,Rhoads,46,35,"Nelson Co., VA","Albemarle Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+174,augusta,1866-05-30,261,Staunton,Edward,Hill,Maria,Ware,36,33,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+175,augusta,1866-05-31,263,Staunton,Simon,Trier,Lucy,Boxby,45,30,"Louisa Co., VA","Louisa Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+176,augusta,1866-05-31,264,Staunton,Warick,Page,Betsy Ann,,50,30,"Albemarle Co., VA","Albemarle Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+177,augusta,1866-05-31,265,Staunton,Daniel,Stribbling,Fanny,Johnson,39,27,"Augusta Co., VA",Kentucky,Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+178,augusta,1866-05-31,266,Staunton,Grayson,Brown,Evelyn,Truss,28,30,"Spotsylvania Co., VA","Augusta Co., VA",Hostler,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+179,augusta,1866-05-31,267,Staunton,Andrew,Jackson,Sallie,Coleman,30,28,"Greene Co., VA","Augusta Co., VA",Laborer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+180,augusta,1866-05-31,268,Staunton,Albert,Timlick,Malinda,Props,27,,"Louisa Co., VA","Augusta Co., VA",Wagoner,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+181,augusta,1866-05-31,269,Staunton,Robert,Franklin,Kitty,Franklin,45,40,"Frederick Co., VA","Culpeper Co., VA",Laborer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+182,augusta,1866-05-31,270,Staunton,Aaron,Crawford,Hannah,Craig,74,60,"Augusta Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+183,augusta,1866-05-31,273,Westfield,Douglas,Bates,Dochie,Gallaway,38,37,"Prince Edward Co., VA",North Carolina,Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+184,augusta,1866-06-22,814,Parnassas,Henry,Bird,Sallie,Dorcas,22,24,"Rockingham Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+185,augusta,1866-05-31,274,Staunton,John,Johnson,Charlotte,Taylor,35,28,"Augusta Co., VA","Augusta Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+186,augusta,1866-05-31,275,Staunton,Jefferson,Cram,Ellen,Ware,58,,"Augusta Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+187,augusta,1866-05-31,276,Staunton,Hamilton,Stewart,Ann,Smith,32,34,"Augusta Co., VA","Greene Co., VA",Wagoner,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+188,augusta,1866-05-31,277,Staunton,David,Randal,Elizebath,Maurice,62,,"Augusta Co., VA","Augusta Co., VA",Gardner,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+189,augusta,1866-05-31,278,Staunton,Simon,Mayhew,Evelyn,Taylor,46,45,"Powhatan Co., VA",,Whitewasher,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+190,augusta,1866-05-31,279,Staunton,William,Gemings,Margaret,Stewart,29,25,"Warren Co., VA","Rockingham Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+191,augusta,1866-05-31,280,Staunton,Benjamin,Walker,Ada,Fuller,40,25,"Augusta Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+192,augusta,1866-05-31,281,Staunton,Alfred,Smith,Ada,Vaughn,45,,"Madison Co., VA","Nelson Co., VA",Tanner,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+193,augusta,1866-05-31,282,Mint Spring,Moses,White,Maria,Stewart,32,22,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+194,augusta,1866-05-31,284,Staunton,James,Burgey,Fanny,Waites,49,33,"Augusta Co., VA","Augusta Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+195,augusta,1866-05-31,285,Staunton,Charles,Brown,,,63,,"Albemarle Co., VA",,Shoemaker,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+196,augusta,1866-05-31,286,Staunton,David,White,Alice,Reeves,39,38,"Louisa Co., VA","Spotsylvania Co., VA",Laborer,4,Canceled not legal,2022-03-04 19:44:19,2022-03-04 19:44:19
+197,augusta,1866-05-31,288,Staunton,Joseph,Burnes,Mary,Kimberly,55,30,"Augusta Co., VA","Alleghany Co., VA",Stage Driver,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+198,augusta,1866-05-31,290,Staunton,Henry,Grayson,Emily,Watson,34,28,"Augusta Co., VA","Augusta Co., VA",Gardner,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+199,augusta,1866-06-01,291,Staunton,William,Banks,Ann,Scaffer,43,,"Clarke Co., VA","Augusta Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+200,augusta,1866-06-01,292,Staunton,Charles,Wimgardner,,,77,,"Augusta Co., VA",,Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+201,augusta,1866-06-01,293,Staunton,William,Johnson,Margaret,Kenny,36,22,"Augusta Co., VA","Augusta Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+202,augusta,1866-06-01,294,Staunton,Patrick,Jones,,,48,,"Louisa Co., VA",,Wagoner,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+203,augusta,1866-06-01,295,Willow Spout,William W.,Hall,Emily,Henderson,35,,"Frederick Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+204,augusta,1866-06-01,298,Moss Creek,Nelson,Smith,Mary J.,Carty,27,25,"Augusta Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+205,augusta,1866-06-01,300,Staunton,Addison,King,Amy,,26,22,"Augusta Co., VA","Clarke Co., VA",Waiter,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+206,augusta,1866-06-01,301,Staunton,Monroe,Trust,Rachel,Carr,27,25,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+207,augusta,1866-06-01,302,Buffalo Gap,Christopher,Matthews,Charity,Teford,48,38,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+208,augusta,1866-06-01,303,Rock Spring,Robert,Lewis,Martha,Johnson,27,26,"Rockingham Co., VA","Hanover Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+209,augusta,1866-06-02,304,Staunton,Thomas,Bethel,Jane,Harris,53,30,"Nelson Co., VA","Rockbridge Co., VA",Hostler,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+210,augusta,1866-06-02,305,Staunton,Joseph,,Ann,Grayson,41,32,"Wayne, WV","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+211,augusta,1866-06-02,306,Staunton,Martin,Hill,Millie,Waits,39,35,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+212,augusta,1866-06-02,309,Staunton,Jerry,White,Rachel,Williams,23,29,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+213,augusta,1866-06-02,310,Staunton,Lewis,Hill,Fanny,Green,33,30,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+214,augusta,1866-06-02,312,Staunton,Joseph,Wilson,Mary,Burgy,26,21,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+215,augusta,1866-06-02,314,Willow Spout,Saml S.,Barts,Amanda C.,Black,42,39,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+216,augusta,1866-06-02,315,Willow Spout,James,Parrot,Janet,Parrot,23,21,"Albemarle Co., VA","Greene Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+217,augusta,1866-06-02,317,Willow Spout,Lewis,Bell,Harriet,Galbiry*,35,22,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+218,augusta,1866-06-02,319,Mount Sidney,George,Stribbling,Sarah,Carter,27,23,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+219,augusta,1866-06-02,320,Willow Spout,Eli,Talton,Mary J.,Taylor,40,42,"Rockingham Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+220,augusta,1866-06-02,323,Staunton,Osbord,Propps,Rachel,Valentine,44,,Maryland,,Farmer,6,wife dead,2022-03-04 19:44:19,2022-03-04 19:44:19
+221,augusta,1866-06-02,324,Westview,Robert,Ellis,Becky,Trimble,52,,"Henrico Co., VA","Dinwiddie Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+222,augusta,1866-06-02,325,Spring Hill,Henry,Smith,Milly,,64,,"Louisa Co., VA",,Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+223,augusta,1866-06-02,326,Mount Solon,Jerry,Vigar,Rosanna,Coons,66,48,"Rockingham Co., VA","Rockingham Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+224,augusta,1866-06-02,327,Fishersville,James,Bell,Louisa,Barns,36,35,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+225,augusta,1866-06-02,329,Staunton,Frank,Fuller,Francis,Tapp,52,32,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+226,augusta,1866-06-02,330,Staunton,Matthew,Harris,Dillie,Fields,56,40,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+227,augusta,1866-06-02,331,Mount Sidney,Joseph,Jones,Mary A.,Holmes,35,23,"Augusta Co., VA",Georgia,Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+228,augusta,1866-06-02,332,Middlebook,Burton,Carter,Mary,Bumgarner,35,30,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+229,augusta,1866-06-02,333,Mount Solon,John W.,Ware,Rachel,Greggs,25,30,"Augusta Co., VA","Rockingham Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+230,augusta,1866-06-02,334,Staunton,Theopolus,Randal,Mary,Burkly,37,28,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+231,augusta,1866-06-02,335,Fords Furnace,John,Johnson,Dorcas,Johnson,49,,"Botetourt Co., VA","Louisa Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+232,augusta,1866-06-02,336,Fords Furnace,Joseph,Thompson,Ann E.,Thompson,45,34,"Spotsylvania Co., VA","Spotsylvania Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+233,augusta,1866-06-02,337,Staunton,Benjamin,Stribbling,Julia A.,Lawson,54,45,"Augusta Co., VA","Augusta Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+234,augusta,1866-06-02,338,Staunton,Charles,Cleavland,Francis,Crawford,30,27,"Albemarle Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+235,augusta,1866-06-02,339,Staunton,Wesley,Barts,Patsey A.,Washington,27,22,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+236,augusta,1866-06-02,340,Staunton,Paul,Madison,Margaret,Taylor,50,35,"Augusta Co., VA","Prince Edward Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+237,augusta,1866-06-02,342,Staunton,Isreal,Taylor,Lucy,Henderson,47,42,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+238,augusta,1866-06-02,345,Staunton,Henry,Venable,Fanny,Williams,50,44,"Augusta Co., VA","Monroe Co., WV",Servant,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+239,augusta,1866-06-02,347,Staunton,Jacob,Brown,Jennie,Schaffer,34,28,"Albemarle Co., VA","Rockingham Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+240,augusta,1866-06-02,348,Staunton,Dennis,Toliver,Sarah,Sernare*,27,32,"Augusta Co., VA","Greenbrier Co., WV",Gardner,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+241,augusta,1866-06-04,350,Staunton,Thomas,Johnson,Mary,Stribbling,65,35,"Nottoway Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+242,augusta,1866-06-04,351,Staunton,Isreal,Porterfield,Martha,Porterfield,51,35,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+243,augusta,1866-06-04,352,Staunton,Washington,Hall,Jane,Washington,35,17,"Fauquier Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+244,augusta,1866-06-04,353,Staunton,George,Clark,Emma,Washington,39,18,"Gilford, NC","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+245,augusta,1866-06-04,354,Staunton,Lewis,Toliver,Harriet,Generals,42,32,"Orange Co., VA","Orange Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+246,augusta,1866-06-04,355,Staunton,Asa,Culbriar,Lizzie,Bowl,25,24,"Rockbridge Co., VA","Cumberland Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+247,augusta,1866-06-04,356,Staunton,Robert,Kenny,Sarah,Dickerson,33,35,"Augusta Co., VA","Augusta Co., VA",Stable Keeper,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+248,augusta,1866-06-04,358,Staunton,James A.,Mopine,Betsy,Harris,26,24,"Albemarle Co., VA","Nelson Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+249,augusta,1866-06-04,359,Staunton,Melvil,Carter,Eliza,Caldonia,32,17,"Augusta Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+250,augusta,1866-06-04,360,Churchville,Addison,Moon,Amy,Aderson,44,35,"Rockingham Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+251,augusta,1866-06-04,364,Mount Sidney,Henry,Norris,Catherine,Walters,41,37,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+252,augusta,1866-06-04,365,North Mountain,Moses,Williams,Maria,Bangs,29,31,"Augusta Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+253,augusta,1866-06-04,366,Mount Sidney,James,Bear,Henrietta,Walton,38,35,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+254,augusta,1866-06-04,367,Churchville,Hugard,Branson,Mary A.,Smith,33,,"Bath Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+255,augusta,1866-06-04,368,Middlebook,Samuel,Wilson,Ellen,Waites,47,35,"Henrico Co., VA","Augusta Co., VA",Wagon Maker,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+256,augusta,1866-06-04,369,Staunton,Shadrack,Brown,Mary,Vaughn,48,23,"Buckingham Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+257,augusta,1866-06-04,371,Staunton,Thomas,Vaughn,Susan,Vaughn,38,29,"Augusta Co., VA","Augusta Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+258,augusta,1866-06-04,372,Staunton,Maurice,Moon,Lucy A.,Henderson,56,58,"Rockbridge Co., VA","Albemarle Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+259,augusta,1866-06-04,373,Staunton,Gabriel,Trunawel,Amanda,Jane,49,32,"Rockingham Co., VA","Greene Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+260,augusta,1866-06-04,374,Staunton,Lindsay,Ashby,Hannah,Brookins,52,48,"Amherst Co., VA","Augusta Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+261,augusta,1866-06-04,375,Spring Hill,George,Washington,Susan J.,Patterson,27,27,"Augusta Co., VA","Rockbridge Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+262,augusta,1866-06-04,376,Spring Hill,Benjamin,Finley,Betsey,Randal,60,57,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+263,augusta,1866-06-04,377,Spring Hill,James,McDonald,Harriet,Jackson,24,24,"Glenville, WV","Greensville Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+264,augusta,1866-06-04,378,Spring Hill,William,Venia,Hester A.,Curry,30,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+265,augusta,1866-06-04,380,Spring Hill,William H.,Jones,Serena,Noiller,23,21,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+266,augusta,1866-06-04,381,Moscow,John,Bullock,Susan,Connart*,41,28,"Louisa Co., VA","Shenandoah Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+267,augusta,1866-06-04,384,Staunton,William,Coleman,Amanda E.,,21,22,"Fauquier Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+268,augusta,1866-06-04,385,Staunton,Miles,Carey,Alabama,Timberlike,41,45,"Goochland Co., VA","Fluvanna Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+269,augusta,1866-06-04,386,Staunton,William H.,Taylor,Fanny,Carter,28,21,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+270,augusta,1866-06-04,387,Greenville,Richard,Brown,Margaret,Gooding,36,35,"Louisa Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+271,augusta,1866-06-04,388,Bridgewater,Henry,Sweet,Maria,Rose,32,26,"Chesterfield Co., VA","Chesterfield Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+272,augusta,1866-06-04,389,Mount Sidney,Gilmon,Briggs,Margaret,Jones,22,21,"Washington Co., VA","Wellsboro, VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+273,augusta,1866-06-04,390,Harbor Hill,Allen,Perry,Catherine,Brock,54,33,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+274,augusta,1866-06-04,392,Staunton,John D.,Crawford,Lucy,Valentine,28,21,"Nelson Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+275,augusta,1866-06-04,393,Staunton,William,Venable,Lavenia,White,46,35,"Augusta Co., VA","Pocahontas Co., WV",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+276,augusta,1866-06-05,395,Staunton,Noah,Kenny,Mary,Washington,30,40,"Nelson Co., VA","Amherst Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+277,augusta,1866-06-05,396,Fishersville,Anthony,Jackson,Martha J.,Powell,42,22,"Augusta Co., VA",North Carolina,Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+278,augusta,1866-06-05,398,Mount Meridian,Beverly,Strother,Charlotte,Francis,54,41,"Rockingham Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+279,augusta,1866-06-05,400,Staunton,David,Batey,Sallie,Richardson,50,44,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+280,augusta,1866-06-05,401,Staunton,Charles,Green,Polly,Batey,20,18,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+281,augusta,1866-06-05,402,Blackburns Furnace,Wyatt,Williams,Pothena,Harris,22,23,"Albemarle Co., VA","Albemarle Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+282,augusta,1866-06-05,403,Churchville,Joseph,Hanley,Margaret,Hanley,27,25,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+283,augusta,1866-06-05,404,Churchville,James,Gudy,Amanda,Woods,37,27,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+284,augusta,1866-06-05,405,Mount Sidney,Benjamin J.,Jones,Sarah,Taylor,28,19,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+285,augusta,1866-06-05,406,New Hope,Isaac,Graves,Charlotte,King,38,38,"Orange Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+286,augusta,1866-06-05,407,Mount Sidney,Jacob,Williams,Sallie,Gibson,38,25,"Augusta Co., VA","Rockingham Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+287,augusta,1866-06-05,409,Staunton,Nelson,Fields,Barbara A.,Freeman,51,46,"Monroe Co., WV","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+288,augusta,1866-06-05,410,Mount Sidney,John,Montgomery,Charity,Taylor,48,26,"Louisburg, VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+289,augusta,1866-06-05,412,Mount Solon,Jacob,Curtis,Jane,Strother,70,44,"Culpeper Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+290,augusta,1866-06-05,413,Mount Sidney,Amos,Stephenson,Melinda,Parsons,52,51,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+291,augusta,1866-06-05,414,Mount Sidney,Robert,Banson,Hannah,Stephenson,37,24,"Rockingham Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+292,augusta,1866-06-05,415,Mount Meridian,Tyray,Rhoads,Mary J.,Smith,29,24,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+293,augusta,1866-06-05,416,Burketown,Elijah,Craig,Rachel,Hayberger,42,38,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+294,augusta,1866-06-05,417,Staunton,James,Briggins,Nancy,Lewis,42,42,"Augusta Co., VA","Orange Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+295,augusta,1866-06-05,419,Bostleburg,Jefferson,Lewis,Mary,Sirvers,35,21,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+296,augusta,1866-06-05,420,Mount Solon,Willis,Greggs,Sarah,Laterbury,69,59,"Frederick Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+297,augusta,1866-06-06,423,Greenville,Jourdan,Breckenridge,Susan,,60,63,"Nelson Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+298,augusta,1866-06-06,424,Mount Solon,Samuel,Strother,Amanda C.,Barnet,39,37,"Augusta Co., VA","Rockingham Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+299,augusta,1866-06-06,425,Mount Sidney,James,Hardin,,,44,,"Rockingham Co., VA",,Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+300,augusta,1866-06-06,427,Mount Solon,William,Vanlier,Eliza,Ball,70,60,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+301,augusta,1866-06-06,428,Mount Solon,James,Van Lear,Catherine,,35,30,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+302,augusta,1866-06-06,430,Mount Meridian,Allen,Rhoads,Ann Davis,,27,25,"Albemarle Co., VA","Greene Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+303,augusta,1866-06-06,432,Mount Meridian,Stephen,Thompson,Mary F.,Huckstep,29,21,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+304,augusta,1866-06-06,433,Staunton,George,Ware,,,72,,"Westmoreland Co., VA",,Cooper,12,,2022-03-04 19:44:19,2022-03-04 19:44:19
+305,augusta,1866-06-06,436,Middlebook,Frank,Abner,Ellen,Dorsey,41,27,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+306,augusta,1866-06-06,437,Middlebook,Lewis,Organ,Eliza,Richardson,47,29,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+307,augusta,1866-06-06,438,Burketown,Elijah,Bell,Mary,Smith,44,41,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+308,augusta,1866-06-06,439,Burketown,Nathaniel,Crawford,Caroline,Miller,39,29,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+309,augusta,1866-06-06,440,Burketown,Mayland B.,Becks,Mary,Bannister,30,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+310,augusta,1866-06-06,441,Westview,William,Adams,Margaret,Rhoads,25,20,"Rockbridge Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+311,augusta,1866-06-06,442,Westview,Henry,Grandison,Whitty,Anderson,38,32,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+312,augusta,1866-06-06,444,Staunton,Humphry,Ware,Rosanna,Propps,26,22,"Augusta Co., VA","Augusta Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+313,augusta,1866-06-06,445,"Port Republic, Rockingham Co.",George,Ware,Minerva J.,Mishack,58,35,"Goochland Co., VA","Rockingham Co., VA",Farmer,4,Rockingham Co,2022-03-04 19:44:19,2022-03-04 19:44:19
+314,augusta,1866-06-06,447,Churchville,Irving,Reed,Louisa,Madison,46,26,"Bedford Co., VA","Augusta Co., VA",Saddler,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+315,augusta,1866-06-07,449,New Hope,Henry,Lewis,Rella,Blair,47,,"Albemarle Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+316,augusta,1866-06-07,450,Greenville,Warren,Mack,Dinah,Dexter,48,38,"Nelson Co., VA","Louisa Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+317,augusta,1866-06-07,451,Spring Hill,Samuel,Jackson,Maria,Winthon,50,24,"Jefferson Co., WV","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+318,augusta,1866-06-07,452,Mount Sidney,John,Jones,Parthenia,Patterson,40,30,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+319,augusta,1866-06-07,455,Spring Hill,Joseph,Williams,Agnes,Landers,33,40,"Rockingham Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+320,augusta,1866-06-07,456,"New Market, Rockingham Co.",James,Perry,Mary,Ling,56,46,"Augusta Co., VA","Augusta Co., VA",Farmer,1,Rockingham C.,2022-03-04 19:44:19,2022-03-04 19:44:19
+321,augusta,1866-06-07,457,Mount Meridian,Anthony,Mills,Sidney,Allen,42,34,"Albemarle Co., VA","Albemarle Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+322,augusta,1866-06-07,458,Moss Creek,Nelson,Jackson,Amanda,Jones,49,28,"Fauquier Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+323,augusta,1866-06-07,459,Staunton,James,Robinson,Mary J.,Watson,50,40,"Albemarle Co., VA","Nelson Co., VA",Brick Layer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+324,augusta,1866-06-07,461,Greenville,Hanibal,Lewis,Margaret,Gainson,50,35,"Augusta Co., VA","Botetourt Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+325,augusta,1866-06-07,462,"Port Republic, Rockingham Co.",Ira,Douglas,Charity,Brigham,55,60,"Albemarle Co., VA","Albemarle Co., VA",Farmer,2,Rockingham Co,2022-03-04 19:44:19,2022-03-04 19:44:19
+326,augusta,1866-06-07,464,Mint Spring,Robert,Sheffy,Hester,Bates,60,50,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+327,augusta,1866-06-07,465,Middlebook,Joseph,Jones,Isabella,Wilson,51,36,"Rockbridge Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+328,augusta,1866-06-07,466,Staunton,Joseph,Mickey,Margaret,Lovent,62,60,Kentucky,"Frederick Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+329,augusta,1866-06-07,467,Mount Solon,John,Stroder,Everiline,Burns,63,31,"Augusta Co., VA","Augusta Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+330,augusta,1866-06-07,468,Mount Solon,Andrew,Stroder,Nancy,Barns,48,39,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+331,augusta,1866-06-07,469,Mount Solon,Sinclair,Strother,Rhoda,Williams,41,37,"Augusta Co., VA","Rockbridge Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+332,augusta,1866-06-07,470,Mount Solon,James,Goings,Edith,Strother,26,28,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+333,augusta,1866-06-07,471,Middlebook,Cyrus,Crawford,Martha,Jones,35,25,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+334,augusta,1866-06-08,472,Mount Solon,London,Faulkner,Mary A. M.,Hugh,52,48,"Spotsylvania Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+335,augusta,1866-06-08,473,Greenville,Jacob,Robinson,Millie,Stewart,47,38,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+336,augusta,1866-06-08,475,Mount Sidney,Robert,Ginsley,Amanda,Doake,37,26,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+337,augusta,1866-06-08,479,Fishersville,Hiram,Thompson,Katy,Alexander,71,58,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+338,augusta,1866-06-08,480,Churchville,John W.,Miner,Mary,Freeman,48,41,"Augusta Co., VA","Albemarle Co., VA",Blacksmith,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+339,augusta,1866-06-08,481,Fishersville,Charles,Trimble,Elisa,Washington,29,37,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+340,augusta,1866-06-08,482,Spring Hill,George,Williams,Margaret,Burns,31,28,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+341,augusta,1866-06-08,483,Mount Sidney,Charles,Walker,Millie,Sellers,60,45,"Augusta Co., VA","Page Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+342,augusta,1866-06-08,484,Staunton,Jefferson,Fowler,,,51,,"Bath Co., VA",,Cook,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+343,augusta,1866-06-08,485,Mint Spring,Jessie,Jackson,Mary,Steward,35,38,"Albemarle Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+344,augusta,1866-06-09,488,Fishersville,Edmund,Balden,Mary,Johnson,53,54,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+345,augusta,1866-06-09,489,Mint Spring,Joe,McCutcheon,Minta,Jones,40,28,"Augusta Co., VA","Rockbridge Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+346,augusta,1866-06-09,490,Greenville,Joshua,Baker,Jane,Thornton,56,40,"Nelson Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+347,augusta,1866-06-09,491,Greenville,Buck,Bolles,Priscilla,Carter,50,45,"Albemarle Co., VA","Albemarle Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+348,augusta,1866-06-09,492,Fishersville,Edmund,West,,,40,,"Henrico Co., VA",,Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+349,augusta,1866-06-09,493,Staunton,Lewis,Farrar,Esther,Robinson,49,35,"Albemarle Co., VA","Rockbridge Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+350,augusta,1866-06-09,494,Swopes Depot,Primus,Henderson,Martha,Ross,29,18,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+351,augusta,1866-06-09,495,Barter Brook,Elijah,Smith,Julia A.,Prior,28,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+352,augusta,1866-06-09,496,Barter Brook,Patrick,Thompson,Charlotte,Kenny,52,45,"Augusta Co., VA","Augusta Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+353,augusta,1866-06-09,497,Greenville,Andrew,Stewart,Jane,McCutcheon,45,29,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+354,augusta,1866-06-09,498,Swopes Depot,Moses,Lewis,Edith,Powell,59,46,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+355,augusta,1866-06-09,499,Tinkling Spring,James,Washington,Emily,Washington,40,39,"Bath Co., VA","Frederick Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+356,augusta,1866-06-09,500,Tinkling Spring,Abraham,Taylor,Cecilia,Wort,38,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+357,augusta,1866-06-09,501,Swopes Depot,Jerry,Waits,Diana,Waits,40,55,"Augusta Co., VA","Cumberland Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+358,augusta,1866-06-09,503,Swopes Depot,Reuben,Gaines,Dianna,Burgee,22,19,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+359,augusta,1866-06-09,504,Swopes Depot,Jerry,Wilson,Besty,Gaines,21,20,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+360,augusta,1866-06-09,505,Barter Brook,Joseph,Bell,Eveline,Baldwin,31,30,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+361,augusta,1866-06-09,506,Greenville,Charles,Parrish,Rebecca,Mosely,40,31,"Louisa Co., VA","Caroline Co., VA",Saw Mill,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+362,augusta,1866-06-09,507,Fishersville,Thomas,Jones,Martha J.,Gobert,23,24,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+363,augusta,1866-06-09,508,Fishersville,Adam,Green,Peggy Ann,Willis,40,37,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+364,augusta,1866-06-09,509,Fishersville,Richard,Jones,Rosa,Cavell,44,33,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+365,augusta,1866-06-09,510,Churchville,Joshua,Jones,Julia,Irving,63,50,"Augusta Co., VA","Rockingham Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+366,augusta,1866-06-09,511,Fishersville,Thomas,Ayres,Maria,Kenney,23,18,"Henrico Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+367,augusta,1866-06-09,512,Barter Brook,Erasmus,Carter,Amanda,Jones,31,21,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+368,augusta,1866-06-09,513,Mint Spring,Henry,Johnson,Rachel,Johnson,60,49,"Augusta Co., VA","Augusta Co., VA",Cooper,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+369,augusta,1866-06-09,514,Barter Brook,Frank,Rhodes,Elisa,Alexander,33,25,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+370,augusta,1866-06-09,515,Barter Brook,Frederick,Lewis,Joanna,Talburg,50,50,"Rockingham Co., VA","Augusta Co., VA",Shoemaker,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+371,augusta,1866-06-09,516,Greenville,William,Perry,Maria,Prior,34,31,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+372,augusta,1866-06-09,517,Christies Creek,Henry A.,Green,Cynthia A.,Johnson,22,19,"Rockbridge Co., VA","Rockbridge Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+373,augusta,1866-06-09,518,Christies Creek,William,Ross,Estaline,Bowis,48,36,"Spotsylvania Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+374,augusta,1866-06-09,519,Greenville,Shadrak,Thompson,Fanny,Happen,23,19,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+375,augusta,1866-06-09,520,Fishersville,Cyrus,Prior,Kesiah,Thompson,39,40,"Augusta Co., VA","Augusta Co., VA",Farmer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+376,augusta,1866-06-09,521,Spring Hill,Alfred,Lee,Lucy,Hart,25,26,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+377,augusta,1866-06-09,522,"Sellers, West View",Reuben,Harding,Barbara V.,Bowis,63,48,"Rockingham Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+378,augusta,1866-06-09,523,Christies Creek,Hardy,Shaw,Lucy,Davis,40,29,"Northampton Co., VA","Northampton Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+379,augusta,1866-06-09,524,West View,Anderson,Coiner,Agnes,Green,36,32,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+380,augusta,1866-06-09,526,New Hope,James,White,Cynthia,Brown,36,37,"Albemarle Co., VA","Albemarle Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+381,augusta,1866-06-09,527,New Hope,Dabney,White,Sidna,Brown,39,35,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+382,augusta,1866-06-09,528,Mint Spring,Benjamin,Steward,Margaret,Harris,40,30,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+383,augusta,1866-06-09,529,New Hope,Richard,Brown,Cornelia,Kenney,27,26,"Albemarle Co., VA","Albemarle Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+384,augusta,1866-06-09,530,Greenville,Morton,Jackson,Jenny,Bellar,27,26,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+385,augusta,1866-06-09,531,Greenville,Washington,Jackson,Elisa,Perry,29,22,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+386,augusta,1866-06-09,532,New Hope,Isaac,Boswell,Lina,Lewis,30,25,"Augusta Co., VA","Albemarle Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+387,augusta,1866-06-09,533,New Hope,George,Moulton,Catherine,Michols,48,20,"Albemarle Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+388,augusta,1866-06-09,534,Middlebook,Sam,Washington,Beacy J.,Crawford,44,42,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+389,augusta,1866-06-09,535,Buffalo Gap,Olmstead,Hughes,Mary,Anderson,36,34,"Botetourt Co., VA","Augusta Co., VA",Carpenter,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+390,augusta,1866-06-09,536,Buffalo Gap,Adam,Anderson,Elvira,Madison,29,24,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+391,augusta,1866-06-09,537,Mount Solon,Charter,Hawkins,Sarah,Haddle,49,35,"Spotsylvania Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+392,augusta,1866-06-09,538,Spring Hill,Isaac,Richardson,Mary,Washington,25,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+393,augusta,1866-06-09,539,Mount Sidney,Abraham,Doake,Amanda,Johnson,28,25,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+394,augusta,1866-06-09,541,Posfern Pottery,John,White,Ellen,Thompson,37,32,"Augusta Co., VA","Augusta Co., VA",Potter,5,near Waynesboro,2022-03-04 19:44:19,2022-03-04 19:44:19
+395,augusta,1866-06-09,542,Centresville,Jacob,Miller,Cecilia,Carry,45,38,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+396,augusta,1866-06-09,543,Staunton,James,Gordon,Elisabeth,Kenly,45,41,"Augusta Co., VA","Augusta Co., VA",Farmer,2,5 miles out,2022-03-04 19:44:19,2022-03-04 19:44:19
+397,augusta,1866-06-09,544,Middlebook,Porterfield,Parks,Caroline,Kinchelo,39,26,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+398,augusta,1866-06-09,545,Staunton,Arthur,Parker,Sarah,Kelly,27,25,"Culpeper Co., VA","Fauquier Co., VA",Blacksmith,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+399,augusta,1866-06-09,547,Greenville,Washington,Brown,Lucy,Kenny,49,36,"Rockbridge Co., VA","Nelson Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+400,augusta,1866-06-09,548,Middlebook,James H.,Harden,Caroline,Steele,30,29,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+401,augusta,1866-06-09,550,Summer Dean,Jordan,Washington,Jenny,Coy,29,20,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+402,augusta,1866-06-09,551,Staunton,William,Haskell,Sophy,Demaster,53,40,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+403,augusta,1866-06-09,552,Churchville,Andrew,Wilson,Ann,Franklin,28,23,"Bath Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+404,augusta,1866-06-09,553,Greenville,David,Walker,Maria,Brown,57,50,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+405,augusta,1866-06-09,554,Fishersville,Wm.,Washington,Ellen,Micholas,26,30,"Albemarle Co., VA","Berkeley Co., WV",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+406,augusta,1866-06-09,555,Spring Hill,John,Backus,Emeline,Allen,39,31,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+407,augusta,1866-06-09,556,Mint Spring,Wm.,Johnson,Margaret,Weyer,44,45,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+408,augusta,1866-06-09,557,Staunton,John Wesley,Tyler,Florinda,Dangerfield,52,47,"Rockingham Co., VA","Frederick Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+409,augusta,1866-06-09,558,Crystal Creek,Nathan,Gordon,Chloe,Henderson,50,29,"Albemarle Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+410,augusta,1866-06-09,560,Greenville,Jefferson,Howard,Betty,Cameron,28,27,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+411,augusta,1866-06-11,561,Staunton,Edmond,Cabol,Eveline,Bagers,45,35,"Amherst Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+412,augusta,1866-06-11,562,Churchville,Primus,Nelson,Frances,Kelsey,50,30,"Louisa Co., VA","Augusta Co., VA",Mason,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+413,augusta,1866-06-11,563,Greenville,James,Witts,Elvira,Brent,53,43,"Nelson Co., VA","Nelson Co., VA",Farmer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+414,augusta,1866-06-11,565,Midway,Jefferson,Weare,Kesiah,Eubanks,50,30,"Amherst Co., VA","Louisa Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+415,augusta,1866-06-11,566,Greenville,Andrew,Ross,Julia A.,Street,42,35,"Rockbridge Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+416,augusta,1866-06-11,567,New Hope,Lewis,Nicholas,Susan,Thompson,56,55,"Albemarle Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+417,augusta,1866-06-11,568,Greenville,George,Baumgartner,Ann,Page,28,24,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+418,augusta,1866-06-11,569,Mint Spring,Nathan,Walker,Fanny,Smith,50,24,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+419,augusta,1866-06-11,571,New Hope,Samuel,White,Hester,Boswell,31,23,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+420,augusta,1866-06-11,572,New Hope,Charles,Dawkus,Harriet,Cathrey,44,35,"Rockingham Co., VA","Rockingham Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+421,augusta,1866-06-11,573,Greenville,Samuel,Boswell,Mary,Green,45,40,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+422,augusta,1866-06-11,574,Greenville,Jacob,Green,Martha,Woodson,38,23,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+423,augusta,1866-06-11,575,Churchville,Samuel,Lewis,Melinda,Crawford,62,45,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+424,augusta,1866-06-11,576,New Hope,Jerry,Moulton,Elisabeth,Smith,30,41,"Greene Co., VA","Albemarle Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+425,augusta,1866-06-11,577,New Hope,Mac,Curry,Elisabeth,Brown,37,27,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+426,augusta,1866-06-11,578,Waynesboro,Nelson,Meekins,Elisa,Walkins,61,60,"Hanover Co., VA","Augusta Co., VA",Farmer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+427,augusta,1866-06-11,579,West View,Alfred,Stribling,Lucy,Ransom,53,46,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+428,augusta,1866-06-11,582,Churchville,Harvey,Laney,Lucinda,Trimble,41,33,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+429,augusta,1866-06-11,583,Waynesboro,Morgan,Alestock,Rachel,Carter,32,30,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+430,augusta,1866-06-11,584,Waynesboro,Thomas,Berkley,Maria,Meekins,42,38,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+431,augusta,1866-06-11,587,Fishersville,Charles,Howard,Harriet,Young,26,23,"Nelson Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+432,augusta,1866-06-11,588,Fishersville,Randall,Balden,Louisa,Young,32,25,"Albemarle Co., VA","Albemarle Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+433,augusta,1866-06-11,589,Middlebook,Wm.,Poindexter,Susan,Bachus,36,31,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+434,augusta,1866-06-11,590,Greenville,Henry,Carter,Frances,Thompson,28,23,"Caroline Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+435,augusta,1866-06-11,591,Spring Hill,Henry,Rhodes,Sarah A.,Lee,34,27,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+436,augusta,1866-06-11,592,New Hope,Nelson,Kenny,Sarah,Stribling,38,25,"Albemarle Co., VA","Augusta Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+437,augusta,1866-06-11,594,Greenville,Harry,White,Elisa B.,Lee,65,45,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+438,augusta,1866-06-11,595,"Port Republic, Rockingham Co.",John,Crawford,Mary J.,Cousins,39,32,"Augusta Co., VA","Louisa Co., VA",Cooper,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+439,augusta,1866-06-11,596,"Port Republic, Rockingham Co.",Henry,Jones,Adaline,Johnson,50,45,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+440,augusta,1866-06-11,597,Staunton,Abraham,Golden,Mary,Pollard,49,38,"Nelson Co., VA","Nelson Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+441,augusta,1866-06-11,599,Summer Dean,Frank,James,Susan,Wilson,34,30,"Alleghany Co., VA","Botetourt Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+442,augusta,1866-06-12,602,Greenville,Aleck,Stewart,Esther,Walker,27,19,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+443,augusta,1866-06-12,604,Middlebook,Joshua,Mullins,Nancy,Smith,40,40,"Augusta Co., VA","Madison Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+444,augusta,1866-06-12,605,Staunton,John,Meekins,Isabella,Meekins,28,25,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+445,augusta,1866-06-12,607,Staunton,Carter,Jones,Julia,Ann,52,40,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+446,augusta,1866-06-12,609,Fishersville,Samuel,Carry,Rachel,Smith,48,48,"Rockbridge Co., VA","Augusta Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+447,augusta,1866-06-12,611,Greenville,Jeff,Martin,Louisa,Watson,24,18,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+448,augusta,1866-06-12,613,Greenville,Otis,Alexander,Cornelia,Ransom,29,31,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+449,augusta,1866-06-12,616,Greenville,Washington,Thompson,Winnie,Green,24,23,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+450,augusta,1866-06-12,617,Greenville,Andy,McDowell,Holly,Robinson,66,42,"Rockbridge Co., VA","Rockbridge Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+451,augusta,1866-06-12,619,Waynesboro,Jerry,Cole,Martha,Fisher,48,35,"Augusta Co., VA","Albemarle Co., VA",Farmer,11,,2022-03-04 19:44:19,2022-03-04 19:44:19
+452,augusta,1866-06-12,620,"Fairfield, Rockbridge Co.",Isaac,McClung,Charlotte,Moore,60,65,"Rockbridge Co., VA","Henrico Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+453,augusta,1866-06-12,621,Augusta Springs,Nelson,Laney,Sarah,Madison,44,26,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+454,augusta,1866-06-12,622,New Hope,James,Meekins,Mary A.,Bautright,25,20,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+455,augusta,1866-06-12,623,James' Gap,Eli,Haggard,Mary,Bayas,24,23,"Bertie Co., NC","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+456,augusta,1866-06-12,624,Greenville,Jessy,Lewis,Sally,Tapp,67,56,"Albemarle Co., VA","Albemarle Co., VA",Farmer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+457,augusta,1866-06-12,625,Staunton,Samuel,Jackson,Mary,Farren,33,26,"Louisa Co., VA","Goochland Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+458,augusta,1866-06-12,626,Staunton,Spencer,Carey,Henrietta,Washington,25,30,"Albemarle Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+459,augusta,1866-06-12,627,Middlebook,Louis A.,Freeman,Melinda E.,Jefferson,29,23,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+460,augusta,1866-06-12,628,New Hope,William,Lindsey,Nancy,Jackson,29,23,"Albemarle Co., VA","Albemarle Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+461,augusta,1866-06-13,631,Middlebook,Isaac Green,Lee,Mary Frances,Coaler,45,27,"Rockbridge Co., VA","Rockbridge Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+462,augusta,1866-06-13,633,Buffalo Gap,Henry,Jones,Joana,Martin,26,24,"Nelson Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+463,augusta,1866-06-13,634,"Fairfield, Rockbridge Co.",Benj.,Franklin,Elisa,Kraus,47,42,"Augusta Co., VA","Rockbridge Co., VA",Farmer,8,Rockbridge Co,2022-03-04 19:44:19,2022-03-04 19:44:19
+464,augusta,1866-06-13,635,Jones Gap,Overton,Lewis,Maria,Perry,37,27,"Albemarle Co., VA","Rockingham Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+465,augusta,1866-06-13,636,Jennings Gap,Cyrus,Crawford,Mary J.,Roman,21,25,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+466,augusta,1866-06-13,637,Fishersville,Nelson,Johnson,Malinda,Brown,30,22,"Albemarle Co., VA","Albemarle Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+467,augusta,1866-06-13,638,Summer Dean,Jerry,Robinson,Ellen,Richardson,35,25,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+468,augusta,1866-06-13,639,Greenville,Frank,Haliburton,Nancy J.,Dexter,28,22,"Rockbridge Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+469,augusta,1866-06-13,640,Greenville,Thomas,Heop*,Nancy,McAmmy,28,30,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+470,augusta,1866-06-13,641,Greenville,Jefferson,Heop*,Mary J.,Doke,21,25,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+471,augusta,1866-06-13,642,Fishersville,Sullivan,Beard,Sarah,Crawford,73,66,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+472,augusta,1866-06-13,644,New Hope,George W.,Kenny,,,49,,"Augusta Co., VA",,Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+473,augusta,1866-06-13,645,Waynesboro,Elvis,Davis,Queen,Whiting,38,34,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+474,augusta,1866-06-13,646,Greenville,Thomas,Bell,Mary,Brooks,48,42,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+475,augusta,1866-06-13,648,Waynesboro,James W.,Strong,Rachel N.,Mauria,25,18,"Berkeley Co., WV",,Farmer,4,Wife dead,2022-03-04 19:44:19,2022-03-04 19:44:19
+476,augusta,1866-06-13,649,Greenville,Charles H.,Brooks,Charlotte J.,Brown,49,47,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+477,augusta,1866-06-13,650,Greenville,Henry,McCarny,Maria,Charleston,44,36,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+478,augusta,1866-06-13,651,Greenville,Henry,Baker,Betsey,Downs,49,42,"Nelson Co., VA","Nelson Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+479,augusta,1866-06-13,652,Churchville,Henry,Williams,,,48,,"Highland Co., VA",,Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+480,augusta,1866-06-13,653,Staunton,John,Dillard,Nancy,Banks,42,35,"Amherst Co., VA","Hampshire Co., VA",Gardner,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+481,augusta,1866-06-13,656,Staunton,Philip G.,Brown,Salena A.,Madison,53,43,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+482,augusta,1866-06-14,657,Waynesboro,Edward,Baldwin,Jane,Allen,35,26,"Charlotte Co., VA","Louisa Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+483,augusta,1866-06-14,659,Waynesboro,George,Robinson,Juda,Pryor,35,33,"Page Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+484,augusta,1866-06-14,661,Waynesboro,Mark,Christian,Elizebath,Christian,37,39,"New Kent Co., VA","Madison Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+485,augusta,1866-06-14,662,Waynesboro,George,Brown,Betsey,Royle,40,35,"Augusta Co., VA","Charlestown, WV",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+486,augusta,1866-06-14,664,Waynesboro,John,Cowan,Susan,Bowles,28,35,"Albemarle Co., VA","Albemarle Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+487,augusta,1866-06-14,665,Waynesboro,David,Martin,Mary,Cowans,40,39,"Nelson Co., VA","Goochland Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+488,augusta,1866-06-14,668,Waynesboro,John,James,Ann M.,Smith,24,23,"Augusta Co., VA",,Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+489,augusta,1866-06-14,669,Waynesboro,Iram,Tines,Hannah,Chew,33,38,"Smithfield, VA","Rockbridge Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+490,augusta,1866-06-14,670,Waynesboro,Harrison,Keys,Emily,Davis,23,24,"Albemarle Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+491,augusta,1866-06-14,671,Waynesboro,Archer,Brock,Nancy,Kenny,26,20,"Augusta Co., VA",West Virginia,Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+492,augusta,1866-06-14,672,Waynesboro,James,Stevenson,Mary,Carter,49,39,"Augusta Co., VA","Rockbridge Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+493,augusta,1866-06-14,673,Waynesboro,Albert F.,Carter,Jane A.,Granison,33,35,"Augusta Co., VA","Augusta Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+494,augusta,1866-06-14,674,Waynesboro,Elijah,Stribbling,Lucy,Royal,44,39,"Augusta Co., VA","Jefferson Co., WV",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+495,augusta,1866-06-14,675,Waynesboro,Thornton,Jones,Phillis,Barber,40,30,"Spotsylvania Co., VA","Augusta Co., VA",Furnace,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+496,augusta,1866-06-14,676,Waynesboro,Absolom,Ross,Emily,Brown,38,39,"Spotsylvania Co., VA","Spotsylvania Co., VA",Carpenter,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+497,augusta,1866-06-14,677,Waynesboro,Robert,Harlin,Hannah,McHadden,58,40,"Albemarle Co., VA","Rockbridge Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+498,augusta,1866-06-14,678,Waynesboro,Jefferson,Rhoads,Malinda,Hilliam,39,22,"Albemarle Co., VA","King William Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+499,augusta,1866-06-14,679,Waynesboro,Samuel,Hardin,Harriet,Jones,43,26,"Nelson Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+500,augusta,1866-06-14,680,Waynesboro,Henry,Johnson,Arvilla,Pague,35,21,"Nelson Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+501,augusta,1866-06-14,681,Waynesboro,Washington,Leach,Mary F.,Read,30,26,"Albemarle Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+502,augusta,1866-06-14,683,Waynesboro,Robert,Whitening,,,48,,"Culpeper Co., VA",,Blacksmith,1,Transferred,2022-03-04 19:44:19,2022-03-04 19:44:19
+503,augusta,1866-06-14,684,Postal Hill,Elick,Johnson,Adeline,Coustaut,48,22,"Augusta Co., VA","Surry Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+504,augusta,1866-06-14,685,Waynesboro,William,Tayler,Ann,Carter,37,36,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+505,augusta,1866-06-14,686,Waynesboro,Benjamin,Raglin,Lucy,Scott,53,50,"Albemarle Co., VA","Albemarle Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+506,augusta,1866-06-14,687,Fishersville,Jurrius*,Woods,Lyndia,Porter,21,16,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+507,augusta,1866-06-14,689,Waynesboro,Jacob,Howard,,,49,,"Albemarle Co., VA",,Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+508,augusta,1866-06-14,690,Body Brook,Richard,Bell,Lynidia,Spencer,40,43,"Augusta Co., VA","Nelson Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+509,augusta,1866-06-14,691,Body Brook,Ruben,Brown,Rachel,Carter,34,28,"Nelson Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+510,augusta,1866-06-14,692,Waynesboro,Sherid,Woods,Mary,Randal,52,47,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+511,augusta,1866-06-14,694,Middlebook,James,Smith,Maria,Jefferson,30,27,"Albemarle Co., VA","Albemarle Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+512,augusta,1866-06-14,695,Middlebook,Jacob,Wills,Lucitta,Cooper,43,30,"Albemarle Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+513,augusta,1866-06-14,696,Middlebook,Joseph,McAmy,Caroline,Gaines,43,27,"Augusta Co., VA","Jefferson Co., WV",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+514,augusta,1866-06-14,697,Waynesboro,Richard,Harvey,Patsey,Booles,53,44,"Fauquier Co., VA","Albemarle Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+515,augusta,1866-06-14,699,Middlebook,Beverly,Noel,Ellen,,50,39,"Hanover Co., VA",North Carolina,Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+516,augusta,1866-06-14,703,Waynesboro,Isaac,Walker,Louisa,Creamer,25,24,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+517,augusta,1866-06-14,704,Waynesboro,David,Dyer,Lucy,Brookins,47,50,"Albemarle Co., VA","Rockingham Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+518,augusta,1866-06-14,705,Fishersville,Fielding,Washington,Sarah Ann,Grebrik (w),39,25,"Augusta Co., VA","Augusta Co., VA",Lime Burner,1,John K. Keiser,2022-03-04 19:44:19,2022-03-04 19:44:19
+519,augusta,1866-06-14,706,Staunton,William,Green,Julia,Lewis,65,32,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+520,augusta,1866-06-14,707,Greenville,Henry,White,Eliza J.,White,48,45,"Augusta Co., VA","Augusta Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+521,augusta,1866-06-14,708,Waynesboro,Henry,Reaves,Nellie,Hurdh,42,41,"Campbell Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+522,augusta,1866-06-14,709,Greenville,Ezekial,Johnson,Maria,Harrig,51,31,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+523,augusta,1866-06-15,710,Fishersville,Gabriel,Caul,Ann,Crawford,37,25,"Nelson Co., VA","Augusta Co., VA",Blacksmith,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+524,augusta,1866-06-15,711,Waynesboro,Hudson,Kelly,Fancy,Wilson,50,62,"Albemarle Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+525,augusta,1866-06-15,712,Fishersville,Robert,Parish,Malinda,Arminber,54,45,"Augusta Co., VA","Page Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+526,augusta,1866-06-15,713,Waynesboro,Washington,Spears,Rosanna,Robinson,58,46,"Albemarle Co., VA","Augusta Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+527,augusta,1866-06-15,714,Waynesboro,Ged,Washington,Martha J.,Davenport,33,29,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+528,augusta,1866-06-15,715,Fishersville,Marshall,Washington,Charlotte,Harding,27,18,"Augusta Co., VA","Augusta Co., VA",Lime Burner,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+529,augusta,1866-06-15,716,Waynesboro,Richard,Washington,Lucy,Wood,21,19,"Augusta Co., VA","Augusta Co., VA",Railroad,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+530,augusta,1866-06-15,717,Waynesboro,Reuben,Martin,Josephine,Cousins,55,40,"Albemarle Co., VA","Goochland Co., VA",Shoemaker,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+531,augusta,1866-06-15,718,Stribling Springs,Reed A.,Allen,Araminta,Brown,45,36,"Augusta Co., VA","Augusta Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+532,augusta,1866-06-15,719,Middlebook,Abraham,Venable,Edy,Hogshead,60,48,"Buckingham Co., VA","Augusta Co., VA",Farmer,13,,2022-03-04 19:44:19,2022-03-04 19:44:19
+533,augusta,1866-06-15,720,Fishersville,Lewis,Washington,Caroline,Harding,30,28,"Augusta Co., VA","Augusta Co., VA",Lime Burner,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+534,augusta,1866-06-15,721,"Port Republic, Rockingham Co.",James,Banks,Cornelia,Barboum,25,20,"Albemarle Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+535,augusta,1866-06-15,722,Waynesboro,James,Bell,Esther A.,Holloway,48,43,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+536,augusta,1866-06-15,723,Fishersville,Primus,Bolles,Martha,Randall,41,31,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+537,augusta,1866-06-15,724,Waynesboro,Jacob,Williams,Anna,Peters,45,38,"Nelson Co., VA","Nelson Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+538,augusta,1866-06-15,725,Waynesboro,Adam,Baker,Barbara,Doornes,55,50,"Nelson Co., VA","Nelson Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+539,augusta,1866-06-15,726,Fishersville,Isaac,Wood,Rachel,Gordon,46,45,"Albemarle Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+540,augusta,1866-06-15,727,Fishersville,Henry,Richardson,Maria,Washington,45,49,"Augusta Co., VA","Augusta Co., VA",Farmer,12,,2022-03-04 19:44:19,2022-03-04 19:44:19
+541,augusta,1866-06-15,728,West View,Lewis,Carr,Emiline,Weave,33,33,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+542,augusta,1866-06-15,730,Waynesboro,Harvey,Hawkins,Ellen,Metcalf,51,40,"Spotsylvania Co., VA","Rockbridge Co., VA",Iron Works,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+543,augusta,1866-06-15,731,Waynesboro,Benj.,Frazier,Kittie,Williams,58,42,"Spotsylvania Co., VA","Spotsylvania Co., VA",Iron Works,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+544,augusta,1866-06-15,732,Waynesboro,Hamilton,Brooks,Mary,Steele,41,30,"Rockbridge Co., VA","Rockbridge Co., VA",Iron Works,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+545,augusta,1866-06-15,733,Waynesboro,Cluff,Jones,Melly,Taylor,34,25,"Spotsylvania Co., VA","Nelson Co., VA",Iron Works,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+546,augusta,1866-06-15,734,Waynesboro,Abraham,Wallace,Paulina,Lockett,56,50,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+547,augusta,1866-06-15,736,Waynesboro,Spottswood,Johnson,Elisa A.,Jackson,45,45,"Amherst Co., VA","Rockbridge Co., VA",Iron Works,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+548,augusta,1866-06-15,737,Suranda,Dick,Coleman,Mary A.,Parrish,45,24,"Spotsylvania Co., VA","Nelson Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+549,augusta,1866-06-15,738,Middlebook,Nelson,Johnson,Agnes,Randolph,71,65,"Louisa Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+550,augusta,1866-06-15,739,Greenville,Branson,McGuffin,Polly,Wallace,35,37,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+551,augusta,1866-06-15,740,Waynesboro,Charles,Tyler,Julia A.,Thornton,35,26,"Spotsylvania Co., VA","Spotsylvania Co., VA",Iron Works,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+552,augusta,1866-06-15,741,Waynesboro,Squire,Martin,Lucinda,Nicholas,42,26,"Nelson Co., VA","Nelson Co., VA",Iron Works,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+553,augusta,1866-06-15,743,Waynesboro,Stephen,Allen,Maria Louisa,Smith,35,22,"Goochland Co., VA","Nelson Co., VA",Iron Works,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+554,augusta,1866-06-15,744,Waynesboro,Henry,Rodes,Harriet,Allen,38,29,"Nelson Co., VA","Nelson Co., VA",Iron Works,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+555,augusta,1866-06-15,745,Waynesboro,Frederick,Ross,Sarah Jane,Crosby,26,21,"Goochland Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+556,augusta,1866-06-15,746,Waynesboro,Robert,Halloway,Ellen,Woods,24,24,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+557,augusta,1866-06-16,748,Fishersville,James H.,Bogers,Malinda,Johnson,69,32,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+558,augusta,1866-06-16,749,West View,Jefferson,Dorsey,Christina V.,Ransom,35,25,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+559,augusta,1866-06-16,750,Spring Hill,Joshua,Taylor,Esther,Mills,33,43,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+560,augusta,1866-06-16,751,Mount Sidney,Abraham,Doake,Maria,Shields,60,52,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+561,augusta,1866-06-16,752,Mount Sidney,Rufus,Steward,Minerva,Dunlop,57,56,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+562,augusta,1866-06-16,753,Waynesboro,William,Smith,Mary,Trimble,47,37,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+563,augusta,1866-06-16,754,Waynesboro,Peter,Fisher,Charlotte,Barre,55,52,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+564,augusta,1866-06-16,755,Waynesboro,Jack,Nichols,Esther,Trimble,30,20,"Albemarle Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+565,augusta,1866-06-16,756,Waynesboro,Corlish,Creemer,,,,,,,Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+566,augusta,1866-06-16,757,Waynesboro,John,Nalentine,Maria,Trimble,63,,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+567,augusta,1866-06-16,758,Middlebook,Charles,Porter,Pabella,Vosmen,45,30,"Rockbridge Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+568,augusta,1866-06-16,759,Fishersville,William,Tolliver,Eliseabeth,Goings,40,26,Pennsylvania,"Albemarle Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+569,augusta,1866-06-16,760,Middlebook,Charles,Brock,Rhoda,Taylor,40,46,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+570,augusta,1866-06-16,761,Waynesboro,Archer,Holloway,Matilda,Fuller,63,50,"Augusta Co., VA","Rockingham Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+571,augusta,1866-06-16,762,Waynesboro,Isaac,Carter,Mary,Reid,38,29,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+572,augusta,1866-06-16,763,Waynesboro,Aesop J.,Perry,Margaret,Hughes,26,25,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+573,augusta,1866-06-16,764,"Port Republic, Rockingham Co.",Nelson,Simpson,Matilda,Ball,56,39,"Greene Co., VA","Greene Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+574,augusta,1866-06-16,765,Waynesboro,Aleck,Ritman,Jane,Halloway,40,37,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+575,augusta,1866-06-16,766,Waynesboro,John,Lewis,Amanda,Fuller,37,31,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+576,augusta,1866-06-16,768,Staunton,James,Madison,Sophy,Lewis,56,40,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+577,augusta,1866-06-16,769,Staunton,John H.,Johnson,Sarah A.,Price,27,21,"Louisa Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+578,augusta,1866-06-16,770,Mount Solon,John,Gamble,Amy,See,54,40,"Randolph Co., WV","Greenbrier Co., WV",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+579,augusta,1866-06-16,771,Greenville,Robt.,Poindexter,Mary,Wilson,52,51,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+580,augusta,1866-06-16,772,Staunton,Frederick,Crawford,Diana,Smith,47,43,"Nelson Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+581,augusta,1866-06-16,773,Staunton,Charles,Frasier,Margaret,Colson,22,24,"Augusta Co., VA","Jefferson Co., WV",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+582,augusta,1866-06-16,774,Staunton,Wm.,Patrick,Harriet Ann,Williams,60,25,"Rockbridge Co., VA","Rockbridge Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+583,augusta,1866-06-18,777,Churchville,Joshua,Jones,Martha,Long,26,22,"Augusta Co., VA","Albemarle Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+584,augusta,1866-06-18,778,Churchville,John,Trimble,Margaret,Thomas,45,46,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+585,augusta,1866-06-18,780,Staunton,Henry,Watson,Eveline,Gentry,65,40,"Augusta Co., VA","Augusta Co., VA",Carpenter,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+586,augusta,1866-06-18,781,Waynesboro,George A.,Smith,Jane,Napper,34,25,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+587,augusta,1866-06-18,783,Staunton,Wm. Lewis,Smith,Lucy,Carr,28,27,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+588,augusta,1866-06-18,784,Waynesboro,Kendall,Rhodes,Rosanna,,40,,"Nelson Co., VA",,Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+589,augusta,1866-06-18,785,Waynesboro,Austin,Brown,Queen,Quarles,50,50,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+590,augusta,1866-06-18,786,Waynesboro,Anthony,Jackson,Charlotte,Washington,30,36,"Augusta Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+591,augusta,1866-06-18,787,Waynesboro,Bery,Stewart,Lucinda,Bogers,58,50,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+592,augusta,1866-06-18,788,Newport,Adam,Weave,Esther,Steele,37,35,"Augusta Co., VA","Rockbridge Co., VA",Farmer,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+593,augusta,1866-06-18,789,Newport,James,Weave,Jane,Kaney,35,34,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+594,augusta,1866-06-18,790,Newport,Jeffrey,Weave,Isabella,Wilson,33,28,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+595,augusta,1866-06-18,791,Newport,Simon,Alexander,Susan,Jefferson,27,23,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+596,augusta,1866-06-18,792,Newport,Benj.,Walker,Sarah,Jackson,44,44,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+597,augusta,1866-06-18,794,Staunton,Edmund,Hale,Fanny,Lewis,26,23,"Grayson Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+598,augusta,1866-06-18,795,Waynesboro,John,Williams,Evelina,Lathorp,30,26,"Augusta Co., VA","Louisa Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+599,augusta,1866-06-19,797,Greenville,John,Sinclair,Delilah,Brown,36,41,"Augusta Co., VA","Augusta Co., VA",Blacksmith,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+600,augusta,1866-06-19,798,Moss Creek,Brown,Cochrane,Polly Ann,Curtis,23,22,"Augusta Co., VA","Augusta Co., VA",Shoemaker,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+601,augusta,1866-06-20,799,Fishersville,Jefferson,Baker,Raner,Peters,31,24,"Nelson Co., VA","Nelson Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+602,augusta,1866-06-20,800,New Port,Alfred,Nelson,Sallie,Fulton,34,36,"Augusta Co., VA","Augusta Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+603,augusta,1866-06-20,801,New Port,Robert,Ware,Ann E.,Utte*,30,35,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+604,augusta,1866-06-20,802,Parnassas,Staunton,Grey,Martha A.,McCue,25,30,"Culpeper Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+605,augusta,1866-06-20,803,Fishersville,Nathan,Grant,Alsia,,42,37,Greenbrier Co. WV,"Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+606,augusta,1866-06-21,805,Mount Vernon,Franklin,Johnson,Elizabeth,Williams,56,45,"Augusta Co., VA","Rockbridge Co., VA",Forgeman,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+607,augusta,1866-06-21,806,Mount Vernon,Eli,Hall,Catherine,Cathlett,29,25,"Orange Co., VA","Rockingham Co., VA",Forgeman,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+608,augusta,1866-06-21,808,Mount Vernon,Albert,Cathy,Rosanna,Teale,34,23,"Rockingham Co., VA","Tuckahoe, VA",Forgeman,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+609,augusta,1866-06-21,809,Newport,George,Carter,Louisa A.,Carey,31,30,"Fauquier Co., VA","Fluvanna Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+610,augusta,1866-06-22,810,Middlebook,James,Carr,Millie,Bird,50,50,"Albemarle Co., VA","Albemarle Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+611,augusta,1866-06-22,813,Middlebook,Henry,Johnson,Cynthia,Porterfield,32,34,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+612,augusta,1866-06-22,815,Saugersville,Jordon,Brown,Catherine,Brown,26,39,"Albemarle Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+613,augusta,1866-06-25,818,Greenville,William T.,Brown,Sophia,Virginia,39,32,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+614,augusta,1866-06-25,819,New Port,David,Alexander,Caroline,Wilson,22,19,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+615,augusta,1866-06-25,820,New Port,Addison,Wilson,Harriet,Walker,30,21,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+616,augusta,1866-06-25,823,Greenville,Lewis,Jefferson,Lucy,Trotter,31,,"Spotsylvania Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+617,augusta,1866-06-25,824,Waynesboro,Richard,White,Cynthia,,60,39,"Greene Co., VA","Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+618,augusta,1866-06-25,828,Saugersville,Ashby,Payton,Lucilla,Jackson,45,35,"Rappahannock Co., VA","Rappahannock Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+619,augusta,1866-06-29,830,Craigsville,Sampson,Hamilton,Margaret,Kelley,43,32,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+620,augusta,1866-06-29,831,Craigsville,Hurget,Williams,Margaret,Brown,34,32,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+621,augusta,1866-06-29,832,Craigsville,Hergart,Miller,Isabella,McCarmy,37,44,"Bath Co., VA","Bath Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+622,augusta,1866-06-29,833,Craigsville,James,Walker,Sarah,Overton,52,53,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+623,augusta,1866-06-29,834,Craigsville,Richard C.,Black,Lucy,Berry,65,66,"Rockbridge Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+624,augusta,1866-06-29,835,West View,William,Kenney,Elizabeth,Battles,46,44,"Albemarle Co., VA","Albemarle Co., VA",Blacksmith,9,,2022-03-04 19:44:19,2022-03-04 19:44:19
+625,augusta,1866-06-30,836,Deerfield,Franklin A.,Reynolds,Jeanette E.,Williams,36,28,"Augusta Co., VA","Augusta Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+626,augusta,1866-06-30,838,Spring Hill,Milton,Malone,Julia,Dotson,28,21,"Rockingham Co., VA","Rockingham Co., VA",Shoemaker,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+627,augusta,1866-06-30,839,Fishersville,Benj.,Pershing,Ann,Cosby,26,27,"Louisa Co., VA","Louisa Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+628,augusta,1866-07-03,840,Waynesboro,Peter,Wright,,,61,,"Augusta Co., VA","Louisa Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+629,augusta,1866-07-03,841,Waynesboro,Washington,Dawson,Sarah,Tyre,41,40,"Spotsylvania Co., VA","Louisa Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+630,augusta,1866-07-03,842,Waynesboro,Buck,Allen,Mary,Redman,37,29,"Augusta Co., VA","Louisa Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+631,augusta,1866-07-03,843,Waynesboro,Saml.,Blackwell,Adaline,McFord,44,39,"Botetourt Co., VA","Louisa Co., VA",Carriage Maker,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+632,augusta,1866-07-04,844,Waynesboro,Moses,Botts,Lucy,Ross,40,36,"Spotsylvania Co., VA","Louisa Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+633,augusta,1866-07-04,845,Waynesboro,George,Lewis,Bettey,Hellen,44,41,"Augusta Co., VA","Louisa Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+634,augusta,1866-07-04,846,Waynesboro,Allen,Jackson,Caroline,Atherton,40,38,"Spotsylvania Co., VA","Louisa Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+635,augusta,1866-07-05,847,Craigsville,Joseph,Jones,Jane,Boyers,40,28,"Spotsylvania Co., VA","Culpeper Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+636,augusta,1866-07-05,848,Craigsville,Jordan,Cutter,Lizzie,McHurgh*,23,20,"Augusta Co., VA","Nelson Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+637,augusta,1866-07-06,849,Augusta County,Saml.,Caloway,Virginia,Frances,37,26,"Botetourt Co., VA","Bedford Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+638,augusta,1866-07-05,850,Augusta County,Richard,Williams,Isabell,Timlick,28,26,"Albemarle Co., VA","Louisa Co., VA",Laborer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+639,augusta,1866-07-05,851,Augusta County,Ruben,Mickey,Julia,Furgerson,35,28,"Goochland Co., VA","Botetourt Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+640,augusta,1866-07-05,852,Augusta County,Henry,Powell,Rosena,Colman,40,38,"Albemarle Co., VA","Dinwiddie Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+641,augusta,1866-07-05,853,Augusta County,Archie,Payne,Eliza,Morris,36,22,"Fluvanna Co., VA","Dinwiddie Co., VA",Blacksmith,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+642,augusta,1866-07-05,854,Brownsburg,Wilson,Johnson,Virginia,Johnson,34,34,"Augusta Co., VA","Rockbridge Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+643,augusta,1866-07-05,855,Brownsburg,Samuel,Johnson,Rachael,McNutt,43,44,"Augusta Co., VA","Augusta Co., VA",Farmer,8,,2022-03-04 19:44:19,2022-03-04 19:44:19
+644,augusta,1866-07-07,856,Brownsburg,William,Johnson,Racheal,More,47,26,"Augusta Co., VA","Rockbridge Co., VA",Farmer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+645,augusta,1866-07-07,857,Staunton,Danl.,Wormesley,Eliza,Goodrich,27,28,"Augusta Co., VA","Augusta Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+646,augusta,1866-07-09,858,Deerfield,Ned,Carter,Dyan,Lewis,39,27,"Buckingham Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+647,augusta,1866-07-12,859,Waynesboro,Coy J.,Ross,Julia,Southall,40,26,"Augusta Co., VA","Albemarle Co., VA",Laborer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+648,augusta,1866-07-14,860,Deerfield,Henry,Lewis,Charlotte,Lee,43,,"Augusta Co., VA","Augusta Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+649,augusta,1866-07-14,861,Deerfield,Anderson,Fielding,Matilda A.,Smith,34,27,"Augusta Co., VA","Rockbridge Co., VA",Laborer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+650,augusta,1866-07-14,862,Deerfield,Thomas,Scott,Nellie,Smith,43,30,"Bath Co., VA","Rockbridge Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+651,augusta,1866-07-20,865,Deerfield,Wm.,Miner,Hannah,Raxon,68,70,"Augusta Co., VA","Augusta Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+652,augusta,1866-07-21,866,Warm Springs,Benj.,Wilson,Charlott,Pleasant,45,38,"Augusta Co., VA","Alleghany Co., VA",Laborer,6,,2022-03-04 19:44:19,2022-03-04 19:44:19
+653,augusta,1866-07-21,867,Deerfield,Abraham,Hunter,Wife Dead,,46,,"Rockbridge Co., VA","Augusta Co., VA",Laborer,10,,2022-03-04 19:44:19,2022-03-04 19:44:19
+654,augusta,1866-07-23,868,New Hope,Frances,Williams,Louisa,Armstrong,66,30,"Loudoun Co., VA","Page Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+655,augusta,1866-07-24,869,Deerfield,Andrew,Robinson,Charlotte,Howard,51,25,"Bath Co., VA","Highland Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+656,augusta,1866-07-27,870,Crawford Springs,Jackson,Thomas,Amanda,Brown,34,26,"Albemarle Co., VA","Albemarle Co., VA",Laborer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+657,augusta,1866-07-30,871,Craigsville,Abraham,Sims,Susan,Edwards,30,31,"Madison Co., VA","Botetourt Co., VA",Laborer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+658,augusta,1866-07-30,872,Newport,Gabriel,Ross,Sarah,Anderson,52,49,"Spotsylvania Co., VA","Augusta Co., VA",Laborer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+659,augusta,1866-08-02,873,Deerfield,Marshal,Dawson,Eliza,Lyndsy,24,50,"McGraw, (VA?)","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+660,augusta,1866-08-03,875,Deerfield,Madison,Brown,Mary,Hendernon,27,28,"Albemarle Co., VA","Alleghany Co., VA",Farmer,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+661,augusta,1866-08-03,876,Deerfield,David,Summers,Dead,,29,,"Augusta Co., VA","Augusta Co., VA",Farmer,2,,2022-03-04 19:44:19,2022-03-04 19:44:19
+662,augusta,1866-08-03,877,Deerfield,Phillip,Waters,Fannie,Brigtan,52,40,"Augusta Co., VA","Augusta Co., VA",Farmer,1,,2022-03-04 19:44:19,2022-03-04 19:44:19
+663,augusta,1866-08-06,878,Warm Springs,Randall,Pettis,Hannah,Dickison,65,35,"Bath Co., VA","Bath Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+664,augusta,1866-08-07,879,Westview,Griffin,Harris,Lillie,Johnson,52,31,"Augusta Co., VA","Augusta Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+665,augusta,1866-08-10,881,Deerfield,Saml.,Hicks,Wife dead,,38,,"Prince Edward Co., VA","Bath Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+666,augusta,1866-08-10,882,Deerfield,Saml.,Jones,Mary,Ransom,40,50,"Bath Co., VA","Bath Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+667,augusta,1866-08-11,884,"Port Republic, Rockingham Co.",St. Clair,Poindexter,Sydney,Palmen,,,,"Augusta Co., VA",Farmer,7,,2022-03-04 19:44:19,2022-03-04 19:44:19
+668,augusta,1866-08-11,886,Craigsville,James,Poindexter,Charlott,Neuson,47,52,"Louisa Co., VA","Brunswick Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+669,augusta,1866-08-14,887,Deerfield,Jonas,Trust,Julia,Turner,50,42,"Rockbridge Co., VA","Augusta Co., VA",Farmer,6,C. A. Dunlap [Child Mary listed as dead in age category],2022-03-04 19:44:19,2022-03-04 19:44:19
+670,augusta,1866-08-21,888,Esterline Furnace,Noah,Hawkins,Sarah,Miller,50,34,"Spotsylvania Co., VA","Rockingham Co., VA",Laborer,9,Joseph Hawkins,2022-03-04 19:44:19,2022-03-04 19:44:19
+671,augusta,1866-09-19,889,Augusta County,Alfred,Smith,Grace,Smith,45,45,"Frederick Co., VA","Frederick Co., VA",Farmer,5,,2022-03-04 19:44:19,2022-03-04 19:44:19
+672,augusta,1866-09-19,890,Augusta County,Henry,Miller,Henrietta,Ware,38,25,"Nelson Co., VA","Nelson Co., VA",Farmer,3,,2022-03-04 19:44:19,2022-03-04 19:44:19
+673,augusta,1866-09-27,891,Esterline Furnace,Andrew,Henny,Mary A.,Miller,38,19,"Louisa Co., VA","Augusta Co., VA",Blacksmith,1,Free Born,2022-03-04 19:44:19,2022-03-04 19:44:19
+674,augusta,1866-09-27,892,Esterline Furnace,George,Hawkins,Sarah A.,Miller,45,38,"Orange Co., VA","Augusta Co., VA",Laborer,1,owned by Benj. Hawkins Craver C.H.,2022-03-04 19:44:19,2022-03-04 19:44:19
+675,augusta,1866-09-27,893,Augusta County,Hamilton,Johnson (Baltr. Md),Betsey,Thompson,49,40,"Greensville Co., VA","Augusta Co., VA",Farmer,9,Elizabeth 19 Lurar 17 Hiram 15 Emma 13 Mary 1 Jackson 4 Edwd 2 Alex J. inf.,2022-03-04 19:44:19,2022-03-04 19:44:19
+676,augusta,1866-05-29,900,Staunton,George W.,Jefferson,Elizabeth,Robinson,38,26,"Augusta Co., VA","Augusta Co., VA",Saloon Keeper,4,,2022-03-04 19:44:19,2022-03-04 19:44:19
+677,augusta,1866-04-26,12,,Henry,Bird,Willyann,Holeman,45,33,"Rockingham Co., VA","Fauquier Co., VA",Farmer & Laborer,1,"One Child, Wm. Henry Ag 2 yrs.",2022-03-04 19:44:19,2022-03-04 19:44:19
+678,augusta,,898,Elizabeth Furnace,James,Jackson,Emeline,Coiner,,,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+679,augusta,1866-04-24,1,,Henry,Sellers,Sannanuf *,Hemming,44,44,"Rockingham Co., VA","Rockingham Co., VA",Tanner,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+680,augusta,1866-04-25,3,,Henry,Kemp,Sarah,Hemmings,,,"Page Co., VA","Page Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+681,augusta,1866-04-25,4,,George,Queen,Malinda,,58,53,"Rockingham Co., VA","Rockingham Co., VA",Farmer & Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+682,augusta,1866-04-25,5,,Robert,Seveniour *,Sarah Ann,Jones,22,17,"Rockingham Co., VA","Augusta Co., VA",Farmer & Laborer,,"""First free negro couples ever married by license in this County, by the Rev. A. P. Ponder Oct. 5 / 65""",2022-03-04 19:44:19,2022-03-04 19:44:19
+683,augusta,1866-04-25,6,,Anderson,Smith,Manilla,Green,30,32,"Augusta Co., VA","Rockingham Co., VA",Farmer & Laborer,,same,2022-03-04 19:44:19,2022-03-04 19:44:19
+684,augusta,1866-04-26,7,,Robert,Wilson,Jane,,34,32,"Augusta Co., VA","Rockingham Co., VA",Farmer & Laborer,,same,2022-03-04 19:44:19,2022-03-04 19:44:19
+685,augusta,1866-04-26,8,,Henry,Prewer,Aggie,Gilmore,61,61,"Rockingham Co., VA","Rockingham Co., VA",Farmer & Laborer,,same,2022-03-04 19:44:19,2022-03-04 19:44:19
+686,augusta,1866-04-26,9,,John,Smith,Eliza,Hill,45,,"Rockingham Co., VA","Augusta Co., VA",Farmer & Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+687,augusta,1866-04-26,10,,James,Smith,Isabela,Simpson,36,,"Rockingham Co., VA","Rockingham Co., VA",Farmer & Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+688,augusta,1866-04-26,11,,Calvin,Hall,Delra,Jurgen,36,28,"Rockingham Co., VA","Mt. Seller, Georgia",Farmer & Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+689,augusta,1866-04-27,14,,Elijah,Hoffman,Maria,Progues,33,31,"Greene Co., VA","Madison Co., VA",Blacksmith,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+690,augusta,1866-04-30,25,,William,Snowden,Nancy,Tollover,27,,"Fauquier Co., VA","Shenandoah Co., VA",Barber,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+691,augusta,1866-04-30,27,,Aaron,Jeans,Louisa,Scott,39,30,"Rockingham Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+692,augusta,1866-04-30,28,,Nelson,Donabra,Aggie,Allie,48,36,"Prince Edward Co., VA","Prince Edward Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+693,augusta,1866-04-30,29,,Morgan,Tuns *,Emily,Junis *,26,,"Shenandoah Co., VA","Rockingham Co., VA",Bar Keeper,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+694,augusta,1866-04-30,33,,James,Henderson,Lorisa,Shrother,67,44,"Rockingham Co., VA","Albemarle Co., VA",Laborer,,Rockingham Co,2022-03-04 19:44:19,2022-03-04 19:44:19
+695,augusta,1866-04-30,34,,Daniel,Brown *,Maria,Harrison,58,50,"Rockingham Co., VA","Page Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+696,augusta,1866-04-30,36,,--- *,Murter,Mari J.,Francis,30,,Virginia,"Savannah, GA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+697,augusta,1866-04-30,37,,David,Allens,Francis,Johnson,25,20,"Goochland Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+698,augusta,1866-05-01,40,,Curtis,Hall,Sarah,Miner,24,21,"Rockingham Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+699,augusta,1866-05-01,41,,Chas,Painter,Margurite *,Lewis,39,39,"Shenandoah Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+700,augusta,1866-05-01,42,,Calvin,Harvey,Catherin,Good,25,,"Rockingham Co., VA","Hardy Co., WV",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+701,augusta,1866-05-01,45,,Edmun,Inghram,Atsay,Effner,60,40,"Montgomery Co., VA","Shenandoah Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+702,augusta,1866-05-02,49,,Robert,Vicars,Harriet,Coons,29,35,"Rockingham Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+703,augusta,1866-05-02,51,,Jno.,Gains,Sarah,Kellogg,69,55,"Orange Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+704,augusta,1866-05-04,56,,Ransom,Sellers,Mary,Yancey,36,36,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+705,augusta,1866-05-05,57,,Ben,Bradford,Hannah,Davis,34,28,"Greene Co., VA","Greene Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+706,augusta,1866-05-05,61,,Abraham,Ham,Maria,Semms,35,23,"Greene Co., VA","Greene Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+707,augusta,1866-05-05,64,Muddy Creek,Wm.,Mack,Dolly,,62,60,"Greene Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+708,augusta,1866-05-05,66,Harrisonburg,Henry,Fields,Jennie,Brooking,23,20,"Rockingham Co., VA","Rockingham Co., VA",Blacksmith,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+709,augusta,1866-05-10,76,Harrisonburg,Joseph,Hevleman,Georgia Anna,Hanbrick,35,,"Shenandoah Co., VA","Albemarle Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+710,augusta,1866-05-12,84,Lacey Spring,John,Plunkit,Mary,Stephens,72,67,"Spotsylvania Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+711,augusta,1866-05-12,85,Fellowship Church,Peter,Oldham,Caroline,,70,30,"Rockingham Co., VA","Madison Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+712,augusta,1866-05-12,87,Inrleytown,Henry,Douglas,Rachel,Robinson,48,,"Rockingham Co., VA","Henrico Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+713,augusta,1866-05-14,93,Lindlis Green,Edwin,Gaines,Queen,Tarlton,58,50,"Rockingham Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+714,augusta,1866-05-15,103,Conrads Store,Custer,Beesley,Margaret,King,22,19,"Rockingham Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+715,augusta,1866-05-15,104,Conrads Store,Robrt,Henderson,Ann,Wair,27,24,"Rockingham Co., VA","Page Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+716,augusta,1866-05-28,115,Staunton,John,Williams,Sarah,Penton,35,32,"Norfolk, VA","Jefferson Co., WV",Steward,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+717,augusta,1866-05-28,116,Staunton,Benjamin,Carter,Jane,Johnson,24,25,"Bath Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+718,augusta,1866-05-28,117,Staunton,Henry,Moore,Patsy,Briggs,25,24,"Mecklenburg Co., NC","Augusta Co., VA",Carpenter,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+719,augusta,1866-05-28,120,Staunton,Adam,Fields,Lucy,Morris,56,58,"Staunton, VA","Augusta Co., VA",Musician,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+720,augusta,1866-05-28,130,Staunton,Castilia,Kelian,Mary A.,Randall,,,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+721,augusta,1866-05-28,132,Staunton,Robert,Venable,Lucy A.,Brown,55,36,"Augusta Co., VA","Lynchburg, VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+722,augusta,1866-05-28,133,Staunton,Cyrus,Johnson,Eliza,Hall,40,41,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+723,augusta,1866-05-28,134,Staunton,James,Madison,Fanny,Walker,61,45,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+724,augusta,1866-05-28,137,Staunton,Jack,Harris,Evelyn,Brown,27,26,"Albemarle Co., VA","Albemarle Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+725,augusta,1866-05-28,140,Staunton,John,Robinson,Margaret,Francis,24,30,"King & Queen Co., VA","Spotsylvania Co., VA",Cook,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+726,augusta,1866-05-28,142,Staunton,John,Payne,Margaret,,49,,"Gloucester Co., VA","Gloucester Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+727,augusta,1866-06-09,629,Macgahesville,William,Johnson,Amanda,Gibs,22,20,"Greene Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+728,augusta,1866-06-09,630,Macgahesville,William F.,Molan,Jenny A.,Belers,24,19,"Rockingham Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+729,augusta,1866-05-28,145,Staunton,Sandy,Reed,Margaret,Reed,25,28,"Albemarle Co., VA","Pocahontas Co., WV",Servant,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+730,augusta,1866-05-28,147,Staunton,George,Washington,Winnie,Jackson,44,,"Rockbridge Co., VA","Washington Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+731,augusta,1866-05-28,149,Staunton,John,Johnson,Mary C.,Carey,38,23,"Caroline Co., VA","Winchester, VA",Soapmaker,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+732,augusta,1866-05-28,150,Staunton,James,Harris,Elizebath,Bramson,22,20,"Danville, VA","Augusta Co., VA",Blacksmith,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+733,augusta,1866-05-28,151,Staunton,William,Woods,Lana,Watts,34,21,Greenbrier Co. WV,"Rockbridge Co., VA",Silversmith,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+734,augusta,1866-05-28,153,Staunton,Elijah,Powell,Julia,Dickerson,24,21,"Albemarle Co., VA","Nelson Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+735,augusta,1866-05-28,154,Staunton,James,Brigham,Esther,Payne,37,32,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+736,augusta,1866-05-28,161,Staunton,Thornton,Alexander,,,24,,"Augusta Co., VA",,Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+737,augusta,1866-05-28,162,Staunton,James,Tennly,Rebecca,Powers,38,40,"Augusta Co., VA","Staunton, VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+738,augusta,1866-05-28,163,Staunton,Joseph,Payne,Sophia,Brown,24,18,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+739,augusta,1866-05-29,170,Staunton,Bartlett,Gilim,Caroline,Perry,34,33,"Albemarle Co., VA","Shenandoah Co., VA",Mason,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+740,augusta,1866-05-29,174,Staunton,Joseph,Lewis,Sallie,Lindsey,33,34,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+741,augusta,1866-05-29,178,Staunton,Archie,Smith,Lizzie,Lewis,29,28,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+742,augusta,1866-05-29,179,Staunton,Jordan,Granison,Lizzie,Thornton,39,36,"Augusta Co., VA","Greene Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+743,augusta,1866-05-29,180,Staunton,James H.,Scrubb,Martha,Twine,27,,"Augusta Co., VA","Deerfield, VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+744,augusta,1866-05-29,181,Staunton,Henry,Gunden,Hannah,Toes,50,41,"Augusta Co., VA","Page Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+745,augusta,1865-05-29,190,Staunton,Benjamin,Morton,Sarah,Alexander,27,21,"Caroline Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+746,augusta,1866-05-29,196,Staunton,Lewis,Brown,Mary,Bronson,32,24,"Bath Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+747,augusta,1866-05-29,199,Staunton,William,Lewis,Dilcie,Washington,24,23,"Albemarle Co., VA","Augusta Co., VA",Servant,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+748,augusta,1866-05-29,201,Staunton,Gerry,Wood,Charlotte,Watts,28,25,"Rockingham Co., VA","Albemarle Co., VA",Gardner,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+749,augusta,1866-05-29,203,Staunton,George,Alexander,Esther,Brown,,,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+750,augusta,1866-05-29,205,,Richard,Johnson,Becky,Jackson,52,,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+751,augusta,1866-05-29,206,Staunton,Henry,Davenport,Lucynda,Lett,42,44,"Augusta Co., VA","Rockingham Co., VA",Gardner,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+752,augusta,1866-05-29,212,Staunton,Benjamin,Jackson,Mary,Wright,64,43,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+753,augusta,1866-05-29,213,Staunton,William,Jones,Evelyn,Crawford,37,48,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+754,augusta,1866-05-29,218,,Amos,Wimgarner,,,,,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+755,augusta,1866-05-29,220,Staunton,John,Hill,Polly,Jones,56,,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+756,augusta,1866-05-29,221,Staunton,Andrew,Lewis,Maria,Williams,36,40,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+757,augusta,1866-05-30,228,Staunton,Cyrus,Bates,Virginia,Hicks,47,30,"Prince Edward Co., VA","Prince Edward Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+758,augusta,1866-05-30,233,Staunton,Jacob,Howard,Betsey,,,,"Goochland Co., VA","Goochland Co., VA",Laborer,,"[Age for both husband and wife was marked ""old""]",2022-03-04 19:44:19,2022-03-04 19:44:19
+759,augusta,1866-05-30,236,Staunton,James,Brown,Hettie,Morris,23,26,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+760,augusta,1866-05-30,240,Staunton,William,Addison,Clara,,65,36,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+761,augusta,1866-05-30,241,Staunton,William,Randal,Patsy,Payne,29,23,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+762,augusta,1866-05-30,244,Staunton,Robert,Watson,Malinda,Branson,26,26,"Augusta Co., VA","Augusta Co., VA",Brick Layer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+763,augusta,1866-05-30,245,Staunton,James,Isaac,Sarah,Plates,48,35,"Albemarle Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+764,augusta,1866-05-30,249,Staunton,James,Stocham,Eliza,Spears,45,,"Rockbridge Co., VA","Nelson Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+765,augusta,1866-05-30,251,Staunton,Alexander,Paterson,Cynthia A.,Jackson,26,20,"Augusta Co., VA","Augusta Co., VA",Blacksmith,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+766,augusta,1866-05-30,257,Staunton,George,Washington,Patsy,Burkly,56,37,"Frederick Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+767,augusta,1866-05-30,262,Staunton,Hubbard,Cabel,Miss,Herring,60,61,"Albemarle Co., VA","Augusta Co., VA",Gardner,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+768,augusta,1866-05-31,271,Staunton,Morgan,Carter,Betsy,Pollard,32,35,"Augusta Co., VA","Augusta Co., VA",Baker,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+769,augusta,1866-05-31,272,Staunton,Henry,Henny,Fanny,Hawkins,25,25,"Albemarle Co., VA","Augusta Co., VA",Barber,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+770,augusta,1866-05-31,283,Staunton,Andrew,Jackson,Millie,Price,21,18,"Louisa Co., VA","Louisa Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+771,augusta,1866-05-31,287,Staunton,Robert,Logan,Catherine,Dana,65,64,"Rockbridge Co., VA","Jefferson Co., WV",Shoemaker,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+772,augusta,1866-05-31,289,Staunton,George,Morris,Mary A.,Harris,35,23,"Orange Co., VA","Augusta Co., VA",Servant,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+773,augusta,1866-06-01,296,Staunton,Henry B.,Christopher,Jaunty,Venable,46,53,"Augusta Co., VA",North Carolina,Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+774,augusta,1866-06-01,297,Staunton,Stephen,Nellins,Chloe,Gaines,56,58,"Louisa Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+775,augusta,1866-06-01,299,Staunton,Robert,Burrill,Mary,White,40,40,"Frederick Co., VA",,Hostler,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+776,augusta,1866-06-02,307,Staunton,Ruben,Hill,Nelie,Johnson,40,19,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+777,augusta,1866-06-02,308,Staunton,James,Williams,Lucretia,Davis,25,23,"Augusta Co., VA","Chesterfield Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+778,augusta,1866-06-02,311,Willow Spout,Charles,Baily,Cassy J.,Lawson,30,40,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+779,augusta,1866-06-02,313,Millbrook,William,Irving,Jane,Johnson,24,34,Florida,Maryland,Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+780,augusta,1866-06-02,316,Willow Spout,Urias,Lawson,Nancy,Gardner,46,47,"Augusta Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+781,augusta,1866-06-02,318,Staunton,James,,Jemima,Bennett,32,36,"Augusta Co., VA","Fairfax Co., VA",Shoemaker,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+782,augusta,1866-06-02,321,Body Brook,James,Davenport,Kitty,Rhoads,38,35,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+783,augusta,1866-06-02,322,Body Brook,Henry,Jones,Mary,Davenport,40,32,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+784,augusta,1866-06-02,328,Mount Solon,Martin,Lewis,Louisa,Griffit,24,23,"Albemarle Co., VA","Washington, DC",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+785,augusta,1866-06-02,341,Summer Dean,James H.,Alexander,Mary M.,Walker,22,23,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+786,augusta,1866-06-02,343,Staunton,Chesterfield,Augusta,Francis,Washington,48,32,"Augusta Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+787,augusta,1866-06-02,344,Staunton,Aaron,Maky,Sarah,Stewart,50,45,"Nelson Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+788,augusta,1866-06-02,346,Staunton,Lewis,Franklin,Beckie,Obleton,26,29,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+789,augusta,1866-06-02,349,Elk Run Church,Jonas,Lana,Betsy E.,Lewis,37,19,"Augusta Co., VA","Augusta Co., VA",Farmer,,Union Chh.,2022-03-04 19:44:19,2022-03-04 19:44:19
+790,augusta,1866-06-04,357,Staunton,Lewis,Franklin,Becky,Overton,26,29,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+791,augusta,1866-06-04,361,Churchville,Tyler,Ransom,Daffny,Dickerson,27,36,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+792,augusta,1866-06-04,362,Westfield,Frank,Harris,Susan,Bingham,24,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+793,augusta,1866-06-04,363,Spring Hill,Wesley,Nights,Levinia,Lee,46,39,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+794,augusta,1866-06-04,370,Staunton,Peasant,Clarkson,Lucy,Johnson,32,,"Nelson Co., VA","Culpeper Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+795,augusta,1866-06-04,379,Spring Hill,Samuel,Venia,Martha A.,Douglas,24,21,"Augusta Co., VA","Fauquier Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+796,augusta,1866-06-04,382,Staunton,Jack,Randal,Maria,Johnson,48,,"Prince Edward Co., VA","Dinwiddie Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+797,augusta,1866-06-04,383,Staunton,Sampson,Moon,Eliza,Maurice,24,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+798,augusta,1866-06-04,391,Staunton,Addison,Hide,Susan,Suffier,58,46,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+799,augusta,1866-06-04,394,Staunton,Samuel,Williams,Mary,Smallwood,28,24,"Augusta Co., VA","Frederick Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+800,augusta,1866-06-05,397,Mount Meridian,Randolph,Madison,Tamson,Mafamack,58,42,"Augusta Co., VA","Essex Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+801,augusta,1866-06-05,399,Staunton,William,Berry,Judy,Munroe,50,40,"Norfolk, VA","Halifax Co., VA",Gardner,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+802,augusta,1866-06-05,408,New Hope,Benjamin,Taylor,Letta,Stephenson,64,40,"Rockingham Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+803,augusta,1866-06-05,411,Mount Solon,Henry,Curtis,Lizzy,Cochran,28,21,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+804,augusta,1866-06-05,418,Staunton,William,Millins,Sarah J.,Walker,31,26,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+805,augusta,1866-06-06,421,Bunkertown,George A. R.,Botts,Ann,,25,19,"Spotsylvania Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+806,augusta,1866-06-06,422,Staunton,Chesley,Bell,Maria,Brock,25,23,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+807,augusta,1866-06-06,426,Spring Hill,Jonas,Turner,Agnes,Toliver,55,40,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+808,augusta,1866-06-06,429,Mount Meridian,Beverley,Allen,Sylvia A.,Garland,51,49,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+809,augusta,1866-06-06,431,Mount Meridian,Bernard,Tisley,Martha,Rhoads,24,22,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+810,augusta,1866-06-06,434,Fishersville,Andrew,Wayland,Fanny,Wayland,45,37,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+811,augusta,1866-06-06,435,Staunton,Edmund,Edney,Ann,Ashby,23,22,Georgia,"Augusta Co., VA",Brick Moulder,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+812,augusta,1866-06-06,443,Staunton,Robert,Meley,Lavinia,Williams,48,48,"Goochland Co., VA","Bath Co., VA",Laborer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+813,augusta,1866-06-06,446,Churchville,William,Brown,Ann,Garrison,50,49,,"Botetourt Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+814,augusta,1866-06-07,448,Churchville,Nelson,Reed,Sophia,Graham,65,65,"Bedford Co., VA","Bedford Co., VA",Chair Maker,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+815,augusta,1866-06-07,453,Spring Hill,Willis,Hart,Dianah,Adams,33,39,"Augusta Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+816,augusta,1866-06-07,454,,Perry,Sheffy,,,,,,,,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+817,augusta,1866-06-07,460,Body Brook,Wyatt,Smith,Sarah,Smith,41,35,"Nelson Co., VA","Augusta Co., VA",Cooper,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+818,augusta,1866-06-07,463,New Hope,Joseph,Woods,Nancy,Douglas,20,19,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+819,augusta,1866-06-08,474,Greenville,Benj.,Johnson,Maria,Buck,65,68,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+820,augusta,1866-06-08,476,New Hope,Richard,Spears,Mary F.,Barbour,40,25,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+821,augusta,1866-06-08,477,New Hope,William,Stephenson,Maria,Brown,50,40,"Augusta Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+822,augusta,1866-06-08,478,New Hope,Aaron,Barbour,Harriet,Jordan,64,58,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+823,augusta,1866-06-09,486,Fishersville,Jerome,Orcurd,Emma,Blackburn,35,20,"Augusta Co., VA","Augusta Co., VA",Carpenter,,Licensed by Court,2022-03-04 19:44:19,2022-03-04 19:44:19
+824,augusta,1866-06-09,487,Fishersville,Reuben,Breckenridge,Elizabeth,Blackburn,52,35,"Albemarle Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+825,augusta,1866-06-09,502,Swopes Depot,Albert G.,Shelton,Sarah,Anderson,44,60,"Albemarle Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+826,augusta,1866-06-09,525,New Hope,Primus,Wonderly,Nancy,Kennedy,50,45,"Rockingham Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+827,augusta,1866-06-09,540,Spring Hill,Benjamin,Barbour,Peggy,Winn,32,20,"Greene Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+828,augusta,1866-06-09,546,Churchville,George,Vickers,Beccy A.,Holly,60,27,"Rockingham Co., VA","Rockingham Co., VA",Cooper,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+829,augusta,1866-06-09,549,Barter Brook,John,Scheffey,Eveline,Myers,23,35,"Augusta Co., VA","Buckingham Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+830,augusta,1866-06-09,559,Middlebook,James,Waits,Lucy,Green,27,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:19,2022-03-04 19:44:19
+831,augusta,1866-06-11,564,Craigsville,Richard,Conway,Lucy,Pickle,50,45,"Louisa Co., VA","Fluvanna Co., VA",Blacksmith,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+832,augusta,1866-06-11,570,Buffalo Gap,Moses,Roane,Phillis,Hale,82,48,"King & Queen Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+833,augusta,1866-06-11,580,Fishersville,Henry,Lee,Ella,White,67,55,"Goochland Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+834,augusta,1866-06-11,581,Fishersville,John,Fields,Mary,Parker,26,19,"Augusta Co., VA","Berkeley Co., WV",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+835,augusta,1866-06-11,585,Waynesboro,Robert,Coleman,Mary,Miner,24,23,"Nelson Co., VA","Pocahontas Co., WV",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+836,augusta,1866-06-11,586,New Hope,Thomas,Patrick,Malinda,Collins,61,58,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+837,augusta,1866-06-11,593,Greenville,Jerry,Brown,Charlotte,White,25,25,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+838,augusta,1866-06-11,598,Staunton,Farley,Brown,Mary,Lee,43,35,"Spotsylvania Co., VA","Augusta Co., VA",Gardner,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+839,augusta,1866-06-11,600,Staunton,Thornton,Tibbs,Sarah J.,Johnson,32,26,"Fauquier Co., VA","Stafford Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+840,augusta,1866-06-12,601,Greenville,Joseph,Anderson,Ellen,Britton,57,48,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+841,augusta,1866-06-12,603,Greenville,Henry,Sheldon,Nancy,Henderson,27,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+842,augusta,1866-06-12,606,Greenville,William,Smith,Millie,Walker,53,49,"Augusta Co., VA","Tuckahoe, VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+843,augusta,1866-06-12,608,Greenville,Jack,Streets,Sarah,Wallace,58,55,"Louisa Co., VA","Rockbridge Co., VA",Tanner,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+844,augusta,1866-06-12,610,Greenville,Joseph,Walker,Sarah,Watson,52,55,"Augusta Co., VA","Augusta Co., VA",Blacksmith,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+845,augusta,1866-06-12,612,Greenville,Edmund,Hill,Elvira,Paris,52,46,"Nelson Co., VA","Nelson Co., VA",Blacksmith,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+846,augusta,1866-06-12,614,Greenville,Rirsh M. *,Goppin,,,23,,"Augusta Co., VA",,Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+847,augusta,1866-06-12,615,Greenville,Joseph,Patterson,Ann M.,Dowell,68,64,"Rockbridge Co., VA","Rockbridge Co., VA",Blacksmith,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+848,augusta,1866-06-12,618,New Hope,Cagir,Hansbury,Martha,Fry,60,,"Nelson Co., VA","Greene Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+849,augusta,1866-06-13,632,Valley Mill,David,Collins,Hannah,Reed,28,23,"Nelson Co., KY",Alabama,Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+850,augusta,1866-06-13,643,Westview,Ranch*,Fox,Martha F.,Madison,27,23,"Nelson Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+851,augusta,1866-06-13,647,Waynesboro,Charles,Barnes,Maria,White,23,27,"Albemarle Co., VA","Nelson Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+852,augusta,1866-06-13,654,Waynesboro,Samuel,Pickle,Harriet,Woods,32,50,"Fluvanna Co., VA","Albemarle Co., VA",Laborer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+853,augusta,1866-06-13,655,Staunton,Soloman,Clairsly,Rachel,Clairsly,85,84,"Augusta Co., VA","Augusta Co., VA",Laborer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+854,augusta,1866-06-14,658,Waynesboro,George,Wellford,Rosanna,Dangerfield,57,50,"Nelson Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+855,augusta,1866-06-14,660,Waynesboro,Henry,Barnes,Sallie,Fry,38,56,"Orange Co., VA","Madison Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+856,augusta,1866-06-14,663,Waynesboro,Lewis,Manuel,Emily,Rucker,50,28,"Augusta Co., VA","Rockingham Co., VA",Brick Layer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+857,augusta,1866-06-14,666,Waynesboro,Jessie,Pickles,Susan,Bell,36,22,"Fluvanna Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+858,augusta,1866-06-14,667,Waynesboro,Henry,Anderson,Lizzy,Alstock,46,43,"Augusta Co., VA","Albemarle Co., VA",Blacksmith,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+859,augusta,1866-06-14,682,Waynesboro,Thomas,Whitening,Millie,Courtney,66,68,"Culpeper Co., VA","Culpeper Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+860,augusta,1866-06-14,688,Fishersville,Saml.,Moretin,Fanny,Wood,48,40,"Culpeper Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+861,augusta,1866-06-14,693,Fishersville,Samuel,Miller,Francis,Adams,40,38,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+862,augusta,1866-06-14,698,Midway,William,Wilson,Amanda,Anderson,24,23,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+863,augusta,1866-06-14,700,Middlebook,Harry,Johnson,Patience,Hays,33,34,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+864,augusta,1866-06-14,701,Waynesboro,Chapman,Rhodes,Sarah,Vaughns,27,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+865,augusta,1866-06-14,702,Waynesboro,Robert,Morse,Ellen,Rhodes,28,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+866,augusta,1866-06-15,729,Waynesboro,Lewis,Waller,Alice,Brown,21,18,"Spotsylvania Co., VA","Nelson Co., VA",Iron Works,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+867,augusta,1866-06-15,735,Waynesboro,James,Barbour,Julia,Foxcroft,58,46,"Nelson Co., VA","Nelson Co., VA",Iron Works,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+868,augusta,1866-06-15,742,Waynesboro,Henry,Coleman,Winnie,Wick,50,45,"Spotsylvania Co., VA","Nelson Co., VA",Iron Works,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+869,augusta,1866-06-15,747,Staunton,Edmund,Jackson,Sarah,Fox,27,26,"Louisa Co., VA","Pendleton Co., WV",Brick Maker,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+870,augusta,1866-06-16,767,Waynesboro,Benjm.,Lee,Hannah,Barker,66,62,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+871,augusta,1866-06-18,775,Waynesboro,Nicholas,Cousins,Nancy,Alestock,35,40,"Albemarle Co., VA","Rockbridge Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+872,augusta,1866-06-18,776,Fishersville,Sidney,Crawford,Daftney,Bell,86,73,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+873,augusta,1866-06-18,779,Churchville,James,Strother,Elisabeth,Miner,28,30,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+874,augusta,1866-06-18,782,Waynesboro,Lester,Miller,Betty,Brown,22,16,"Norfolk, VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+875,augusta,1866-06-18,793,Medway,Henry,Thompson,Kate,Johnson,26,21,"Augusta Co., VA","Rockbridge Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+876,augusta,1866-06-19,796,Staunton,Wm. C.,Eckols,Catharine,Ferris,36,29,"Campbell Co., VA","Campbell Co., VA",Preacher,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+877,augusta,1866-06-21,804,Mount Vernon,John,Williams,Betsy,Strother,22,20,"Augusta Co., VA","Augusta Co., VA",Forgeman,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+878,augusta,1866-06-21,807,Mount Vernon,Robert,Johnson,Lizee,Miller,26,30,"Augusta Co., VA",,Forgeman,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+879,augusta,1866-06-22,811,Parnassas,Manassa,Lewis,Caroline,Stephenson,39,23,"Albemarle Co., VA",North Carolina,Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+880,augusta,1866-06-22,812,Parnassas,Jerry,Branniman,Anna,Stewart,27,22,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+881,augusta,1866-06-25,816,Fishersville,Sableton,Samuel,Louisa,Rhoads,22,26,"Spotsylvania Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+882,augusta,1866-06-25,817,Waynesboro,James,Williams,Ann,Williams,26,26,"Albemarle Co., VA","Albemarle Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+883,augusta,1866-06-25,821,Greenville,Anthony,Anderson,Eliza,Finley,66,50,"Augusta Co., VA","Nelson Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+884,augusta,1866-06-25,822,Waynesboro,Lapten*,Bailey,Jane,Smith,33,,"Sussex Co., VA","Jefferson Co., WV",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+885,augusta,1866-06-25,825,Brownsburg,Jacob,Weir,Esther,Beard,44,35,"Rockbridge Co., VA","Rockbridge Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+886,augusta,1866-06-25,826,Staunton,Edward,Wrickman,Rosanna,Boyers,67,52,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+887,augusta,1866-06-25,827,Staunton,Samuel,Steel,Sarah,Hamilton,51,52,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+888,augusta,1866-06-28,829,Saugersville,Harvey,Dodson,Martha A.,Phillips,28,28,"Augusta Co., VA","Augusta Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+889,augusta,1866-06-30,837,Brownsburg,John,Dobbins,Rachel,Moore,52,40,"Nelson Co., VA","Rockbridge Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+890,augusta,1866-07-18,863,Deerfield,Jackson,Norrall,Betsey,Burns,33,20,"Loudoun Co., VA","Fauquier Co., VA",Laborer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+891,augusta,1866-07-18,864,McDowell,Chas.,Smith,Salley,Chrisman,23,21,"Highland Co., VA","Rockingham Co., VA",Laborer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+892,augusta,1866-08-02,874,Deerfield,Benj.,Johnson,Mary,Deckmon,22,22,"Augusta Co., VA","Bath Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+893,augusta,1866-08-09,880,Waynesboro,Wm.,Campbel,Susan,Cozzins,,,"Augusta Co., VA","Augusta Co., VA",Waiter,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+894,augusta,1866-08-10,883,Augusta Springs,Shadrack,Morris,Caroline,Dorrill,61,58,"King & Queen Co., VA",,Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+895,augusta,1866-08-11,885,"Port Republic, Rockingham Co.",John,Mason,Rachael,Poindexter,23,25,"Rockingham Co., VA","Rockingham Co., VA",Farmer,,,2022-03-04 19:44:20,2022-03-04 19:44:20
+896,augusta,1866-09-27,894,Staunton,Wm. A.,"Davis (Staunton, Va)",Martha L.,Hanes,24,24,,"Mt. Sidney, VA",Shoemaker,,W. A. Inf-,2022-03-04 19:44:20,2022-03-04 19:44:20
