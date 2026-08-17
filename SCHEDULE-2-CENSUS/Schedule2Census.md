@@ -115,7 +115,7 @@
 
 *Save as CSV file*
 
-	- Columns to save: mention_id, full_name, mention1, mention2, mention3
+	- Columns to save: mention_id, full_name, birth_year, mention1, mention2, mention3
 	- (Exclude candidate_id, first_name, middle_name, last_name, norm_first_name, nysiis_last_name, metaphone_last_name, head, district, original_line, enumerator, enumerator_date, household_count)
 	- When saving mention1, mention2, and mention3 fields, encode each object as JSON (e.g. {} if no match).
 	- Save enslavers table to disc as county + “-VP-SS-“ + year + “.csv” (i.e “AUG-VP-SS-1850.csv”) 

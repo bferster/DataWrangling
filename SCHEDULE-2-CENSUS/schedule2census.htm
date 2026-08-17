@@ -9,6 +9,7 @@
 	<!-- External Libraries -->
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+	<script src="match.js"></script>
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -732,12 +733,13 @@
 							<th>Line</th>
 							<th>Enumerator / Date</th>
 							<th>Slaves</th>
+							<th>Probability</th>
 							<th>Matched Census Mentions & Scores [Name, Dist, Head, Date]</th>
 						</tr>
 					</thead>
 					<tbody id="tableBody">
 						<tr>
-							<td colspan="7">
+							<td colspan="8">
 								<div class="empty-state">
 									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -939,6 +941,12 @@
 					}
 				}
 				return Math.max(0, Math.min(1, base));
+			}
+
+			nameProbability(score) {
+				if (!this._nameCalib) return null;
+				const c = this._nameCalib;
+				return 1 / (1 + Math.exp(-(c.b + c.w * ((Number(score) - c.mean) / c.sd))));
 			}
 		}
 
@@ -1154,6 +1162,7 @@
 							enumerator: od.enumerator || r.enumerator || '',
 							enumerator_date: od.enumerator_date || r.enumerator_date || '',
 							household_count: household_count,
+							birth_year: '',
 							matched_name: '',
 							mention1: {},
 							mention2: {},
@@ -1224,6 +1233,34 @@
 					}
 				}
 
+				// Initialize candidate pool frequencies and calibration
+				if (nameMatcher && typeof nameMatcher.usePool === 'function') {
+					nameMatcher.usePool(censusCandidates);
+				}
+
+				if (nameMatcher && typeof nameMatcher.fitNameCalibration === 'function') {
+					try {
+						const hasLabeledRows = Array.isArray(rows) && rows.some(r => r && r.score !== undefined && r.label !== undefined);
+						const calibData = hasLabeledRows ? rows : [
+							{ score: 1.80, label: 1 },
+							{ score: 1.50, label: 1 },
+							{ score: 1.30, label: 1 },
+							{ score: 1.00, label: 1 },
+							{ score: 0.90, label: 1 },
+							{ score: 0.85, label: 1 },
+							{ score: 0.75, label: 1 },
+							{ score: 0.70, label: 0 },
+							{ score: 0.60, label: 0 },
+							{ score: 0.50, label: 0 },
+							{ score: 0.35, label: 0 },
+							{ score: 0.00, label: 0 }
+						];
+						nameMatcher.fitNameCalibration(calibData, { lr: 0.1, epochs: 2500, lambda: 0.01 });
+					} catch (e) {
+						console.warn('fitNameCalibration note:', e.message);
+					}
+				}
+
 				updateProgress(60, `Matching ${enslaverTable.length} enslavers using MatchName and context scoring...`);
 
 				let totalMentionsLinked = 0;
@@ -1265,7 +1302,7 @@
 
 						for (const cand of candidateSet) {
 							const nameScore = MatchName(enslaver, cand);
-							if (nameScore > 0) {
+							if (nameScore >= 0) {
 								let districtBonus = 0;
 								let headBonus = 0;
 								let dateBonus = 0;
@@ -1286,34 +1323,58 @@
 								);
 
 								const totalScore = nameScore + districtBonus + headBonus + dateBonus;
-								const confidence = totalScore;
+								const confidence = Number(totalScore.toFixed(3));
 
-								if (confidence >= threshold) {
-									candidateMatches.push({
-										mention_id: cand.mention_id,
-										matched_name: cand.full_name || `${cand.first_name} ${cand.last_name}`.trim(),
-										confidence: Number(confidence.toFixed(3)),
-										scores: {
-											name: Number(nameScore.toFixed(3)),
-											district: Number(districtBonus.toFixed(3)),
-											head: Number(headBonus.toFixed(3)),
-											date: Number(dateBonus.toFixed(3))
-										},
-										_candidate: cand
-									});
+								let prob = null;
+								if (nameMatcher && typeof nameMatcher.nameProbability === 'function') {
+									const calcProb = nameMatcher.nameProbability(confidence);
+									if (calcProb !== null && calcProb !== undefined && !isNaN(calcProb)) {
+										prob = Number(Number(calcProb).toFixed(3));
+									}
 								}
+
+								const evalVal = (prob !== null && prob !== undefined) ? prob : confidence;
+
+								// Always record candidate matches (including those below threshold)
+								candidateMatches.push({
+									mention_id: cand.mention_id,
+									matched_name: cand.full_name || `${cand.first_name} ${cand.last_name}`.trim(),
+									confidence: confidence,
+									probability: prob !== null ? prob : evalVal,
+									scores: {
+										name: Number(nameScore.toFixed(3)),
+										district: Number(districtBonus.toFixed(3)),
+										head: Number(headBonus.toFixed(3)),
+										date: Number(dateBonus.toFixed(3))
+									},
+									_candidate: cand
+								});
 							}
 						}
 
-
-						candidateMatches.sort((a, b) => b.confidence - a.confidence);
+						// Sort candidate matches on probability (descending), with tie-breaker on confidence
+						candidateMatches.sort((a, b) => {
+							const pA = (a.probability !== null && a.probability !== undefined) ? a.probability : a.confidence;
+							const pB = (b.probability !== null && b.probability !== undefined) ? b.probability : b.confidence;
+							if (pB !== pA) return pB - pA;
+							return b.confidence - a.confidence;
+						});
 
 						function formatMention(match) {
 							if (!match) return {};
+							let prob = match.probability;
+							if ((prob === undefined || prob === null) && nameMatcher && typeof nameMatcher.nameProbability === 'function') {
+								const evalScore = (match.confidence !== undefined && match.confidence !== null) ? match.confidence : (match.scores ? match.scores.name : 0);
+								const calcProb = nameMatcher.nameProbability(evalScore);
+								if (calcProb !== null && calcProb !== undefined && !isNaN(calcProb)) {
+									prob = Number(Number(calcProb).toFixed(3));
+								}
+							}
 							return {
 								full_name: match.matched_name || '',
 								mention_id: match.mention_id || '',
 								confidence: match.confidence,
+								probability: prob !== undefined && prob !== null ? prob : null,
 								scores: {
 									name: match.scores.name,
 									district: match.scores.district,
@@ -1329,6 +1390,9 @@
 						enslaver.mention3 = formatMention(candidateMatches[2]);
 
 						enslaver.matched_name = candidateMatches.length > 0 ? candidateMatches[0].matched_name : '';
+						enslaver.birth_year = (candidateMatches.length > 0 && candidateMatches[0]._candidate && candidateMatches[0]._candidate.birth_year)
+							? candidateMatches[0]._candidate.birth_year
+							: '';
 						enslaver._fullMatches = candidateMatches;
 
 						const linkedCount = [enslaver.mention1, enslaver.mention2, enslaver.mention3].filter(m => m && m.mention_id).length;
@@ -1369,10 +1433,15 @@
 			$tbody.empty();
 
 			if (!data || data.length === 0) {
-				$tbody.html('<tr><td colspan="7" class="empty-state">No enslaver records found matching criteria.</td></tr>');
+				$tbody.html('<tr><td colspan="8" class="empty-state">No enslaver records found matching criteria.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
 				return;
 			}
+
+			const rawVal = $('#thresholdInput').val();
+			const parsedNum = parseFloat(rawVal);
+			const rawThreshold = isNaN(parsedNum) ? 75 : parsedNum;
+			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
 			$('#resultCountBadge').text(`${data.length.toLocaleString()} Rows`);
 
@@ -1391,7 +1460,7 @@
 				let mentionsHtml = '';
 
 				if (activeMentions.length === 0) {
-					mentionsHtml = '<span style="color: var(--text-muted); font-size: 12px;">None above threshold</span>';
+					mentionsHtml = '<span style="color: var(--text-muted); font-size: 12px;">No candidate matches</span>';
 				} else {
 					mentionsHtml = activeMentions.map((m) => {
 						const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
@@ -1401,11 +1470,23 @@
 						const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
 						const matchedName = m.full_name || '';
 
+						let probBadge = '';
+						if (m.probability !== null && m.probability !== undefined) {
+							const isPass = m.probability >= threshold;
+							const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+							const pillColor = isPass ? '#15803d' : '#b91c1c';
+							const pillBorder = isPass ? '#86efac' : '#fca5a5';
+							probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:11px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
+						}
+
 						return `
               <div class="mention-block">
                 <div class="mention-top-line">
                   <span class="mention-name-id"><strong>${m.label}:</strong> ${m.mention_id} ${matchedName ? `<span class="mention-matched-name">(${matchedName})</span>` : ''}</span>
-                  <span class="conf-badge ${confClass}">Conf: ${m.confidence}</span>
+                  <div>
+                    <span class="conf-badge ${confClass}">Conf: ${m.confidence}</span>
+                    ${probBadge}
+                  </div>
                 </div>
                 <div class="score-breakdown-row">
                   <span class="score-chip chip-name" title="Name Similarity Score">Name: ${ns}</span>
@@ -1421,16 +1502,31 @@
 
 				const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
 
+				// Determine top match probability for the dedicated Probability column
+				const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
+					? row.mention1.probability
+					: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
+
+				let probPillHtml = '<span style="color: var(--text-muted); font-size: 12px;">-</span>';
+				if (topProb !== null && topProb !== undefined) {
+					const isPass = topProb >= threshold;
+					const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+					const pillColor = isPass ? '#15803d' : '#b91c1c';
+					const pillBorder = isPass ? '#86efac' : '#fca5a5';
+					probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:12px;padding:4px 10px;border-radius:9999px;display:inline-block;">${topProb}</span>`;
+				}
+
 				tr.innerHTML = `
           <td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
           <td>
             <strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
-            ${row.matched_name ? `<div style="font-size: 11px; color: #059669; font-weight: 500;">Top Match: ${row.matched_name}</div>` : ''}
+            ${row.matched_name ? `<div style="font-size: 11px; color: #059669; font-weight: 500;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
           </td>
           <td>${row.district || '-'}</td>
           <td>${row.original_line || '-'}</td>
           <td>${enumText}</td>
           <td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
+          <td style="text-align: center;">${probPillHtml}</td>
           <td class="mentions-cell">${mentionsHtml}</td>
         `;
 
@@ -1447,6 +1543,16 @@
 						const hs = m.scores.head;
 						const dts = m.scores.date;
 						const rankLabel = mIdx === 0 ? 'mention1 (Rank 1)' : (mIdx === 1 ? 'mention2 (Rank 2)' : (mIdx === 2 ? 'mention3 (Rank 3)' : `Rank ${mIdx + 1}`));
+
+						let cardProbBadge = '';
+						if (m.probability !== null && m.probability !== undefined) {
+							const cPass = m.probability >= threshold;
+							const cBg = cPass ? '#dcfce7' : '#fee2e2';
+							const cColor = cPass ? '#15803d' : '#b91c1c';
+							const cBorder = cPass ? '#86efac' : '#fca5a5';
+							cardProbBadge = `<span class="badge" style="background:${cBg};color:${cColor};border:1px solid ${cBorder};font-size:12px;font-weight:700;border-radius:9999px;">Prob: ${m.probability}</span>`;
+						}
+
 						return `
               <div class="match-breakdown-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
@@ -1455,6 +1561,7 @@
                   </span>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="scores-raw-array">scores: [${ns}, ${ds}, ${hs}, ${dts}]</span>
+                    ${cardProbBadge}
                     <span class="badge badge-success" style="font-size: 12px;">Total Confidence: ${m.confidence}</span>
                   </div>
                 </div>
@@ -1475,6 +1582,10 @@
                     <div class="breakdown-label">Enumerator Date Bonus</div>
                     <div class="breakdown-value">+${dts}</div>
                   </div>
+                  <div class="breakdown-item" style="border-left: 3px solid #6366f1;">
+                    <div class="breakdown-label">Census Birth Year</div>
+                    <div class="breakdown-value">${m._candidate.birth_year || '-'}</div>
+                  </div>
                   <div class="breakdown-item">
                     <div class="breakdown-label">Census District / Line</div>
                     <div class="breakdown-value">${m._candidate.district || '-'} / ${m._candidate.original_line || '-'}</div>
@@ -1489,7 +1600,7 @@
 					}).join('');
 
 					detailTr.innerHTML = `
-            <td colspan="7" style="padding: 18px 24px;">
+            <td colspan="8" style="padding: 18px 24px;">
               <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; font-weight: 700;">
                 All Scored Candidate Matches for ${row.full_name} (${row.candidate_id})
               </h4>
@@ -1513,13 +1624,21 @@
 			const record_year = $('#yearSelect').val() || '1850';
 			const filename = `${county}-VP-SS-${record_year}.csv`;
 
-			const exportData = enslaverTable.map(row => ({
-				mention_id: row.mention_id,
-				full_name: row.full_name,
-				mention1: JSON.stringify(row.mention1 || {}),
-				mention2: JSON.stringify(row.mention2 || {}),
-				mention3: JSON.stringify(row.mention3 || {})
-			}));
+			const exportData = enslaverTable.map(row => {
+				const topProb = (row.mention1 && row.mention1.mention_id && row.mention1.probability !== null && row.mention1.probability !== undefined)
+					? Number(Number(row.mention1.probability).toFixed(2))
+					: 0;
+
+				return {
+					mention_id: row.mention_id,
+					full_name: row.full_name,
+					birth_year: row.birth_year || '',
+					top_probability: topProb,
+					mention1: JSON.stringify(row.mention1 || {}),
+					mention2: JSON.stringify(row.mention2 || {}),
+					mention3: JSON.stringify(row.mention3 || {})
+				};
+			});
 
 			const csvString = Papa.unparse(exportData);
 			const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
