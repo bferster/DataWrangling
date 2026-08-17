@@ -9,7 +9,7 @@
 	<!-- External Libraries -->
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-	<script src="match.js"></script>
+	<script src="../COMMON/match.js"></script>
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1061,9 +1061,11 @@
 					});
 				});
 			} else {
-				updateProgress(10, 'Fetching mentions.csv from C:\\Bill\\CC\\js\\AI\\Verite\\img...');
-				// Multiple representations targeting C:\Bill\CC\js\AI\Verite\img\mentions.csv
+				updateProgress(10, 'Fetching mentions.csv from COMMON folder...');
+				// Multiple representations targeting COMMON/mentions.csv
 				const targetPaths = [
+					'../COMMON/mentions.csv',
+					'COMMON/mentions.csv',
 					'img/mentions.csv',
 					'../img/mentions.csv',
 					'../../Verite/img/mentions.csv',
@@ -1093,10 +1095,10 @@
 							return data;
 						}
 					} catch (e) {
-						// try next path representation for C:\Bill\CC\js\AI\Verite\img\mentions.csv
+						// try next path representation
 					}
 				}
-				throw new Error('Could not load mentions.csv automatically from C:\\Bill\\CC\\js\\AI\\Verite\\img\\mentions.csv. If your browser restricts cross-folder requests, please select mentions.csv using the "Source CSV" file picker above.');
+				throw new Error('Could not load mentions.csv automatically from COMMON/mentions.csv. Please select mentions.csv using the "Source CSV" file picker above.');
 			}
 		}
 
