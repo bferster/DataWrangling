@@ -764,17 +764,13 @@
 
 					<div class="form-group">
 						<label for="ceilingInput">Ceiling (%)</label>
-						<input type="number" id="ceilingInput" class="form-control" value="80" min="0" max="100"
+						<input type="number" id="ceilingInput" class="form-control" value="75" min="0" max="100"
 							step="1">
 					</div>
 
 					<div class="form-group">
 						<label for="floorInput">Floor (%)</label>
 						<input type="number" id="floorInput" class="form-control" value="40" min="0" max="100" step="1">
-					</div>
-					<div class="form-group">
-						<label for="marginInput">Margin (%)</label>
-						<input type="number" id="marginInput" class="form-control" value="15" min="0" max="100" step="1">
 					</div>
 
 					<div class="form-group" style="grid-column: span 2;">
@@ -787,10 +783,6 @@
 						<label for="mentionsFileInput">Mentions CSV (mentions.csv)</label>
 						<input type="file" id="mentionsFileInput" accept=".csv" class="form-control"
 							style="padding: 2px 4px;">
-					</div>
-					<div class="form-group" style="grid-column: span 2;">
-						<label for="labelsFileInput">Resolved labels CSV (optional — enables probability)</label>
-						<input type="file" id="labelsFileInput" accept=".csv" class="form-control" style="padding: 2px 4px;">
 					</div>
 
 					<div class="form-group"
@@ -1161,9 +1153,8 @@
 				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
 				const recordYear = $('#yearSelect').val() || '1860';
 				const yrNum = parseInt(recordYear, 10);
-				const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
+				const ceiling = (parseFloat($('#ceilingInput').val()) || 75) / 100;
 				const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
-				const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
 
 				$('#statTargetSource').text(`Target: ${county}-VP`);
 				$('#statCensusTarget').text(`Source: ${county}-CN-${recordYear}`);
@@ -1303,60 +1294,66 @@
 						}
 					}
 
-					// Instantiate + configure the shared Match engine for this pass
+					// Instantiate Match class
 					const matcher = new Match();
-					if (typeof matcher.usePool === 'function') matcher.usePool(censusMentions);
+					if (typeof matcher.usePool === 'function') {
+						matcher.usePool(censusMentions);
+					}
 
-					// Tunables (see design notes): birth sigma loosened for age-report
-					// noise; household applied as a noisy-OR BOOST (beta) not a lever.
-					const BETA = 0.6;
-					const BIRTH_PROFILES = {
-						CENSUS_CENSUS:     { sigma: 3.0, knockout: 12 },
-						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
-					};
-					const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
-					const promoteFloor = Math.max(floor, ceiling - 0.25);
-					const SECOND_MAX = 0.50;
-
-					// Optional resolved-label CSV -> REAL probability calibration.
-					// Columns: person_id, mention_id, label (1=same person, 0=not).
-					const labelRows = await this.loadCsv('labelsFileInput', [
-						`${county}-LABELS.csv`, `../COMMON/${county}-LABELS.csv`, `labels.csv`
-					]);
-					const labelKey = (pid, mid) => `${this.normStr(pid)}|${this.normStr(mid)}`;
-					const labelMap = new Map();
-					if (labelRows && labelRows.length) {
-						for (const l of labelRows) {
-							const lab = parseInt(l.label, 10);
-							if (l.person_id && l.mention_id && (lab === 0 || lab === 1))
-								labelMap.set(labelKey(l.person_id, l.mention_id), lab);
+					// Fit Calibration on standard Platt curve
+					if (typeof matcher.fitNameCalibration === 'function') {
+						try {
+							matcher.fitNameCalibration([
+								{ score: 1.00, label: 1 },
+								{ score: 0.90, label: 1 },
+								{ score: 0.85, label: 1 },
+								{ score: 0.75, label: 1 },
+								{ score: 0.65, label: 0 },
+								{ score: 0.50, label: 0 },
+								{ score: 0.35, label: 0 },
+								{ score: 0.00, label: 0 }
+							]);
+						} catch (e) {
+							console.warn('fitNameCalibration note:', e);
 						}
 					}
 
-					this.updateProgress(55, 'Scoring verified persons against census pool...');
+					this.updateProgress(55, 'Matching verified persons against census pool...');
 
+					const rawResults = [];
 					const totalVp = vpRows.length;
 					const chunkSize = 150;
 
-					// ---- PASS 1: score every surviving (person, candidate) edge ----
-					const perPerson = new Array(totalVp).fill(null).map(() => []);
-					const edges = [];
-					const calibRows = [];
-
 					for (let idx = 0; idx < totalVp; idx += chunkSize) {
 						const endIdx = Math.min(idx + chunkSize, totalVp);
+
 						for (let i = idx; i < endIdx; i++) {
 							const person = vpRows[i];
 
+							// Blocking: Knockouts on verified person constraints
 							const pGender = matcher._gender(person);
-							const pRaceCls = matcher._raceClass(person);
+							const pRace = matcher._race(person);
 							const pBirthRange = this.parseRange(person.birth_year);
 							const pDeathRange = this.parseRange(person.death_year);
 
-							// died before this census -> cannot be present (leave empty -> NEW)
-							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
+							// Ignore if verified death_year is before census year (e.g. death < 1859 for 1860 census)
+							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) {
+								rawResults.push({
+									person: person,
+									status: 'NEW',
+									probability: 0,
+									score: 0,
+									bestCandidate: null,
+									why: {
+										name: 0, birth: 0, family: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+										needsCorroboration: false, note: `Verified death year (${pDeathRange[1]}) is before census ${recordYear}`
+									},
+									allCandidates: []
+								});
+								continue;
+							}
 
-							// candidate retrieval via phonetic/surname block
+							// Retrieve candidate pool
 							const candidateSet = new Set();
 							const addKeys = (prefix, val) => {
 								const k = makeIndexKey(prefix, val);
@@ -1364,6 +1361,7 @@
 								const list = phoneticIndex.get(k);
 								if (list) for (let c = 0; c < list.length; c++) candidateSet.add(list[c]);
 							};
+
 							if (person.last_name) addKeys('L', person.last_name);
 							if (person.nysiis_last_name) addKeys('N', person.nysiis_last_name);
 							if (person.full_name) addKeys('F', person.full_name);
@@ -1373,154 +1371,142 @@
 								if (parts[1]) addKeys('M', parts[1]);
 							}
 
+							// Person kin roster
 							const personKin = (person.household_id && vpHouseholds.get(person.household_id))
 								? vpHouseholds.get(person.household_id).filter(p => p !== person)
 								: [];
 
+							const scoredCandidates = [];
+
 							for (const cand of candidateSet) {
-								// blocking knockouts (race collapses B<->M via _raceClass)
+								// Blocking Rules:
+								// 1. Gender knockout
 								const cGender = matcher._gender(cand);
 								if (pGender && cGender && pGender !== cGender) continue;
-								const cRaceCls = matcher._raceClass(cand);
-								if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
+
+								// 2. Race knockout
+								const cRace = matcher._race(cand);
+								if (pRace && cRace && pRace !== cRace) continue;
+
+								// 3. Birth year gap knockout (> 15 years)
 								const cBirthRange = this.parseRange(cand.birth_year);
 								if (pBirthRange && cBirthRange) {
-									const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
-										: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
-									if (gap > 12) continue;   // aligned with MatchPerson knockout
+									const gap = (cBirthRange[0] > pBirthRange[1])
+										? cBirthRange[0] - pBirthRange[1]
+										: (pBirthRange[0] > cBirthRange[1])
+											? pBirthRange[0] - cBirthRange[1]
+											: 0;
+									if (gap > 15) continue;
 								}
 
+								// Candidate household roster
 								const candHh = this.normStr(cand.household_id);
 								const candHousehold = (candHh && censusHouseholds.has(candHh))
 									? censusHouseholds.get(candHh).filter(m => m !== cand)
 									: [];
 
+								// Run MatchPerson
 								const matchRes = matcher.MatchPerson(person, cand, {
 									censusYear: yrNum,
 									personKin: personKin,
 									candidateHousehold: candHousehold,
-									weights: LEVER_WEIGHTS,
-									birthProfiles: BIRTH_PROFILES,
-									householdBoost: BETA
+									weights: { name: 0.40, birth: 0.30, household: 0.30 }
 								});
+
 								if (matchRes.tier === 'KNOCKOUT') continue;
 
-								const entry = {
-									candidate: cand,
-									score: Number(matchRes.score.toFixed(4)),
-									probability: (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null,
-									tier: matchRes.tier,
-									why: matchRes.why
-								};
-								perPerson[i].push(entry);
-								edges.push({ pi: i, mid: this.normStr(cand.mention_id), entry: entry });
+								let prob = matchRes.probability;
+								if (prob == null && typeof matcher.nameProbability === 'function') {
+									prob = matcher.nameProbability(matchRes.score);
+								}
+								if (prob != null) prob = Number(Number(prob).toFixed(3));
 
-								const lab = labelMap.get(labelKey(person.person_id || person.mention_id, cand.mention_id));
-								if (lab === 0 || lab === 1)
-									calibRows.push({ features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family], label: lab });
+								scoredCandidates.push({
+									candidate: cand,
+									score: Number(matchRes.score.toFixed(3)),
+									probability: prob != null ? prob : Number(matchRes.score.toFixed(3)),
+									tier: matchRes.tier,
+									why: matchRes.why,
+									weights: matchRes.weights
+								});
 							}
-							perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
+
+							// Sort candidates descending by score then probability
+							scoredCandidates.sort((a, b) => (b.score - a.score) || (b.probability - a.probability));
+
+							const best = scoredCandidates[0] || null;
+							let status = 'NEW';
+							let finalScore = 0;
+							let finalProb = 0;
+							let whyObj = null;
+
+							if (best) {
+								finalScore = best.score;
+								finalProb = best.probability;
+								whyObj = best.why;
+
+								if (finalScore >= ceiling) {
+									status = 'MATCH';
+								} else if (finalScore >= floor) {
+									status = 'MAYBE';
+								} else {
+									status = 'NEW';
+								}
+							}
+
+							rawResults.push({
+								person: person,
+								status: status,
+								probability: finalProb,
+								score: finalScore,
+								bestCandidate: best ? best.candidate : null,
+								why: whyObj,
+								allCandidates: scoredCandidates
+							});
 						}
-						this.updateProgress(55 + (endIdx / totalVp) * 25, `Scoring: ${endIdx} of ${totalVp}...`);
+
+						const progressPct = 50 + (endIdx / totalVp) * 40;
+						this.updateProgress(progressPct, `Matching verified persons: ${endIdx} of ${totalVp}...`);
 						await new Promise(r => setTimeout(r, 0));
 					}
 
-					// ---- optional REAL calibration on resolved labels ----
-					let calibrated = false;
-					if (calibRows.length >= 8 && typeof matcher.fitCalibration === 'function') {
-						try {
-							matcher.fitCalibration(calibRows);
-							calibrated = true;
-							for (const e of edges) {
-								try {
-									e.entry.probability = Number(matcher.probability(
-										[e.entry.why.name, e.entry.why.birth, e.entry.why.family]).toFixed(3));
-								} catch (_) { }
+					// POST-MATCHING PROGRESS & RECONCILIATION
+					this.updateProgress(91, 'Reconciling claims: evaluating close-margin scores (within 0.05)...');
+					await new Promise(r => setTimeout(r, 0));
+
+					// 1. Close margin demotion: When top 2 candidates are within 0.05, force MAYBE
+					for (const r of rawResults) {
+						if (r.status === 'MATCH' && r.allCandidates && r.allCandidates.length >= 2) {
+							const diff = r.allCandidates[0].score - r.allCandidates[1].score;
+							if (diff <= 0.05) {
+								r.status = 'MAYBE';
+								if (r.why) r.why.reconciledNote = `Demoted to MAYBE: close margin (diff ${diff.toFixed(3)}) with runner-up`;
 							}
-						} catch (err) { console.warn('fitCalibration skipped:', err.message); }
-					}
-
-					// ---- PASS 2: global one-to-one assignment (confident-first + slack) ----
-					this.updateProgress(82, 'Assigning: deconflicting contested census mentions...');
-					await new Promise(r => setTimeout(r, 0));
-
-					const usedMention = new Set();
-					const assigned = new Array(totalVp).fill(null);
-					const locked = new Set();
-
-					// order persons by best score so the strongest confident claim wins a mention
-					const order = [];
-					for (let i = 0; i < totalVp; i++) if (perPerson[i].length) order.push(i);
-					order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
-
-					// 1) lock confident, clear winners
-					for (const i of order) {
-						const cands = perPerson[i];
-						const best = cands[0];
-						const second = cands[1] ? cands[1].score : 0;
-						const bmid = this.normStr(best.candidate.mention_id);
-						if (best.score >= ceiling && (best.score - second) >= 0.05 && !usedMention.has(bmid)) {
-							assigned[i] = best;
-							usedMention.add(bmid);
-							locked.add(i);
 						}
 					}
 
-					// 2) deconflict the rest greedily by score, WITH SLACK (never force sub-floor)
-					const rem = edges
-						.filter(e => !locked.has(e.pi) && !usedMention.has(e.mid) && e.entry.score >= floor)
-						.sort((a, b) => b.entry.score - a.entry.score);
-					for (const e of rem) {
-						if (assigned[e.pi] || usedMention.has(e.mid)) continue;
-						assigned[e.pi] = e.entry;
-						usedMention.add(e.mid);
-					}
-
-					// ---- PASS 3: classify MATCH / MAYBE / NEW by margin over assigned edge ----
-					this.updateProgress(90, 'Classifying by margin (best vs runner-up)...');
+					this.updateProgress(93, 'Resolving duplicate claims: ensuring single census mention per verified person...');
 					await new Promise(r => setTimeout(r, 0));
 
-					const classify = (best, second) => {
-						if (best >= ceiling) return 'MATCH';
-						if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
-						if (best >= floor) return 'MAYBE';
-						return 'NEW';
-					};
-
-					const rawResults = [];
-					for (let i = 0; i < totalVp; i++) {
-						const person = vpRows[i];
-						const cands = perPerson[i];
-						const a = assigned[i];
-
-						if (!a) {
-							rawResults.push({
-								person: person, status: 'NEW', probability: null, score: 0, bestCandidate: null,
-								why: {
-									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
-									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
-									note: cands.length ? 'Lost assignment to a better-fitting person' : 'No candidate cleared blocking'
-								},
-								allCandidates: cands
-							});
-							continue;
+					// 2. Duplicate claim resolution
+					const mentionClaimMap = new Map();
+					for (const r of rawResults) {
+						if (r.status === 'MATCH' && r.bestCandidate && r.bestCandidate.mention_id) {
+							const mid = r.bestCandidate.mention_id;
+							if (!mentionClaimMap.has(mid)) mentionClaimMap.set(mid, []);
+							mentionClaimMap.get(mid).push(r);
 						}
+					}
 
-						const best = a.score;
-						const secondEntry = cands.find(c => this.normStr(c.candidate.mention_id) !== this.normStr(a.candidate.mention_id));
-						const second = secondEntry ? secondEntry.score : 0;
-						const status = classify(best, second);
-
-						const why = Object.assign({}, a.why, {
-							margin: Number((best - second).toFixed(3)),
-							secondBest: Number(second.toFixed(3))
-						});
-
-						rawResults.push({
-							person: person, status: status,
-							probability: a.probability, score: best,
-							bestCandidate: a.candidate, why: why, allCandidates: cands
-						});
+					for (const [mid, claims] of mentionClaimMap.entries()) {
+						if (claims.length > 1) {
+							claims.sort((a, b) => b.score - a.score);
+							for (let k = 1; k < claims.length; k++) {
+								claims[k].status = 'MAYBE';
+								const pid = claims[0].person.person_id || claims[0].person.mention_id || 'another person';
+								if (claims[k].why) claims[k].why.reconciledNote = `Demoted to MAYBE: contested census mention claimed by higher scoring person (${pid})`;
+							}
+						}
 					}
 
 					this.updateProgress(95, 'Formatting explanation levers and top candidate runner-ups...');
@@ -1548,12 +1534,7 @@
 								family: why.family != null ? why.family : 0,
 								rung: why.rung || 'NONE',
 								surnameKind: why.surnameKind || 'NONE',
-								needsCorroboration: !!why.needsCorroboration,
-								birthGap: why.birthGap != null ? why.birthGap : '',
-								familyCount: why.familyCount != null ? why.familyCount : 0,
-								householdH: why.householdH != null ? why.householdH : 0,
-								margin: why.margin != null ? why.margin : '',
-								secondBest: why.secondBest != null ? why.secondBest : ''
+								needsCorroboration: !!why.needsCorroboration
 							},
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
 								? why.familyMatches.join(', ')
@@ -1661,19 +1642,7 @@
 							<div class="breakdown-item" style="border-left: 3px solid #06b6d4;">
 								<div class="breakdown-label">Corroborated Kin</div>
 								<div class="breakdown-value" style="font-size: 10px; font-weight: 600;">${famCorr}</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #f59e0b;">
-                <div class="breakdown-label">Birth Gap (yrs)</div>
-                <div class="breakdown-value">${levers.birthGap != null && levers.birthGap !== '' ? levers.birthGap : '-'}</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #22c55e;">
-                <div class="breakdown-label">Kin Matched (H)</div>
-                <div class="breakdown-value">${levers.familyCount != null ? levers.familyCount : 0} (H ${levers.householdH != null ? levers.householdH : 0})</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #ec4899;">
-                <div class="breakdown-label">Margin vs #2</div>
-                <div class="breakdown-value">${levers.margin != null && levers.margin !== '' ? levers.margin : '-'} (2nd ${levers.secondBest != null && levers.secondBest !== '' ? levers.secondBest : '-'})</div>
-              </div>
+							</div>
 						</div>
 
 						${runnerUpsHtml}
