@@ -16,7 +16,8 @@
 	Add a text input to set the threshold. Default to 75
 	Add a pulldown to select between 1850 and 1860. 
 
-	raw data exists in a CSV file called mentions.csv in the ../AI/Verite/img folder
+	Use light them with light red background
+	Raw data exists in a CSV file called mentions.csv in the ../AI/Verite/img folder
 	Use MatchName in the ../Verite/match.js file
 
 *Extract enslaver table*
@@ -60,7 +61,19 @@
 			}
 		}
 
-*Extract census candidates table*
+
+*Examine result*
+
+	If I click on a result, add two scrollable display divs under the results display {
+		- It has two scrollable divs, tall enought to show 3 lines of text.  
+		- The top div shows the original line from the verified table.
+		- The bottom div shows the original line from the census table.
+		- Each has 24 rows of data 12 leading up to the selected row and 12 following the selected row.  
+		- Highlight the center row.  
+		}
+
+
+	*Extract census candidates table*
 
 	Create a census table called ”censusCandidates”  with fields {
 	mention_id

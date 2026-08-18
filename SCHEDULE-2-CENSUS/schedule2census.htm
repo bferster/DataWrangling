@@ -58,61 +58,69 @@
 			font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 			background-color: var(--bg-body);
 			color: var(--text-primary);
-			line-height: 1.5;
-			padding: 24px;
-			min-height: 100vh;
+			line-height: 1.35;
+			padding: 20px;
+			height: 100vh;
+			margin: 0;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
 		}
 
 		.container {
-			max-width: 1480px;
+			max-width: 1760px;
+			width: 100%;
 			margin: 0 auto;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
 		}
 
+		/* Header */
 		header {
-			margin-bottom: 24px;
+			margin-bottom: 8px;
+			flex-shrink: 0;
+		}
+
+		.header-title {
 			display: flex;
-			justify-content: space-between;
-			align-items: flex-start;
-			border-bottom: 1px solid var(--border-color);
-			padding-bottom: 18px;
-			background: #ffffff;
-			padding: 20px 24px;
-			border-radius: var(--radius-lg);
-			box-shadow: var(--shadow-sm);
-			border: 1px solid var(--border-color);
+			align-items: baseline;
+			gap: 12px;
+			flex-wrap: wrap;
 		}
 
 		.header-title h1 {
-			font-size: 24px;
+			font-size: 16px;
 			font-weight: 800;
-			letter-spacing: -0.02em;
+			letter-spacing: -0.01em;
 			color: #1e293b;
-			display: flex;
+			display: inline-flex;
 			align-items: center;
-			gap: 12px;
+			gap: 8px;
+			margin: 0;
 		}
 
 		.header-title p {
 			color: var(--text-secondary);
-			font-size: 14px;
-			margin-top: 4px;
+			font-size: 12px;
+			margin: 0;
 		}
 
 		.badge {
 			display: inline-flex;
 			align-items: center;
-			padding: 4px 10px;
-			border-radius: 9999px;
-			font-size: 11px;
+			padding: 1px 6px;
+			border-radius: 4px;
+			font-size: 10px;
 			font-weight: 700;
 			text-transform: uppercase;
-			letter-spacing: 0.05em;
+			letter-spacing: 0.04em;
 		}
 
 		.badge-primary {
 			background: #eff6ff;
 			color: #1d4ed8;
-			border: 1px solid #bfdbfe;
 		}
 
 		.badge-success {
@@ -133,50 +141,49 @@
 			border: 1px solid #ddd6fe;
 		}
 
-		/* Controls Card */
+		/* Top Dashboard Grid (Controls Left, Stats Right) */
+		.top-dashboard-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+			gap: 10px;
+			margin-bottom: 10px;
+			align-items: stretch;
+			flex-shrink: 0;
+		}
+
 		.card {
 			background-color: var(--bg-card);
 			border: 1px solid var(--border-color);
-			border-radius: var(--radius-lg);
-			padding: 22px 24px;
+			border-radius: var(--radius-md);
+			padding: 10px 12px;
 			box-shadow: var(--shadow-sm);
-			margin-bottom: 24px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
 		}
 
 		.controls-grid {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 16px;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr) 1.5fr;
+			gap: 6px 8px;
 			align-items: flex-end;
-		}
-
-		.form-group-compact {
-			width: 100px;
-			flex: 0 0 100px;
-		}
-
-		.form-group-file {
-			flex: 1 1 240px;
-			min-width: 200px;
-		}
-
-		.form-group-actions {
-			flex: 1 1 260px;
-			min-width: 240px;
 		}
 
 		.form-group {
 			display: flex;
 			flex-direction: column;
-			gap: 6px;
+			gap: 2px;
 		}
 
 		.form-group label {
-			font-size: 12px;
+			font-size: 10px;
 			font-weight: 700;
 			color: var(--text-secondary);
 			text-transform: uppercase;
-			letter-spacing: 0.05em;
+			letter-spacing: 0.03em;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 		.form-control {
@@ -184,16 +191,18 @@
 			border: 1px solid var(--border-color);
 			border-radius: var(--radius-sm);
 			color: var(--text-primary);
-			padding: 10px 12px;
-			font-size: 14px;
+			padding: 4px 6px;
+			font-size: 12px;
 			font-family: inherit;
+			height: 28px;
+			box-sizing: border-box;
 			transition: all 0.2s;
 			outline: none;
 		}
 
 		.form-control:focus {
 			border-color: var(--border-focus);
-			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+			box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 		}
 
 		select.form-control {
@@ -204,10 +213,11 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			gap: 8px;
-			padding: 11px 20px;
-			font-size: 14px;
-			font-weight: 600;
+			gap: 6px;
+			padding: 0 12px;
+			height: 28px;
+			font-size: 12px;
+			font-weight: 700;
 			border-radius: var(--radius-sm);
 			border: none;
 			cursor: pointer;
@@ -226,7 +236,6 @@
 		.btn-primary:hover:not(:disabled) {
 			background: #1d4ed8;
 			box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
-			transform: translateY(-1px);
 		}
 
 		.btn-success {
@@ -237,7 +246,6 @@
 
 		.btn-success:hover:not(:disabled) {
 			background: #047857;
-			transform: translateY(-1px);
 		}
 
 		.btn:disabled {
@@ -247,73 +255,74 @@
 			box-shadow: none !important;
 		}
 
-		/* Stats Grid */
-		.stats-grid {
+		/* Stats Right Side Grid */
+		.stats-panel-right {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.stats-grid-right {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-			gap: 16px;
-			margin-bottom: 24px;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 6px;
+			height: 100%;
 		}
 
 		.stat-card {
 			background: var(--bg-card);
 			border: 1px solid var(--border-color);
-			border-radius: var(--radius-md);
-			padding: 18px 20px;
+			border-left: 3px solid var(--stat-accent, var(--accent-primary));
+			border-radius: var(--radius-sm);
+			padding: 6px 10px;
 			position: relative;
-			overflow: hidden;
 			box-shadow: var(--shadow-sm);
-		}
-
-		.stat-card::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 4px;
-			background: var(--stat-accent, var(--accent-primary));
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
 		}
 
 		.stat-title {
-			font-size: 11px;
+			font-size: 9px;
 			color: var(--text-muted);
 			font-weight: 700;
 			text-transform: uppercase;
-			letter-spacing: 0.05em;
+			letter-spacing: 0.04em;
 		}
 
 		.stat-value {
-			font-size: 28px;
+			font-size: 18px;
 			font-weight: 800;
-			margin-top: 4px;
+			margin: 1px 0;
 			font-family: 'JetBrains Mono', monospace;
 			color: var(--text-primary);
+			line-height: 1.1;
 		}
 
 		.stat-sub {
-			font-size: 12px;
+			font-size: 10px;
 			color: var(--text-secondary);
-			margin-top: 2px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 		/* Progress & Status */
 		.status-panel {
-			margin-bottom: 24px;
-			background: var(--bg-card);
-			padding: 16px 20px;
-			border-radius: var(--radius-md);
+			background: #f8fafc;
+			padding: 6px 8px;
+			border-radius: var(--radius-sm);
 			border: 1px solid var(--border-color);
 			box-shadow: var(--shadow-sm);
 			display: none;
+			margin-top: 6px;
 		}
 
 		.progress-bar-container {
-			height: 8px;
+			height: 5px;
 			background-color: #e2e8f0;
 			border-radius: 9999px;
 			overflow: hidden;
-			margin-bottom: 10px;
+			margin-bottom: 4px;
 		}
 
 		.progress-bar {
@@ -324,287 +333,299 @@
 		}
 
 		.status-message {
-			font-size: 13px;
+			font-size: 11px;
 			color: var(--text-secondary);
 			display: flex;
 			justify-content: space-between;
 			font-family: 'JetBrains Mono', monospace;
+			font-weight: 600;
 		}
 
 		/* Data Table Section */
 		.table-container {
 			background: var(--bg-card);
 			border: 1px solid var(--border-color);
-			border-radius: var(--radius-lg);
+			border-radius: var(--radius-md);
 			overflow: hidden;
 			box-shadow: var(--shadow-sm);
+			flex: 1;
+			min-height: 0;
+			display: flex;
+			flex-direction: column;
 		}
 
 		.table-header {
-			padding: 16px 20px;
+			padding: 8px 12px;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			border-bottom: 1px solid var(--border-color);
-			background: #f8fafc;
-			gap: 16px;
+			background: #ffffff;
+			gap: 8px;
 			flex-wrap: wrap;
+			flex-shrink: 0;
 		}
 
 		.table-header h2 {
-			font-size: 17px;
+			font-size: 14px;
 			font-weight: 700;
 			color: #1e293b;
 			display: flex;
 			align-items: center;
-			gap: 10px;
-		}
-
-		.table-actions {
-			display: flex;
-			align-items: center;
-			gap: 12px;
+			gap: 8px;
+			margin: 0;
 		}
 
 		.search-input {
-			padding: 8px 14px;
-			border-radius: var(--radius-sm);
-			background: var(--bg-input);
+			padding: 4px 8px;
 			border: 1px solid var(--border-color);
-			color: var(--text-primary);
-			font-size: 13px;
-			min-width: 280px;
+			border-radius: var(--radius-sm);
+			font-size: 12px;
+			width: 260px;
+			height: 28px;
+			box-sizing: border-box;
+			outline: none;
+			background: white;
+		}
+
+		.search-input:focus {
+			border-color: var(--border-focus);
 		}
 
 		.table-wrapper {
-			max-height: 660px;
-			overflow-y: auto;
 			overflow-x: auto;
+			overflow-y: auto;
+			flex: 1;
+			min-height: 0;
 		}
 
 		table {
 			width: 100%;
 			border-collapse: collapse;
-			font-size: 13px;
 			text-align: left;
+			font-size: 12px;
 		}
 
 		th {
-			background: #f1f5f9;
-			color: var(--text-secondary);
+			background: #f8fafc;
+			padding: 7px 10px;
+			font-size: 10px;
 			font-weight: 700;
 			text-transform: uppercase;
-			font-size: 11px;
 			letter-spacing: 0.05em;
-			padding: 12px 16px;
+			color: var(--text-muted);
+			border-bottom: 1px solid var(--border-color);
 			position: sticky;
 			top: 0;
 			z-index: 10;
-			border-bottom: 1px solid var(--border-color);
 		}
 
 		td {
-			padding: 12px 16px;
+			padding: 7px 10px;
 			border-bottom: 1px solid var(--border-color);
-			color: var(--text-primary);
 			vertical-align: middle;
 		}
 
-		tr.row-clickable {
-			cursor: pointer;
-			transition: background-color 0.15s;
-		}
-
-		tr.row-clickable:hover td {
+		tbody tr:hover {
 			background-color: var(--bg-card-hover);
 		}
 
-		.mentions-cell {
-			max-width: 540px;
+		tbody tr.selected-row {
+			background-color: #fef08a !important;
+			outline: 2px solid #eab308;
+			outline-offset: -2px;
 		}
 
-		/* Mention & Scoring Badges */
-		.mention-block {
-			display: flex;
-			flex-direction: column;
-			gap: 4px;
-			margin-bottom: 6px;
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
-			border-radius: var(--radius-sm);
-			padding: 6px 10px;
+		.row-clickable {
+			cursor: pointer;
 		}
 
-		.mention-block:last-child {
-			margin-bottom: 0;
-		}
-
-		.mention-top-line {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.mention-name-id {
-			font-weight: 600;
-			color: #1e40af;
-			font-size: 12px;
-			font-family: 'JetBrains Mono', monospace;
-		}
-
-		.mention-matched-name {
-			color: #0f172a;
-			font-weight: 600;
-			font-family: inherit;
-		}
-
-		.score-breakdown-row {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			flex-wrap: wrap;
-			margin-top: 2px;
-		}
-
-		.score-chip {
-			font-size: 11px;
-			font-family: 'JetBrains Mono', monospace;
-			padding: 2px 6px;
-			border-radius: 4px;
-			background: #ffffff;
-			border: 1px solid #cbd5e1;
-			color: #334155;
-			display: inline-flex;
-			align-items: center;
-			gap: 3px;
-		}
-
-		.score-chip.chip-name {
-			border-color: #bfdbfe;
-			background: #eff6ff;
-			color: #1e40af;
-		}
-
-		.score-chip.chip-dist {
-			border-color: #ddd6fe;
-			background: #f5f3ff;
-			color: #6d28d9;
-		}
-
-		.score-chip.chip-head {
-			border-color: #bbf7d0;
-			background: #f0fdf4;
-			color: #166534;
-		}
-
-		.score-chip.chip-date {
-			border-color: #fed7aa;
-			background: #fff7ed;
-			color: #9a3412;
-		}
-
-		.scores-raw-array {
-			font-family: 'JetBrains Mono', monospace;
-			font-size: 11px;
-			color: #64748b;
-			font-weight: 500;
-		}
-
-		.conf-badge {
+		.why-pill-btn {
+			background: #e0e7ff;
+			color: #3730a3;
+			border: 1px solid #c7d2fe;
+			padding: 2px 8px;
+			border-radius: 9999px;
+			font-size: 10px;
 			font-weight: 700;
-			font-size: 11px;
-			padding: 2px 7px;
-			border-radius: 4px;
-			font-family: 'JetBrains Mono', monospace;
+			cursor: pointer;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			transition: all 0.15s ease;
+			display: inline-block;
 		}
 
-		.conf-high {
-			background: #dcfce7;
-			color: #15803d;
-			border: 1px solid #86efac;
+		.why-pill-btn:hover {
+			background: #4f46e5;
+			color: #ffffff;
+			border-color: #4338ca;
 		}
 
-		.conf-med {
-			background: #fef3c7;
-			color: #b45309;
-			border: 1px solid #fcd34d;
+		.why-pill-btn.active {
+			background: #4338ca;
+			color: #ffffff;
+			border-color: #3730a3;
 		}
 
 		.mono {
 			font-family: 'JetBrains Mono', monospace;
-			font-size: 12px;
+			font-size: 11px;
 		}
 
-		/* Details Drawer */
+		/* Details Accordion */
 		.details-row {
-			background-color: #f1f5f9 !important;
+			background-color: #f8fafc !important;
 			display: none;
 		}
 
-		.match-breakdown-card {
+		.details-row.open {
+			display: table-row !important;
+		}
+
+		.details-content {
+			padding: 10px 14px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.mention-card {
+			background: white;
+			border: 1px solid #e2e8f0;
+			border-radius: var(--radius-sm);
+			padding: 10px 12px;
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		.mention-card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.score-breakdown-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+			gap: 6px;
+			margin-top: 4px;
+		}
+
+		.score-box {
+			background: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: var(--radius-sm);
+			padding: 6px 8px;
+		}
+
+		.score-box-label {
+			font-size: 9px;
+			color: var(--text-muted);
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.score-box-val {
+			font-size: 11px;
+			font-weight: 700;
+			font-family: 'JetBrains Mono', monospace;
+			margin-top: 1px;
+		}
+
+		/* 24-Row Context Window Displays */
+		.context-windows-wrapper {
+			margin-top: 10px;
+			padding-top: 8px;
+			border-top: 1px solid #cbd5e1;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.context-box {
 			background: #ffffff;
 			border: 1px solid #cbd5e1;
-			border-radius: var(--radius-md);
-			padding: 14px 16px;
-			margin: 8px 0;
-			box-shadow: var(--shadow-sm);
-		}
-
-		.breakdown-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-			gap: 12px;
-			margin-top: 10px;
-			font-size: 12px;
-		}
-
-		.breakdown-item {
-			background: #f8fafc;
-			padding: 10px 12px;
 			border-radius: var(--radius-sm);
-			border: 1px solid #e2e8f0;
+			overflow: hidden;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 		}
 
-		.breakdown-label {
-			color: var(--text-muted);
-			font-size: 11px;
+		.context-box-header {
+			background: #f8fafc;
+			padding: 4px 8px;
+			border-bottom: 1px solid #e2e8f0;
+			font-size: 10px;
 			font-weight: 700;
 			text-transform: uppercase;
 			letter-spacing: 0.04em;
+			color: #1e293b;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
 		}
 
-		.breakdown-value {
-			font-weight: 700;
-			color: var(--text-primary);
-			margin-top: 2px;
+		.context-scroll-pane {
+			height: 100px;
+			/* tall enough for 3 visible lines */
+			max-height: 108px;
+			overflow-y: auto;
+			overflow-x: auto;
+			background: #ffffff;
+		}
+
+		.context-table {
+			min-width: max-content;
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 10px;
 			font-family: 'JetBrains Mono', monospace;
+			white-space: nowrap;
+		}
+
+		.context-table th {
+			background: #f1f5f9;
+			color: var(--text-secondary);
+			padding: 3px 6px;
+			font-size: 9px;
+			font-weight: 700;
+			text-transform: uppercase;
+			border-bottom: 1px solid #cbd5e1;
+			position: sticky;
+			top: 0;
+			z-index: 2;
+		}
+
+		.context-table td {
+			padding: 3px 6px;
+			border-bottom: 1px solid #f1f5f9;
+			line-height: 1.25;
+		}
+
+		.context-table tr.highlight-center {
+			background-color: #fef08a !important;
+			font-weight: 700;
+			color: #854d0e;
+			box-shadow: inset 0 0 0 1px #eab308;
 		}
 
 		.empty-state {
-			padding: 60px 20px;
+			padding: 40px 20px;
 			text-align: center;
 			color: var(--text-secondary);
 		}
 
 		.empty-state svg {
-			width: 48px;
-			height: 48px;
-			margin-bottom: 12px;
+			width: 36px;
+			height: 36px;
+			margin-bottom: 8px;
 			color: var(--text-muted);
 		}
 
-		@media (max-width: 768px) {
-			body {
-				padding: 12px;
-			}
-
-			.controls-grid {
+		@media (max-width: 1024px) {
+			.top-dashboard-grid {
 				grid-template-columns: 1fr;
-			}
-
-			.header-title h1 {
-				font-size: 20px;
 			}
 		}
 	</style>
@@ -625,88 +646,95 @@
 			</div>
 		</header>
 
-		<!-- Controls Card -->
-		<div class="card">
-			<div class="controls-grid">
-				<div class="form-group form-group-compact">
-					<label for="countyInput">County</label>
-					<input type="text" id="countyInput" class="form-control mono" value="AUG" placeholder="AUG">
+		<!-- Top Dashboard Grid (Controls Left, Stats Right) -->
+		<div class="top-dashboard-grid">
+			<!-- Left Side: Controls Card -->
+			<div class="card">
+				<div class="controls-grid">
+					<div class="form-group">
+						<label for="countyInput">County</label>
+						<input type="text" id="countyInput" class="form-control mono" value="AUG" placeholder="AUG">
+					</div>
+
+					<div class="form-group">
+						<label for="yearSelect">Year</label>
+						<select id="yearSelect" class="form-control">
+							<option value="1850" selected>1850</option>
+							<option value="1860">1860</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="thresholdInput">Threshold</label>
+						<input type="number" id="thresholdInput" class="form-control" value="0" min="0" step="1">
+					</div>
+
+					<div class="form-group">
+						<label for="csvFileInput">Source CSV (Optional)</label>
+						<input type="file" id="csvFileInput" accept=".csv" class="form-control"
+							style="padding: 2px 4px;">
+					</div>
+
+					<div class="form-group"
+						style="display: flex; flex-direction: row; gap: 6px; grid-column: span 4; margin-top: 2px;">
+						<button id="runBtn" class="btn btn-primary" style="flex: 1;">
+							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+								<path
+									d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
+							</svg>
+							Match Schedule
+						</button>
+						<button id="downloadBtn" class="btn btn-success" disabled style="flex: 1;">
+							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+								<path
+									d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+								<path
+									d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+							</svg>
+							Save CSV
+						</button>
+					</div>
 				</div>
 
-				<div class="form-group form-group-compact">
-					<label for="yearSelect">Year</label>
-					<select id="yearSelect" class="form-control">
-						<option value="1850" selected>1850</option>
-						<option value="1860">1860</option>
-					</select>
-				</div>
-
-				<div class="form-group form-group-compact">
-					<label for="thresholdInput">Threshold</label>
-					<input type="number" id="thresholdInput" class="form-control" value="75" min="0" step="1">
-				</div>
-
-				<div class="form-group form-group-file">
-					<label for="csvFileInput">Source CSV (Optional File Pick)</label>
-					<input type="file" id="csvFileInput" accept=".csv" class="form-control" style="padding: 7px 10px;">
-				</div>
-
-				<div class="form-group form-group-actions" style="display: flex; flex-direction: row; gap: 10px;">
-					<button id="runBtn" class="btn btn-primary" style="flex: 1;">
-						<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-							<path
-								d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
-						</svg>
-						Match Schedule
-					</button>
-					<button id="downloadBtn" class="btn btn-success" disabled>
-						<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-							<path
-								d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-							<path
-								d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-						</svg>
-						Save CSV
-					</button>
+				<!-- Compact Progress & Status -->
+				<div id="statusPanel" class="status-panel">
+					<div class="progress-bar-container">
+						<div id="progressBar" class="progress-bar"></div>
+					</div>
+					<div class="status-message">
+						<span id="statusText">Initializing...</span>
+						<span id="progressPercent">0%</span>
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Progress & Status -->
-		<div id="statusPanel" class="status-panel">
-			<div class="progress-bar-container">
-				<div id="progressBar" class="progress-bar"></div>
-			</div>
-			<div class="status-message">
-				<span id="statusText">Initializing...</span>
-				<span id="progressPercent">0%</span>
-			</div>
-		</div>
+			<!-- Right Side: Stats Panel -->
+			<div class="stats-panel-right">
+				<div class="stats-grid-right">
+					<div class="stat-card" style="--stat-accent: #2563eb;">
+						<div class="stat-title">Enslaver Heads (SS)</div>
+						<div class="stat-value" id="statEnslavers">0</div>
+						<div class="stat-sub" id="statTableTarget">Target: AUG-VP-SS-1850</div>
+					</div>
 
-		<!-- Stats Grid -->
-		<div class="stats-grid">
-			<div class="stat-card" style="--stat-accent: #2563eb;">
-				<div class="stat-title">Enslaver Heads (SS)</div>
-				<div class="stat-value" id="statEnslavers">0</div>
-				<div class="stat-sub" id="statTableTarget">Target: AUG-VP-SS-1850</div>
-			</div>
+					<div class="stat-card" style="--stat-accent: #7c3aed;">
+						<div class="stat-title">Census Pool (CN)</div>
+						<div class="stat-value" id="statCandidates">0</div>
+						<div class="stat-sub">Age ≥ 12 & Race = White</div>
+					</div>
 
-			<div class="stat-card" style="--stat-accent: #7c3aed;">
-				<div class="stat-title">Census Pool (CN)</div>
-				<div class="stat-value" id="statCandidates">0</div>
-				<div class="stat-sub">Age ≥ 12 & Race = White</div>
-			</div>
+					<div class="stat-card" style="--stat-accent: #059669;">
+						<div class="stat-title">Matched Enslavers</div>
+						<div class="stat-value" id="statMatched">0</div>
+						<div class="stat-sub" id="statMatchPct">0% with ≥ 1 mention</div>
+					</div>
 
-			<div class="stat-card" style="--stat-accent: #059669;">
-				<div class="stat-title">Matched Enslavers</div>
-				<div class="stat-value" id="statMatched">0</div>
-				<div class="stat-sub" id="statMatchPct">0% with ≥ 1 mention</div>
-			</div>
-
-			<div class="stat-card" style="--stat-accent: #d97706;">
-				<div class="stat-title">Total Mentions Linked</div>
-				<div class="stat-value" id="statTotalMentions">0</div>
-				<div class="stat-sub">Confidence ≥ Threshold</div>
+					<div class="stat-card" style="--stat-accent: #d97706;">
+						<div class="stat-title">Total Mentions Linked</div>
+						<div class="stat-value" id="statTotalMentions">0</div>
+						<div class="stat-sub">Confidence ≥ Threshold</div>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -728,6 +756,7 @@
 					<thead>
 						<tr>
 							<th>Candidate ID</th>
+							<th>Why</th>
 							<th>Enslaver Name</th>
 							<th>District</th>
 							<th>Line</th>
@@ -739,7 +768,7 @@
 					</thead>
 					<tbody id="tableBody">
 						<tr>
-							<td colspan="8">
+							<td colspan="9">
 								<div class="empty-state">
 									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -752,6 +781,32 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
+		</div>
+
+		<!-- Examine Sources Card (Underneath Results Section) -->
+		<div id="examineSourcesCard" class="card examine-sources-card" style="margin-top: 10px;">
+			<div
+				style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 6px;">
+				<h3
+					style="font-size: 13px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.04em; margin: 0; display: flex; align-items: center; gap: 6px;">
+					<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+						<path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+						<path
+							d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+					</svg>
+					Examine Census Context &mdash; 24 Rows Surrounding Selection
+				</h3>
+				<span id="examineSelectionInfo" class="mono"
+					style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">
+					Click any result row above to inspect source context
+				</span>
+			</div>
+			<div id="examineSourcesContainer" class="context-windows-wrapper"
+				style="margin-top: 0; border-top: none; padding-top: 0;">
+				<div class="empty-state" style="padding: 20px 10px; font-size: 12px; color: var(--text-muted);">
+					Click any row in the table above to view the 24 surrounding Census source rows.
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1108,7 +1163,7 @@
 			const record_year = $('#yearSelect').val() || '1850';
 			const rawVal = $('#thresholdInput').val();
 			const parsedNum = parseFloat(rawVal);
-			const rawThreshold = isNaN(parsedNum) ? 75 : parsedNum;
+			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
 			currentTableName = `${county}-VP-SS-${record_year}`;
@@ -1127,6 +1182,9 @@
 				const ssSource = `${county}-SS-${record_year}`;
 				const cnSource = `${county}-CN-${record_year}`;
 				const householdCounts = {};
+
+				rawSsMentions = rows.filter(r => r.source === ssSource);
+				rawCnMentions = rows.filter(r => r.source === cnSource);
 
 				for (let i = 0; i < rows.length; i++) {
 					const r = rows[i];
@@ -1404,22 +1462,27 @@
 						}
 					}
 
-					const progressPct = 60 + (endIdx / totalEnslavers) * 38;
+					const progressPct = 50 + (endIdx / totalEnslavers) * 45;
 					updateProgress(progressPct, `Matching enslavers: ${endIdx} of ${totalEnslavers}...`);
 
 					await new Promise(r => setTimeout(r, 0));
 				}
+
+				updateProgress(96, 'Aggregating match statistics and linking mentions...');
+				await new Promise(r => setTimeout(r, 0));
 
 				$('#statMatched').text(matchedEnslaverCount.toLocaleString());
 				const matchPct = totalEnslavers > 0 ? ((matchedEnslaverCount / totalEnslavers) * 100).toFixed(1) : 0;
 				$('#statMatchPct').text(`${matchPct}% with ≥ 1 mention`);
 				$('#statTotalMentions').text(totalMentionsLinked.toLocaleString());
 
-				updateProgress(100, `Completed matching! ${matchedEnslaverCount} enslavers linked to census records.`);
-				setTimeout(() => $('#statusPanel').slideUp(), 2000);
+				updateProgress(98, 'Preparing enslaver linkage display...');
+				await new Promise(r => setTimeout(r, 0));
 
-				renderResultsTable(enslaverTable);
+				await renderResultsTable(enslaverTable);
 				$('#downloadBtn').prop('disabled', false);
+
+				updateProgress(100, `Completed matching! ${matchedEnslaverCount.toLocaleString()} enslavers linked to census records.`);
 
 			} catch (err) {
 				console.error(err);
@@ -1430,192 +1493,383 @@
 			}
 		}
 
-		function renderResultsTable(data) {
+		// Helper: Get context window of rows (up to 12 leading, center, 12 following)
+		function getContextWindow(items, matchFn, radius = 12) {
+			if (!items || items.length === 0) return { slice: [], centerRelIdx: -1, centerAbsIdx: -1, startIdx: 0, total: 0 };
+			let centerIdx = items.findIndex(matchFn);
+			if (centerIdx === -1) centerIdx = 0;
+			const start = Math.max(0, centerIdx - radius);
+			const end = Math.min(items.length, centerIdx + radius + 1);
+			return {
+				slice: items.slice(start, end),
+				centerRelIdx: centerIdx - start,
+				centerAbsIdx: centerIdx,
+				startIdx: start,
+				total: items.length
+			};
+		}
+
+		// Generic function to render all source fields (except original_data) in 24-row context window
+		function renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix) {
+			if (!items || items.length === 0) {
+				return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No context rows available.'}</div></div>`;
+			}
+
+			const win = getContextWindow(items, matchFn, 12);
+			if (win.slice.length === 0) {
+				return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
+			}
+
+			// Gather all unique keys from the rows excluding original_data, source, source_year, norm_occupation, legal_status, phonetic, and internal fields
+			const allKeys = [];
+			const seen = new Set([
+				'original_data',
+				'source',
+				'source_year',
+				'norm_occupation',
+				'legal_status',
+				'nysiis_last_name',
+				'metaphone_last_name',
+				'narrative',
+				'narrrative',
+				'norm_race',
+				'_candidate',
+				'_fullMatches',
+				'scores',
+				'why',
+				'formattedWhy',
+				'allCandidates'
+			]);
+			for (const r of win.slice) {
+				if (r && typeof r === 'object') {
+					for (const k of Object.keys(r)) {
+						if (!seen.has(k) && !k.startsWith('_')) {
+							seen.add(k);
+							allKeys.push(k);
+						}
+					}
+				}
+			}
+
+			const theadHtml = `
+				<tr>
+					<th style="width: 44px; text-align: right; position: sticky; left: 0; z-index: 3; background: #f1f5f9; box-shadow: 1px 0 0 #cbd5e1;">#</th>
+					${allKeys.map(k => `<th>${k}</th>`).join('')}
+				</tr>
+			`;
+
+			const tbodyHtml = win.slice.map((r, relIdx) => {
+				const isCenter = relIdx === win.centerRelIdx;
+				const lineNum = win.startIdx + relIdx + 1;
+				const centerAttr = isCenter ? `id="${centerIdPrefix}-${paneId}" class="highlight-center"` : '';
+
+				const cellsHtml = allKeys.map(k => {
+					let val = r[k];
+					if (val === undefined || val === null || val === '') val = '-';
+					else if (typeof val === 'object') val = JSON.stringify(val);
+					return `<td>${val}</td>`;
+				}).join('');
+
+				return `
+					<tr ${centerAttr}>
+						<td style="color: var(--text-muted); width: 44px; text-align: right; position: sticky; left: 0; z-index: 1; background: ${isCenter ? '#fef08a' : '#f8fafc'}; font-weight: 700; box-shadow: 1px 0 0 #cbd5e1;">${lineNum}</td>
+						${cellsHtml}
+					</tr>
+				`;
+			}).join('');
+
+			return `
+				<div class="context-box">
+					<div class="context-box-header">
+						<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [12 Leading & 12 Following]</span>
+						<span class="mono" style="font-size: 11px; color: var(--text-muted);">${win.slice.length} Rows Window (${allKeys.length} Fields)</span>
+					</div>
+					<div class="context-scroll-pane" id="${paneId}">
+						<table class="context-table">
+							<thead>${theadHtml}</thead>
+							<tbody>${tbodyHtml}</tbody>
+						</table>
+					</div>
+				</div>
+			`;
+		}
+
+		// Render Top Div: Original lines from Slave Schedule / Verified Table
+		function renderSsContextWindowHtml(row, paneId) {
+			const targetMid = row.mention_id;
+			const targetHh = row.candidate_id ? row.candidate_id.split('-').pop() : '';
+			return renderSourceContextWindowHtml(
+				rawSsMentions,
+				(m) => m.mention_id === targetMid || (targetHh && m.household_id === targetHh),
+				'Original Slave Schedule (SS) Table',
+				paneId,
+				'No Slave Schedule context rows loaded.',
+				'ss-center'
+			);
+		}
+
+		// Render Bottom Div: Original lines from Census Table
+		function renderCnContextWindowHtml(topCandMentionId, paneId) {
+			if (!topCandMentionId) {
+				return `
+					<div class="context-box">
+						<div class="context-box-header">
+							<span>Original Census (CN) Population Context</span>
+						</div>
+						<div style="padding: 12px; color: var(--text-muted); font-size: 12px;">No matched census candidate selected to display context window.</div>
+					</div>
+				`;
+			}
+
+			return renderSourceContextWindowHtml(
+				rawCnMentions,
+				(m) => m.mention_id === topCandMentionId,
+				'Original Census (CN) Population Table',
+				paneId,
+				'No Census context rows loaded.',
+				'cn-center'
+			);
+		}
+
+		// Render Details Accordion Content on demand for an enslaver row
+		function renderEnslaverDetailHtml(row, i) {
+			const rawVal = $('#thresholdInput').val();
+			const parsedNum = parseFloat(rawVal);
+			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
+			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
+
+			let matchesCardsHtml = '';
+			if (row._fullMatches && row._fullMatches.length > 0) {
+				matchesCardsHtml = row._fullMatches.map((m, mIdx) => {
+					const ns = m.scores.name;
+					const ds = m.scores.district;
+					const hs = m.scores.head;
+					const dts = m.scores.date;
+					const rankLabel = mIdx === 0 ? 'mention1 (Rank 1)' : (mIdx === 1 ? 'mention2 (Rank 2)' : (mIdx === 2 ? 'mention3 (Rank 3)' : `Rank ${mIdx + 1}`));
+
+					let cardProbBadge = '';
+					if (m.probability !== null && m.probability !== undefined) {
+						const cPass = m.probability >= threshold;
+						const cBg = cPass ? '#dcfce7' : '#fee2e2';
+						const cColor = cPass ? '#15803d' : '#b91c1c';
+						const cBorder = cPass ? '#86efac' : '#fca5a5';
+						cardProbBadge = `<span class="badge" style="background:${cBg};color:${cColor};border:1px solid ${cBorder};font-size:11px;font-weight:700;border-radius:9999px;">Prob: ${m.probability}</span>`;
+					}
+
+					return `
+						<div class="mention-card">
+							<div class="mention-card-header">
+								<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 12px;">
+									<span class="badge badge-purple" style="margin-right: 6px;">${rankLabel}</span> ${m.mention_id} &mdash; ${m.matched_name}
+								</span>
+								<div style="display: flex; align-items: center; gap: 6px;">
+									<span class="scores-raw-array" style="font-size: 10px;">scores: [${ns}, ${ds}, ${hs}, ${dts}]</span>
+									${cardProbBadge}
+									<span class="badge badge-success">Conf: ${m.confidence}</span>
+								</div>
+							</div>
+							<div class="score-breakdown-grid">
+								<div class="score-box" style="border-left: 3px solid #2563eb;">
+									<div class="score-box-label">Name Score</div>
+									<div class="score-box-val">${ns}</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #7c3aed;">
+									<div class="score-box-label">District Bonus</div>
+									<div class="score-box-val">+${ds}</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #059669;">
+									<div class="score-box-label">Head Bonus</div>
+									<div class="score-box-val">+${hs}</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #d97706;">
+									<div class="score-box-label">Date Bonus</div>
+									<div class="score-box-val">+${dts}</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #6366f1;">
+									<div class="score-box-label">Census Birth</div>
+									<div class="score-box-val">${m._candidate.birth_year || '-'}</div>
+								</div>
+								<div class="score-box">
+									<div class="score-box-label">District / Line</div>
+									<div class="score-box-val">${m._candidate.district || '-'} / ${m._candidate.original_line || '-'}</div>
+								</div>
+								<div class="score-box">
+									<div class="score-box-label">Enumerator / Date</div>
+									<div class="score-box-val" style="font-size: 10px;">${m._candidate.enumerator || '-'} / ${m._candidate.enumerator_date || '-'}</div>
+								</div>
+							</div>
+						</div>
+					`;
+				}).join('');
+			}
+
+			return `
+				<div class="details-content">
+					${matchesCardsHtml ? `
+						<h4 style="font-size: 11px; color: var(--text-secondary); margin: 0 0 4px 0; text-transform: uppercase; font-weight: 700;">
+							Scored Candidate Matches for ${row.full_name} (${row.candidate_id})
+						</h4>
+						${matchesCardsHtml}
+					` : ''}
+				</div>
+			`;
+		}
+
+		// Update Examine Sources Section underneath Results Table
+		function updateExamineSourcesSection(row, idx) {
+			const topCandidateMentionId = (row.mention1 && row.mention1.mention_id)
+				? row.mention1.mention_id
+				: (row._fullMatches && row._fullMatches[0] ? row._fullMatches[0].mention_id : null);
+
+			$('#examineSelectionInfo').html(`Selected Row #${idx + 1}: <strong style="color: #7c3aed;">${row.full_name}</strong> [${row.candidate_id}] &harr; <strong style="color: #2563eb;">${row.matched_name || 'No match'}</strong> [${topCandidateMentionId || 'None'}]`);
+
+			const cnContextHtml = renderCnContextWindowHtml(topCandidateMentionId, `examine-cn-${idx}`);
+
+			$('#examineSourcesContainer').html(cnContextHtml);
+
+			setTimeout(() => {
+				const cnPane = document.getElementById(`examine-cn-${idx}`);
+				const cnCenter = document.getElementById(`cn-center-examine-cn-${idx}`);
+				if (cnPane && cnCenter) {
+					cnPane.scrollTop = cnCenter.offsetTop - (cnPane.clientHeight / 2) + (cnCenter.clientHeight / 2);
+				}
+			}, 40);
+		}
+
+		// Render Results Table
+		async function renderResultsTable(data) {
 			const $tbody = $('#tableBody');
 			$tbody.empty();
 
 			if (!data || data.length === 0) {
-				$tbody.html('<tr><td colspan="8" class="empty-state">No enslaver records found matching criteria.</td></tr>');
+				$tbody.html('<tr><td colspan="9" class="empty-state">No matching enslaver records found.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
 				return;
 			}
 
 			const rawVal = $('#thresholdInput').val();
 			const parsedNum = parseFloat(rawVal);
-			const rawThreshold = isNaN(parsedNum) ? 75 : parsedNum;
+			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
 			$('#resultCountBadge').text(`${data.length.toLocaleString()} Rows`);
 
-			const fragment = document.createDocumentFragment();
+			const totalRows = data.length;
+			const chunkSize = 250;
 
-			data.forEach((row, i) => {
-				const tr = document.createElement('tr');
-				tr.className = 'row-clickable';
-				tr.dataset.index = i;
+			for (let startIdx = 0; startIdx < totalRows; startIdx += chunkSize) {
+				const endIdx = Math.min(startIdx + chunkSize, totalRows);
+				const fragment = document.createDocumentFragment();
 
-				const activeMentions = [];
-				if (row.mention1 && row.mention1.mention_id) activeMentions.push({ label: 'Mention 1', ...row.mention1 });
-				if (row.mention2 && row.mention2.mention_id) activeMentions.push({ label: 'Mention 2', ...row.mention2 });
-				if (row.mention3 && row.mention3.mention_id) activeMentions.push({ label: 'Mention 3', ...row.mention3 });
+				for (let i = startIdx; i < endIdx; i++) {
+					const row = data[i];
+					const tr = document.createElement('tr');
+					tr.className = 'row-clickable';
+					tr.dataset.index = i;
 
-				let mentionsHtml = '';
+					const activeMentions = [];
+					if (row.mention1 && row.mention1.mention_id) activeMentions.push({ label: 'Mention 1', ...row.mention1 });
+					if (row.mention2 && row.mention2.mention_id) activeMentions.push({ label: 'Mention 2', ...row.mention2 });
+					if (row.mention3 && row.mention3.mention_id) activeMentions.push({ label: 'Mention 3', ...row.mention3 });
 
-				if (activeMentions.length === 0) {
-					mentionsHtml = '<span style="color: var(--text-muted); font-size: 12px;">No candidate matches</span>';
-				} else {
-					mentionsHtml = activeMentions.map((m) => {
-						const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
-						const ns = m.scores && m.scores.name !== undefined ? m.scores.name : 0;
-						const ds = m.scores && m.scores.district !== undefined ? m.scores.district : 0;
-						const hs = m.scores && m.scores.head !== undefined ? m.scores.head : 0;
-						const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
-						const matchedName = m.full_name || '';
+					let mentionsHtml = '';
 
-						let probBadge = '';
-						if (m.probability !== null && m.probability !== undefined) {
-							const isPass = m.probability >= threshold;
-							const pillBg = isPass ? '#dcfce7' : '#fee2e2';
-							const pillColor = isPass ? '#15803d' : '#b91c1c';
-							const pillBorder = isPass ? '#86efac' : '#fca5a5';
-							probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:11px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
-						}
+					if (activeMentions.length === 0) {
+						mentionsHtml = '<span style="color: var(--text-muted); font-size: 11px;">No candidate matches</span>';
+					} else {
+						mentionsHtml = activeMentions.map((m) => {
+							const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
+							const ns = m.scores && m.scores.name !== undefined ? m.scores.name : 0;
+							const ds = m.scores && m.scores.district !== undefined ? m.scores.district : 0;
+							const hs = m.scores && m.scores.head !== undefined ? m.scores.head : 0;
+							const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
+							const matchedName = m.full_name || '';
 
-						return `
-              <div class="mention-block">
-                <div class="mention-top-line">
-                  <span class="mention-name-id"><strong>${m.label}:</strong> ${m.mention_id} ${matchedName ? `<span class="mention-matched-name">(${matchedName})</span>` : ''}</span>
-                  <div>
-                    <span class="conf-badge ${confClass}">Conf: ${m.confidence}</span>
-                    ${probBadge}
-                  </div>
-                </div>
-                <div class="score-breakdown-row">
-                  <span class="score-chip chip-name" title="Name Similarity Score">Name: ${ns}</span>
-                  <span class="score-chip chip-dist" title="Same District Bonus">Dist: +${ds}</span>
-                  <span class="score-chip chip-head" title="Census Head Bonus">Head: +${hs}</span>
-                  <span class="score-chip chip-date" title="Enumerator & Date Proximity Bonus">Date: +${dts}</span>
-                  <span class="scores-raw-array" title="scores: {name, district, head, date}">[${ns}, ${ds}, ${hs}, ${dts}]</span>
-                </div>
-              </div>
-            `;
-					}).join('');
-				}
+							let probBadge = '';
+							if (m.probability !== null && m.probability !== undefined) {
+								const isPass = m.probability >= threshold;
+								const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+								const pillColor = isPass ? '#15803d' : '#b91c1c';
+								const pillBorder = isPass ? '#86efac' : '#fca5a5';
+								probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:10px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
+							}
 
-				const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
+							return `
+								<div class="mention-block" style="padding: 4px 6px; margin-bottom: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+									<div style="display: flex; justify-content: space-between; align-items: center;">
+										<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 11px;">${m.label}: ${m.mention_id} ${matchedName ? `<span>(${matchedName})</span>` : ''}</span>
+										<div>
+											<span class="badge badge-success">Conf: ${m.confidence}</span>
+											${probBadge}
+										</div>
+									</div>
+									<div style="display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap;">
+										<span class="score-chip chip-name" style="font-size: 10px;">Name: ${ns}</span>
+										<span class="score-chip chip-dist" style="font-size: 10px;">Dist: +${ds}</span>
+										<span class="score-chip chip-head" style="font-size: 10px;">Head: +${hs}</span>
+										<span class="score-chip chip-date" style="font-size: 10px;">Date: +${dts}</span>
+									</div>
+								</div>
+							`;
+						}).join('');
+					}
 
-				// Determine top match probability for the dedicated Probability column
-				const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
-					? row.mention1.probability
-					: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
+					const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
 
-				let probPillHtml = '<span style="color: var(--text-muted); font-size: 12px;">-</span>';
-				if (topProb !== null && topProb !== undefined) {
-					const isPass = topProb >= threshold;
-					const pillBg = isPass ? '#dcfce7' : '#fee2e2';
-					const pillColor = isPass ? '#15803d' : '#b91c1c';
-					const pillBorder = isPass ? '#86efac' : '#fca5a5';
-					probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:12px;padding:4px 10px;border-radius:9999px;display:inline-block;">${topProb}</span>`;
-				}
+					const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
+						? row.mention1.probability
+						: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
 
-				tr.innerHTML = `
-          <td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
-          <td>
-            <strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
-            ${row.matched_name ? `<div style="font-size: 11px; color: #059669; font-weight: 500;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
-          </td>
-          <td>${row.district || '-'}</td>
-          <td>${row.original_line || '-'}</td>
-          <td>${enumText}</td>
-          <td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
-          <td style="text-align: center;">${probPillHtml}</td>
-          <td class="mentions-cell">${mentionsHtml}</td>
-        `;
+					let probPillHtml = '<span style="color: var(--text-muted); font-size: 11px;">-</span>';
+					if (topProb !== null && topProb !== undefined) {
+						const isPass = topProb >= threshold;
+						const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+						const pillColor = isPass ? '#15803d' : '#b91c1c';
+						const pillBorder = isPass ? '#86efac' : '#fca5a5';
+						probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:11px;padding:2px 6px;border-radius:9999px;">${topProb}</span>`;
+					}
 
-				fragment.appendChild(tr);
+					tr.innerHTML = `
+						<td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
+						<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+						<td>
+							<strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
+							${row.matched_name ? `<div style="font-size: 10px; color: #059669; font-weight: 600;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
+						</td>
+						<td>${row.district || '-'}</td>
+						<td>${row.original_line || '-'}</td>
+						<td>${enumText}</td>
+						<td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
+						<td style="text-align: center;">${probPillHtml}</td>
+						<td class="mentions-cell">${mentionsHtml}</td>
+					`;
 
-				if (row._fullMatches && row._fullMatches.length > 0) {
+					fragment.appendChild(tr);
+
+					// Details Row Placeholder
 					const detailTr = document.createElement('tr');
 					detailTr.className = 'details-row';
 					detailTr.id = `detail-${i}`;
-
-					const matchesCards = row._fullMatches.map((m, mIdx) => {
-						const ns = m.scores.name;
-						const ds = m.scores.district;
-						const hs = m.scores.head;
-						const dts = m.scores.date;
-						const rankLabel = mIdx === 0 ? 'mention1 (Rank 1)' : (mIdx === 1 ? 'mention2 (Rank 2)' : (mIdx === 2 ? 'mention3 (Rank 3)' : `Rank ${mIdx + 1}`));
-
-						let cardProbBadge = '';
-						if (m.probability !== null && m.probability !== undefined) {
-							const cPass = m.probability >= threshold;
-							const cBg = cPass ? '#dcfce7' : '#fee2e2';
-							const cColor = cPass ? '#15803d' : '#b91c1c';
-							const cBorder = cPass ? '#86efac' : '#fca5a5';
-							cardProbBadge = `<span class="badge" style="background:${cBg};color:${cColor};border:1px solid ${cBorder};font-size:12px;font-weight:700;border-radius:9999px;">Prob: ${m.probability}</span>`;
-						}
-
-						return `
-              <div class="match-breakdown-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                  <span class="mono" style="font-weight: 700; color: #1e40af; font-size: 13px;">
-                    <span class="badge badge-purple" style="margin-right: 6px;">${rankLabel}</span> ${m.mention_id} &mdash; ${m.matched_name}
-                  </span>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="scores-raw-array">scores: [${ns}, ${ds}, ${hs}, ${dts}]</span>
-                    ${cardProbBadge}
-                    <span class="badge badge-success" style="font-size: 12px;">Total Confidence: ${m.confidence}</span>
-                  </div>
-                </div>
-                <div class="breakdown-grid">
-                  <div class="breakdown-item" style="border-left: 3px solid #2563eb;">
-                    <div class="breakdown-label">Name Score</div>
-                    <div class="breakdown-value">${ns}</div>
-                  </div>
-                  <div class="breakdown-item" style="border-left: 3px solid #7c3aed;">
-                    <div class="breakdown-label">District Bonus</div>
-                    <div class="breakdown-value">+${ds}</div>
-                  </div>
-                  <div class="breakdown-item" style="border-left: 3px solid #059669;">
-                    <div class="breakdown-label">Head Bonus</div>
-                    <div class="breakdown-value">+${hs}</div>
-                  </div>
-                  <div class="breakdown-item" style="border-left: 3px solid #d97706;">
-                    <div class="breakdown-label">Enumerator Date Bonus</div>
-                    <div class="breakdown-value">+${dts}</div>
-                  </div>
-                  <div class="breakdown-item" style="border-left: 3px solid #6366f1;">
-                    <div class="breakdown-label">Census Birth Year</div>
-                    <div class="breakdown-value">${m._candidate.birth_year || '-'}</div>
-                  </div>
-                  <div class="breakdown-item">
-                    <div class="breakdown-label">Census District / Line</div>
-                    <div class="breakdown-value">${m._candidate.district || '-'} / ${m._candidate.original_line || '-'}</div>
-                  </div>
-                  <div class="breakdown-item">
-                    <div class="breakdown-label">Census Enumerator / Date</div>
-                    <div class="breakdown-value">${m._candidate.enumerator || '-'} / ${m._candidate.enumerator_date || '-'}</div>
-                  </div>
-                </div>
-              </div>
-            `;
-					}).join('');
-
-					detailTr.innerHTML = `
-            <td colspan="8" style="padding: 18px 24px;">
-              <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; font-weight: 700;">
-                All Scored Candidate Matches for ${row.full_name} (${row.candidate_id})
-              </h4>
-              ${matchesCards}
-            </td>
-          `;
+					detailTr.innerHTML = `<td colspan="9" style="padding: 8px 12px;" id="detail-content-${i}"></td>`;
 					fragment.appendChild(detailTr);
 				}
-			});
 
-			$tbody.append(fragment);
+				$tbody.append(fragment);
+
+				if (totalRows > chunkSize) {
+					const pct = 98 + (endIdx / totalRows) * 2;
+					updateProgress(pct, `Displaying results: ${endIdx.toLocaleString()} of ${totalRows.toLocaleString()} enslaver rows...`);
+					await new Promise(r => setTimeout(r, 0));
+				}
+			}
+
+			// Automatically select first row to populate Examine Sources
+			if (data.length > 0) {
+				const firstTr = $tbody.find('tr.row-clickable').first();
+				firstTr.addClass('selected-row');
+				updateExamineSourcesSection(data[0], 0);
+			}
 		}
-
 
 		function exportToCsv() {
 			if (!enslaverTable || enslaverTable.length === 0) {
@@ -1628,18 +1882,20 @@
 			const filename = `${county}-VP-SS-${record_year}.csv`;
 
 			const exportData = enslaverTable.map(row => {
-				const topProb = (row.mention1 && row.mention1.mention_id && row.mention1.probability !== null && row.mention1.probability !== undefined)
-					? Number(Number(row.mention1.probability).toFixed(2))
-					: 0;
+				const censusMentionId = (row.mention1 && row.mention1.mention_id) ? row.mention1.mention_id : '';
 
 				return {
-					mention_id: row.mention_id,
+					enslaver_id: row.mention_id,
 					full_name: row.full_name,
 					birth_year: row.birth_year || '',
-					top_probability: topProb,
-					mention1: JSON.stringify(row.mention1 || {}),
-					mention2: JSON.stringify(row.mention2 || {}),
-					mention3: JSON.stringify(row.mention3 || {})
+					first_name: row.first_name,
+					middle_name: row.middle_name,
+					last_name: row.last_name,
+					mention_id: censusMentionId,
+					mention1: row.mention1 && row.mention1.mention_id ? JSON.stringify(row.mention1) : '',
+					mention2: row.mention2 && row.mention2.mention_id ? JSON.stringify(row.mention2) : '',
+					mention3: row.mention3 && row.mention3.mention_id ? JSON.stringify(row.mention3) : '',
+					original_line: row.original_line
 				};
 			});
 
@@ -1669,9 +1925,44 @@
 			});
 		});
 
-		$(document).on('click', '.row-clickable', function () {
+		$(document).on('click', '.row-clickable', function (e) {
+			if ($(e.target).closest('.why-pill-btn').length > 0) return;
+
 			const idx = $(this).data('index');
-			$(`#detail-${idx}`).toggle();
+			$('#tableBody tr.row-clickable').removeClass('selected-row');
+			$(this).addClass('selected-row');
+
+			const row = enslaverTable[idx];
+			if (row) {
+				updateExamineSourcesSection(row, idx);
+			}
+		});
+
+		$(document).on('click', '.why-pill-btn', function (e) {
+			e.stopPropagation();
+			const idx = $(this).data('index');
+			const $detail = $(`#detail-${idx}`);
+			const $content = $(`#detail-content-${idx}`);
+			const row = enslaverTable[idx];
+
+			$('#tableBody tr.row-clickable').removeClass('selected-row');
+			$(`tr[data-index="${idx}"]`).addClass('selected-row');
+			if (row) {
+				updateExamineSourcesSection(row, idx);
+			}
+
+			if (row) {
+				$content.html(renderEnslaverDetailHtml(row, idx));
+			}
+
+			const wasOpen = $detail.hasClass('open');
+			if (wasOpen) {
+				$detail.removeClass('open').hide();
+				$(this).removeClass('active');
+			} else {
+				$detail.addClass('open').show();
+				$(this).addClass('active');
+			}
 		});
 
 		$('#runBtn').on('click', runMatching);
