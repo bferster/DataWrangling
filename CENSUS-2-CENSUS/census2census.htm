@@ -184,6 +184,7 @@
 			border: 1px solid #fcd34d;
 		}
 
+		.status-unmatched,
 		.status-new {
 			background: #f1f5f9;
 			color: #64748b;
@@ -627,6 +628,10 @@
 		}
 
 		/* 24-Row Context Window Displays */
+		.examine-sources-card {
+			flex-shrink: 0;
+		}
+
 		.context-windows-wrapper {
 			margin-top: 10px;
 			padding-top: 8px;
@@ -713,6 +718,30 @@
 			height: 36px;
 			margin-bottom: 8px;
 			color: var(--text-muted);
+		}
+
+		/* Spinning Waiting Icon */
+		.spinner {
+			width: 28px;
+			height: 28px;
+			border: 3px solid rgba(37, 99, 235, 0.18);
+			border-top-color: var(--accent-primary);
+			border-radius: 50%;
+			animation: spin 0.75s linear infinite;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+		.spinner-sm {
+			width: 14px;
+			height: 14px;
+			border-width: 2px;
+		}
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
 		}
 
 		@media (max-width: 1024px) {
@@ -854,8 +883,8 @@
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #64748b; grid-column: span 2;">
-						<div class="stat-title">NEW Persons</div>
-						<div class="stat-value" id="statNew">0</div>
+						<div class="stat-title">UN-MATCHED Persons</div>
+						<div class="stat-value" id="statUnmatched">0</div>
 						<div class="stat-sub">Score &lt; Floor</div>
 					</div>
 				</div>
@@ -874,7 +903,7 @@
 						<button class="filter-tab active" data-filter="ALL">All</button>
 						<button class="filter-tab" data-filter="MATCH">Matches</button>
 						<button class="filter-tab" data-filter="MAYBE">Maybes</button>
-						<button class="filter-tab" data-filter="NEW">New</button>
+						<button class="filter-tab" data-filter="UN-MATCHED">Un-Matched</button>
 					</div>
 					<input type="text" id="tableFilterInput" class="search-input"
 						placeholder="Search person, mention, name...">
@@ -988,21 +1017,23 @@
 
 			// Helper: Get context window of rows (up to 12 leading, center, 12 following)
 			getContextWindow(items, matchFn, radius = 12) {
-				if (!items || items.length === 0) return { slice: [], centerRelIdx: -1, centerAbsIdx: -1, startIdx: 0, total: 0 };
+				if (!items || items.length === 0) return { slice: [], centerRelIdx: -1, centerAbsIdx: -1, startIdx: 0, total: 0, matched: false };
 				let centerIdx = items.findIndex(matchFn);
-				if (centerIdx === -1) centerIdx = 0;
+				const matched = centerIdx !== -1;
+				if (!matched) centerIdx = 0;
 				const start = Math.max(0, centerIdx - radius);
 				const end = Math.min(items.length, centerIdx + radius + 1);
 				return {
 					slice: items.slice(start, end),
-					centerRelIdx: centerIdx - start,
+					centerRelIdx: matched ? (centerIdx - start) : -1,
 					centerAbsIdx: centerIdx,
 					startIdx: start,
-					total: items.length
+					total: items.length,
+					matched: matched
 				};
 			}
 
-			// Generic function to render all source fields (except original_data) in 24-row context window
+			// Generic function to render all source fields (unpacking original_data) in 24-row context window
 			renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix) {
 				if (!items || items.length === 0) {
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No context rows available.'}</div></div>`;
@@ -1013,10 +1044,26 @@
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 				}
 
-				// Gather all unique keys from the rows excluding original_data, source, source_year, norm_occupation, legal_status, phonetic, and internal fields
+				// Helper to extract property from row or its parsed original_data
+				const getRowValue = (r, k) => {
+					if (r[k] !== undefined && r[k] !== null && r[k] !== '') return r[k];
+					if (r.original_data) {
+						if (!r._parsedOriginalData) {
+							try {
+								r._parsedOriginalData = typeof r.original_data === 'object' ? r.original_data : JSON.parse(r.original_data);
+							} catch (_) { r._parsedOriginalData = {}; }
+						}
+						const od = r._parsedOriginalData;
+						if (od && od[k] !== undefined && od[k] !== null && od[k] !== '') return od[k];
+					}
+					return undefined;
+				};
+
+				// Gather all unique keys from the rows excluding internal and raw JSON fields
 				const allKeys = [];
 				const seen = new Set([
 					'original_data',
+					'_parsedOriginalData',
 					'source',
 					'source_year',
 					'norm_occupation',
@@ -1033,12 +1080,29 @@
 					'formattedWhy',
 					'allCandidates'
 				]);
+
 				for (const r of win.slice) {
 					if (r && typeof r === 'object') {
 						for (const k of Object.keys(r)) {
 							if (!seen.has(k) && !k.startsWith('_')) {
 								seen.add(k);
 								allKeys.push(k);
+							}
+						}
+						if (r.original_data) {
+							if (!r._parsedOriginalData) {
+								try {
+									r._parsedOriginalData = typeof r.original_data === 'object' ? r.original_data : JSON.parse(r.original_data);
+								} catch (_) { r._parsedOriginalData = {}; }
+							}
+							const od = r._parsedOriginalData;
+							if (od && typeof od === 'object') {
+								for (const k of Object.keys(od)) {
+									if (!seen.has(k) && !k.startsWith('_')) {
+										seen.add(k);
+										allKeys.push(k);
+									}
+								}
 							}
 						}
 					}
@@ -1057,7 +1121,7 @@
 					const centerAttr = isCenter ? `id="${centerIdPrefix}-${paneId}" class="highlight-center"` : '';
 
 					const cellsHtml = allKeys.map(k => {
-						let val = r[k];
+						let val = getRowValue(r, k);
 						if (val === undefined || val === null || val === '') val = '-';
 						else if (typeof val === 'object') val = JSON.stringify(val);
 						return `<td>${val}</td>`;
@@ -1071,10 +1135,14 @@
 					`;
 				}).join('');
 
+				const headerTitle = win.matched
+					? `<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [12 Leading & 12 Following]</span>`
+					: `<span>${titlePrefix} &mdash; Census Pool Records 1 &ndash; ${win.slice.length} of ${win.total}</span>`;
+
 				return `
 					<div class="context-box">
 						<div class="context-box-header">
-							<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [12 Leading & 12 Following]</span>
+							${headerTitle}
 							<span class="mono" style="font-size: 11px; color: var(--text-muted);">${win.slice.length} Rows Window (${allKeys.length} Fields)</span>
 						</div>
 						<div class="context-scroll-pane" id="${paneId}">
@@ -1101,21 +1169,39 @@
 			}
 
 			// Render Bottom Div: Original lines from Census Table
-			renderCensusContextWindowHtml(bestCandidate, paneId) {
-				if (!bestCandidate || !bestCandidate.mention_id) {
+			renderCensusContextWindowHtml(candidate, person, paneId, allCandidates = []) {
+				if (!this.rawCensusMentions || this.rawCensusMentions.length === 0) {
 					return `
 						<div class="context-box">
 							<div class="context-box-header">
-								<span>Original Census (CN) Population Context</span>
+								<span>Original Census (CN) Population Table</span>
 							</div>
-							<div style="padding: 12px; color: var(--text-muted); font-size: 12px;">No matched census candidate (NEW person) to display context window.</div>
+							<div style="padding: 12px; color: var(--text-muted); font-size: 12px;">No Census mentions loaded. Please run the matcher to load census records.</div>
 						</div>
 					`;
 				}
+
+				// Find target candidate if passed or from allCandidates
+				let targetCand = (candidate && candidate.mention_id) ? candidate : null;
+				let subNote = '';
+
+				if (!targetCand && allCandidates && allCandidates.length > 0 && allCandidates[0] && allCandidates[0].candidate) {
+					targetCand = allCandidates[0].candidate;
+					subNote = ` [Top Candidate: ${targetCand.full_name || targetCand.mention_id}]`;
+				}
+
+				const targetMid = targetCand ? (targetCand.mention_id || '') : '';
+				const pLastName = (person && (person.last_name || person.full_name)) ? (person.last_name || person.full_name).trim().toUpperCase() : '';
+
 				return this.renderSourceContextWindowHtml(
 					this.rawCensusMentions,
-					(m) => m.mention_id === bestCandidate.mention_id,
-					'Original Census (CN) Population Table',
+					(m) => {
+						if (targetMid && m.mention_id && String(m.mention_id).trim() === String(targetMid).trim()) return true;
+						if (targetCand && m === targetCand) return true;
+						if (!targetMid && pLastName && m.last_name && m.last_name.trim().toUpperCase() === pLastName) return true;
+						return false;
+					},
+					`Original Census (CN) Population Table${subNote}`,
 					paneId,
 					'No Census context rows loaded.',
 					'cn-center'
@@ -1167,9 +1253,29 @@
 
 				$('#statTargetSource').text(`Target: ${county}-VP`);
 				$('#statCensusTarget').text(`Source: ${county}-CN-${recordYear}`);
-
-				$('#runBtn').prop('disabled', true);
+				$('#runBtn').prop('disabled', true).html('<span class="spinner spinner-sm" style="width: 12px; height: 12px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.3); margin-right: 6px;"></span> Matching...');
 				$('#downloadBtn').prop('disabled', true);
+				$('#resultCountBadge').html('<span class="spinner spinner-sm" style="width: 10px; height: 10px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.4); margin-right: 4px; display: inline-block; vertical-align: middle;"></span> Matching...');
+
+				// Show spinning indicator in the results table during matching
+				$('#tableBody').html(`
+					<tr>
+						<td colspan="10">
+							<div class="empty-state" style="padding: 40px 20px;">
+								<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
+								<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
+								<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Loading data and scoring verified persons against census pool</div>
+							</div>
+						</td>
+					</tr>
+				`);
+
+				$('#examineSourcesContainer').html(`
+					<div class="empty-state" style="padding: 24px 10px; font-size: 12px; color: var(--text-muted);">
+						<div class="spinner" style="margin: 0 auto 8px auto; width: 20px; height: 20px; border-width: 2px;"></div>
+						Awaiting match results...
+					</div>
+				`);
 
 				try {
 					$('#statusPanel').slideDown(150);
@@ -1194,21 +1300,44 @@
 					];
 
 					let vpRows = await this.loadCsv('vpFileInput', vpFilenames);
-					const vpCount = vpRows ? vpRows.length : 0;
 
-					this.updateProgress(25, `Loaded ${vpCount.toLocaleString()} verified persons. Loading census mentions (mentions.csv)...`);
+					// Filter verified persons to only include rows where county matches set county
+					if (vpRows && vpRows.length > 0) {
+						const countyPrefix = `${county}-`;
+						vpRows = vpRows.filter(r => {
+							const c = this.normStr(r.county).toUpperCase();
+							if (c && c === county) return true;
+							const s = this.normStr(r.source).toUpperCase();
+							if (s && (s.startsWith(countyPrefix) || s === county)) return true;
+							const pid = this.normStr(r.person_id).toUpperCase();
+							if (pid && pid.startsWith(countyPrefix)) return true;
+							const mid = this.normStr(r.mention_id).toUpperCase();
+							if (mid && mid.startsWith(countyPrefix)) return true;
+							const mentions = this.normStr(r.mentions).toUpperCase();
+							if (mentions && mentions.includes(countyPrefix)) return true;
+							return false;
+						});
+					}
+
+					const vpCount = vpRows ? vpRows.length : 0;
+					this.updateProgress(25, `Loaded ${vpCount.toLocaleString()} verified persons for county ${county}. Loading census mentions (mentions.csv)...`);
 
 					let mentionsRows = await this.loadCsv('mentionsFileInput', mentionsFilenames);
 					const mentionsCount = mentionsRows ? mentionsRows.length : 0;
 
 					this.updateProgress(45, `Loaded ${mentionsCount.toLocaleString()} mentions. Filtering ${county}-CN-${recordYear}...`);
 
-					// If mentions loaded but no verified list file exists yet, extract seed verified persons from baseline earlier census
+					// If mentions loaded but no verified list file exists yet, extract seed verified persons from baseline earlier census for set county
 					if (!vpRows || vpRows.length === 0) {
 						if (mentionsRows && mentionsRows.length > 0) {
-							this.updateProgress(15, `No ${county}-VP.csv found. Seeding initial verified list from baseline census...`);
+							this.updateProgress(15, `No ${county}-VP.csv found. Seeding initial verified list for ${county} from baseline census...`);
 							const baseSource = `${county}-CN-1850`;
-							const seedRows = mentionsRows.filter(r => r.source === baseSource || (r.source && r.source.startsWith(`${county}-CN`)));
+							const seedRows = mentionsRows.filter(r => {
+								const s = this.normStr(r.source).toUpperCase();
+								const c = this.normStr(r.county).toUpperCase();
+								const mid = this.normStr(r.mention_id).toUpperCase();
+								return c === county || s === baseSource || s.startsWith(`${county}-CN-`) || mid.startsWith(`${county}-`);
+							});
 							vpRows = seedRows.map((r, i) => ({
 								person_id: `${county}-VP-${1000 + i}`,
 								confidence: '1.0',
@@ -1244,7 +1373,7 @@
 
 					// Filter census candidate mentions for current county and record year
 					const targetSource = `${county}-CN-${recordYear}`;
-					const censusMentions = mentionsRows.filter(r => r.source === targetSource);
+					const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
 					this.rawCensusMentions = censusMentions;
 
 					$('#statVerified').text(vpRows.length.toLocaleString());
@@ -1353,7 +1482,7 @@
 							const pBirthRange = this.parseRange(person.birth_year);
 							const pDeathRange = this.parseRange(person.death_year);
 
-							// died before this census -> cannot be present (leave empty -> NEW)
+							// died before this census -> cannot be present (leave empty -> UN-MATCHED)
 							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
 
 							// candidate retrieval via phonetic/surname block
@@ -1484,7 +1613,7 @@
 						if (best >= ceiling) return 'MATCH';
 						if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
 						if (best >= floor) return 'MAYBE';
-						return 'NEW';
+						return 'UN-MATCHED';
 					};
 
 					const rawResults = [];
@@ -1495,7 +1624,7 @@
 
 						if (!a) {
 							rawResults.push({
-								person: person, status: 'NEW', probability: null, score: 0, bestCandidate: null,
+								person: person, status: 'UN-MATCHED', probability: null, score: 0, bestCandidate: null,
 								why: {
 									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
 									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
@@ -1571,27 +1700,30 @@
 					// Summary stats
 					const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
 					const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
-					const newCount = this.matchedResults.filter(r => r.status === 'NEW').length;
+					const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
 
 					$('#statMatches').text(matchCount.toLocaleString());
 					$('#statMatchPct').text(`${((matchCount / (totalVp || 1)) * 100).toFixed(1)}% of verified list`);
 					$('#statMaybes').text(maybeCount.toLocaleString());
-					$('#statNew').text(newCount.toLocaleString());
+					$('#statUnmatched, #statNew').text(unmatchedCount.toLocaleString());
 
-					this.updateProgress(98, 'Preparing interactive results display...');
-					await new Promise(r => setTimeout(r, 0));
-
+					this.updateProgress(98, 'Displaying results...');
 					await this.renderResultsTable(this.matchedResults);
 					$('#downloadBtn').prop('disabled', false);
 
-					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${newCount.toLocaleString()} new persons.`);
+					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.`);
 
 				} catch (err) {
 					console.error(err);
 					alert(`Error: ${err.message}`);
 					$('#statusText').text(`Error: ${err.message}`);
 				} finally {
-					$('#runBtn').prop('disabled', false);
+					$('#runBtn').prop('disabled', false).html(`
+						<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+							<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
+						</svg>
+						Run Matcher
+					`);
 				}
 			}
 
@@ -1683,15 +1815,16 @@
 
 			// Update Examine Sources Section underneath Results Table
 			updateExamineSourcesSection(row, idx) {
-				const cand = row.bestCandidate || {};
+				const cand = row.bestCandidate || (row.allCandidates && row.allCandidates[0] ? row.allCandidates[0].candidate : null) || {};
 				const vp = row.person || {};
 				const vpPid = vp.person_id || vp.mention_id || '-';
-				const candMid = cand.mention_id || 'NEW (No Candidate)';
+				const candMid = cand.mention_id || (row.status === 'UN-MATCHED' ? 'UN-MATCHED (No Candidate)' : '-');
+				const candName = cand.full_name || (row.status === 'UN-MATCHED' ? 'UN-MATCHED' : '-');
 
-				$('#examineSelectionInfo').html(`Selected Row #${idx + 1}: <strong style="color: #7c3aed;">${vp.full_name || '-'}</strong> [${vpPid}] &harr; <strong style="color: #2563eb;">${cand.full_name || 'NEW'}</strong> [${candMid}]`);
+				$('#examineSelectionInfo').html(`Selected Row #${idx + 1}: <strong style="color: #7c3aed;">${vp.full_name || '-'}</strong> [${vpPid}] &harr; <strong style="color: #2563eb;">${candName}</strong> [${candMid}]`);
 
 				const vpContextHtml = this.renderVpContextWindowHtml(vp, `examine-vp-${idx}`);
-				const cnContextHtml = this.renderCensusContextWindowHtml(cand, `examine-cn-${idx}`);
+				const cnContextHtml = this.renderCensusContextWindowHtml(cand, vp, `examine-cn-${idx}`, row.allCandidates);
 
 				$('#examineSourcesContainer').html(vpContextHtml + cnContextHtml);
 
@@ -1709,15 +1842,75 @@
 				}, 40);
 			}
 
-			// Render Results Table
+			// Fast HTML row builder
+			renderRowHtml(row, i) {
+				const statusClass = row.status === 'MATCH' ? 'status-match' : (row.status === 'MAYBE' ? 'status-maybe' : 'status-unmatched');
+				const cand = row.bestCandidate || {};
+				const vp = row.person || {};
+
+				const nameDisplay = cand.full_name ? `${cand.full_name} : ${vp.full_name || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.full_name || '-'}</span>`;
+				const birthDisplay = cand.birth_year ? `${cand.birth_year} : ${vp.birth_year || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.birth_year || '-'}</span>`;
+				const genderDisplay = `${cand.gender || '-'} : ${vp.gender || '-'}`;
+				const raceDisplay = `${cand.norm_race || cand.race || '-'} : ${vp.norm_race || vp.race || '-'}`;
+				const mentionIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
+				const personIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
+
+				return `
+					<tr class="row-clickable" data-index="${i}">
+						<td><span class="status-pill ${statusClass}">${row.status}</span></td>
+						<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+						<td class="mono" style="font-weight: 700;">${row.probability != null ? row.probability.toFixed(3) : '-'}</td>
+						<td class="mono" style="font-weight: 700; color: #2563eb;">${row.score != null ? row.score.toFixed(3) : '0.000'}</td>
+						<td><strong>${nameDisplay}</strong></td>
+						<td class="mono">${birthDisplay}</td>
+						<td class="mono">${genderDisplay}</td>
+						<td class="mono">${raceDisplay}</td>
+						<td>${mentionIdDisplay}</td>
+						<td>${personIdDisplay}</td>
+					</tr>
+				`;
+			}
+
+			// Append next batch of rows via fast insertAdjacentHTML
+			appendRowsBatch(count = 200) {
+				if (!this.currentFilteredResults || this.renderedRowCount >= this.currentFilteredResults.length) return;
+				const start = this.renderedRowCount;
+				const end = Math.min(start + count, this.currentFilteredResults.length);
+				let batchHtml = '';
+				for (let i = start; i < end; i++) {
+					batchHtml += this.renderRowHtml(this.currentFilteredResults[i], i);
+				}
+				const tbody = document.getElementById('tableBody');
+				if (tbody) {
+					tbody.insertAdjacentHTML('beforeend', batchHtml);
+				}
+				this.renderedRowCount = end;
+			}
+
+			// Background streaming render loop to avoid UI freezing
+			scheduleBackgroundRender() {
+				if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
+				const renderNextChunk = () => {
+					if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
+						this.appendRowsBatch(250);
+						if (this.renderedRowCount < this.currentFilteredResults.length) {
+							this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
+						}
+					}
+				};
+				this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
+			}
+
+			// Render Results Table (Instant initial display + smooth background streaming)
 			async renderResultsTable(data) {
+				if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
 				const $tbody = $('#tableBody');
-				$tbody.empty();
 
 				if (!data || data.length === 0) {
 					$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found.</td></tr>');
 					$('#resultCountBadge').text('0 Rows');
 					this.currentFilteredResults = [];
+					this.renderedRowCount = 0;
 					return;
 				}
 
@@ -1735,69 +1928,34 @@
 				});
 
 				this.currentFilteredResults = filtered;
-				$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows`);
 
-				const totalRows = filtered.length;
-				const chunkSize = 250;
-
-				for (let startIdx = 0; startIdx < totalRows; startIdx += chunkSize) {
-					const endIdx = Math.min(startIdx + chunkSize, totalRows);
-					const fragment = document.createDocumentFragment();
-
-					for (let i = startIdx; i < endIdx; i++) {
-						const row = filtered[i];
-						const tr = document.createElement('tr');
-						tr.className = 'row-clickable';
-						tr.dataset.index = i;
-
-						const statusClass = row.status === 'MATCH' ? 'status-match' : (row.status === 'MAYBE' ? 'status-maybe' : 'status-new');
-						const cand = row.bestCandidate || {};
-						const vp = row.person || {};
-
-						const nameDisplay = cand.full_name ? `${cand.full_name} : ${vp.full_name || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.full_name || '-'}</span>`;
-						const birthDisplay = cand.birth_year ? `${cand.birth_year} : ${vp.birth_year || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.birth_year || '-'}</span>`;
-						const genderDisplay = `${cand.gender || '-'} : ${vp.gender || '-'}`;
-						const raceDisplay = `${cand.norm_race || cand.race || '-'} : ${vp.norm_race || vp.race || '-'}`;
-						const mentionIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
-						const personIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
-
-						tr.innerHTML = `
-							<td><span class="status-pill ${statusClass}">${row.status}</span></td>
-							<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
-							<td class="mono" style="font-weight: 700;">${row.probability != null ? row.probability.toFixed(3) : '-'}</td>
-							<td class="mono" style="font-weight: 700; color: #2563eb;">${row.score != null ? row.score.toFixed(3) : '0.000'}</td>
-							<td><strong>${nameDisplay}</strong></td>
-							<td class="mono">${birthDisplay}</td>
-							<td class="mono">${genderDisplay}</td>
-							<td class="mono">${raceDisplay}</td>
-							<td>${mentionIdDisplay}</td>
-							<td>${personIdDisplay}</td>
-						`;
-
-						fragment.appendChild(tr);
-
-						// Details Accordion Drawer Placeholder (rendered on demand when clicked)
-						const detailTr = document.createElement('tr');
-						detailTr.className = 'details-row';
-						detailTr.id = `detail-${i}`;
-						detailTr.innerHTML = `<td colspan="10" style="padding: 6px 10px;" id="detail-content-${i}"></td>`;
-						fragment.appendChild(detailTr);
-					}
-
-					$tbody.append(fragment);
-
-					if (totalRows > chunkSize) {
-						const pct = 98 + (endIdx / totalRows) * 2;
-						this.updateProgress(pct, `Displaying results: ${endIdx.toLocaleString()} of ${totalRows.toLocaleString()} rows...`);
-						await new Promise(r => setTimeout(r, 0));
-					}
+				if (filtered.length === 0) {
+					$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found for active filters.</td></tr>');
+					$('#resultCountBadge').text('0 Rows');
+					this.renderedRowCount = 0;
+					return;
 				}
 
-				// Automatically select first row to populate Examine Sources if results available
-				if (filtered.length > 0) {
-					const firstTr = $tbody.find('tr.row-clickable').first();
-					firstTr.addClass('selected-row');
-					this.updateExamineSourcesSection(filtered[0], 0);
+				$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows`);
+
+				// Render initial 100 rows immediately for instant sub-10ms display
+				const initialCount = Math.min(100, filtered.length);
+				let initialHtml = '';
+				for (let i = 0; i < initialCount; i++) {
+					initialHtml += this.renderRowHtml(filtered[i], i);
+				}
+				$tbody.html(initialHtml);
+				this.renderedRowCount = initialCount;
+				$('.table-wrapper').scrollTop(0);
+
+				// Automatically select first row to populate Examine Sources
+				const firstTr = $tbody.find('tr.row-clickable').first();
+				firstTr.addClass('selected-row');
+				this.updateExamineSourcesSection(filtered[0], 0);
+
+				// Stream remaining rows smoothly in background chunks
+				if (this.renderedRowCount < filtered.length) {
+					this.scheduleBackgroundRender();
 				}
 			}
 
@@ -1852,8 +2010,22 @@
 					this.renderResultsTable(this.matchedResults);
 				});
 
+				let filterDebounce = null;
 				$('#tableFilterInput').on('input', () => {
-					this.renderResultsTable(this.matchedResults);
+					if (filterDebounce) clearTimeout(filterDebounce);
+					filterDebounce = setTimeout(() => {
+						this.renderResultsTable(this.matchedResults);
+					}, 120);
+				});
+
+				// Infinite / progressive scroll on table-wrapper
+				$('.table-wrapper').on('scroll', (e) => {
+					const el = e.currentTarget;
+					if (el.scrollHeight - el.scrollTop - el.clientHeight < 500) {
+						if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
+							this.appendRowsBatch(200);
+						}
+					}
 				});
 
 				$(document).on('click', '.row-clickable', (e) => {
@@ -1873,13 +2045,20 @@
 				$(document).on('click', '.why-pill-btn', (e) => {
 					e.stopPropagation();
 					const idx = $(e.currentTarget).data('index');
-					const $detail = $(`#detail-${idx}`);
+					const $row = $(`tr.row-clickable[data-index="${idx}"]`);
+					let $detail = $(`#detail-${idx}`);
+
+					if ($detail.length === 0) {
+						$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="10" style="padding: 6px 10px;" id="detail-content-${idx}"></td></tr>`);
+						$row.after($detail);
+					}
+
 					const $content = $(`#detail-content-${idx}`);
 					const row = this.currentFilteredResults[idx];
 
 					// Select active row and update source context
 					$('#tableBody tr.row-clickable').removeClass('selected-row');
-					$(`tr[data-index="${idx}"]`).addClass('selected-row');
+					$row.addClass('selected-row');
 					if (row) {
 						this.updateExamineSourcesSection(row, idx);
 					}

@@ -623,6 +623,30 @@
 			color: var(--text-muted);
 		}
 
+		/* Spinning Waiting Icon */
+		.spinner {
+			width: 28px;
+			height: 28px;
+			border: 3px solid rgba(37, 99, 235, 0.18);
+			border-top-color: var(--accent-primary);
+			border-radius: 50%;
+			animation: spin 0.75s linear infinite;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+		.spinner-sm {
+			width: 14px;
+			height: 14px;
+			border-width: 2px;
+		}
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+
 		@media (max-width: 1024px) {
 			.top-dashboard-grid {
 				grid-template-columns: 1fr;
@@ -1169,8 +1193,28 @@
 			currentTableName = `${county}-VP-SS-${record_year}`;
 			$('#statTableTarget').text(`Target: ${currentTableName}`);
 
-			$('#runBtn').prop('disabled', true);
+			$('#runBtn').prop('disabled', true).html('<span class="spinner spinner-sm" style="width: 12px; height: 12px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.3); margin-right: 6px;"></span> Matching...');
 			$('#downloadBtn').prop('disabled', true);
+			$('#resultCountBadge').html('<span class="spinner spinner-sm" style="width: 10px; height: 10px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.4); margin-right: 4px; display: inline-block; vertical-align: middle;"></span> Matching...');
+
+			$('#tableBody').html(`
+				<tr>
+					<td colspan="9">
+						<div class="empty-state" style="padding: 40px 20px;">
+							<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
+							<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
+							<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Loading data and linking Slave Schedule enslavers to census records</div>
+						</div>
+					</td>
+				</tr>
+			`);
+
+			$('#examineSourcesContainer').html(`
+				<div class="empty-state" style="padding: 24px 10px; font-size: 12px; color: var(--text-muted);">
+					<div class="spinner" style="margin: 0 auto 8px auto; width: 20px; height: 20px; border-width: 2px;"></div>
+					Awaiting match results...
+				</div>
+			`);
 
 			try {
 				updateProgress(5, 'Loading CSV data...');
@@ -1439,7 +1483,7 @@
 									name: match.scores.name,
 									district: match.scores.district,
 									head: match.scores.head,
-									date: match.scores.date
+date: match.scores.date
 								}
 							};
 						}
@@ -1476,9 +1520,7 @@
 				$('#statMatchPct').text(`${matchPct}% with ≥ 1 mention`);
 				$('#statTotalMentions').text(totalMentionsLinked.toLocaleString());
 
-				updateProgress(98, 'Preparing enslaver linkage display...');
-				await new Promise(r => setTimeout(r, 0));
-
+				updateProgress(98, 'Displaying results...');
 				await renderResultsTable(enslaverTable);
 				$('#downloadBtn').prop('disabled', false);
 
@@ -1489,7 +1531,12 @@
 				alert(`Error during matching: ${err.message}`);
 				$('#statusText').text(`Error: ${err.message}`);
 			} finally {
-				$('#runBtn').prop('disabled', false);
+				$('#runBtn').prop('disabled', false).html(`
+					<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+						<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
+					</svg>
+					Run Matcher
+				`);
 			}
 		}
 
@@ -1736,14 +1783,135 @@
 			}, 40);
 		}
 
-		// Render Results Table
+		let renderedEnslaverCount = 0;
+		let bgEnslaverRenderTimer = null;
+
+		// Fast HTML builder for single enslaver row
+		function renderEnslaverRowHtml(row, i, threshold) {
+			const activeMentions = [];
+			if (row.mention1 && row.mention1.mention_id) activeMentions.push({ label: 'Mention 1', ...row.mention1 });
+			if (row.mention2 && row.mention2.mention_id) activeMentions.push({ label: 'Mention 2', ...row.mention2 });
+			if (row.mention3 && row.mention3.mention_id) activeMentions.push({ label: 'Mention 3', ...row.mention3 });
+
+			let mentionsHtml = '';
+
+			if (activeMentions.length === 0) {
+				mentionsHtml = '<span style="color: var(--text-muted); font-size: 11px;">No candidate matches</span>';
+			} else {
+				mentionsHtml = activeMentions.map((m) => {
+					const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
+					const ns = m.scores && m.scores.name !== undefined ? m.scores.name : 0;
+					const ds = m.scores && m.scores.district !== undefined ? m.scores.district : 0;
+					const hs = m.scores && m.scores.head !== undefined ? m.scores.head : 0;
+					const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
+					const matchedName = m.full_name || '';
+
+					let probBadge = '';
+					if (m.probability !== null && m.probability !== undefined) {
+						const isPass = m.probability >= threshold;
+						const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+						const pillColor = isPass ? '#15803d' : '#b91c1c';
+						const pillBorder = isPass ? '#86efac' : '#fca5a5';
+						probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:10px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
+					}
+
+					return `
+						<div class="mention-block" style="padding: 4px 6px; margin-bottom: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+							<div style="display: flex; justify-content: space-between; align-items: center;">
+								<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 11px;">${m.label}: ${m.mention_id} ${matchedName ? `<span>(${matchedName})</span>` : ''}</span>
+								<div>
+									<span class="badge badge-success">Conf: ${m.confidence}</span>
+									${probBadge}
+								</div>
+							</div>
+							<div style="display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap;">
+								<span class="score-chip chip-name" style="font-size: 10px;">Name: ${ns}</span>
+								<span class="score-chip chip-dist" style="font-size: 10px;">Dist: +${ds}</span>
+								<span class="score-chip chip-head" style="font-size: 10px;">Head: +${hs}</span>
+								<span class="score-chip chip-date" style="font-size: 10px;">Date: +${dts}</span>
+							</div>
+						</div>
+					`;
+				}).join('');
+			}
+
+			const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
+
+			const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
+				? row.mention1.probability
+				: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
+
+			let probPillHtml = '<span style="color: var(--text-muted); font-size: 11px;">-</span>';
+			if (topProb !== null && topProb !== undefined) {
+				const isPass = topProb >= threshold;
+				const pillBg = isPass ? '#dcfce7' : '#fee2e2';
+				const pillColor = isPass ? '#15803d' : '#b91c1c';
+				const pillBorder = isPass ? '#86efac' : '#fca5a5';
+				probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:11px;padding:2px 6px;border-radius:9999px;">${topProb}</span>`;
+			}
+
+			return `
+				<tr class="row-clickable" data-index="${i}">
+					<td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
+					<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+					<td>
+						<strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
+						${row.matched_name ? `<div style="font-size: 10px; color: #059669; font-weight: 600;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
+					</td>
+					<td>${row.district || '-'}</td>
+					<td>${row.original_line || '-'}</td>
+					<td>${enumText}</td>
+					<td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
+					<td style="text-align: center;">${probPillHtml}</td>
+					<td class="mentions-cell">${mentionsHtml}</td>
+				</tr>
+			`;
+		}
+
+		// Append next batch of rows via fast insertAdjacentHTML
+		function appendEnslaverRowsBatch(count = 200) {
+			if (!enslaverTable || renderedEnslaverCount >= enslaverTable.length) return;
+			const rawVal = $('#thresholdInput').val();
+			const parsedNum = parseFloat(rawVal);
+			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
+			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
+
+			const start = renderedEnslaverCount;
+			const end = Math.min(start + count, enslaverTable.length);
+			let batchHtml = '';
+			for (let i = start; i < end; i++) {
+				batchHtml += renderEnslaverRowHtml(enslaverTable[i], i, threshold);
+			}
+			const tbody = document.getElementById('tableBody');
+			if (tbody) {
+				tbody.insertAdjacentHTML('beforeend', batchHtml);
+			}
+			renderedEnslaverCount = end;
+		}
+
+		// Background streaming loop
+		function scheduleEnslaverBackgroundRender() {
+			if (bgEnslaverRenderTimer) cancelAnimationFrame(bgEnslaverRenderTimer);
+			const renderNext = () => {
+				if (enslaverTable && renderedEnslaverCount < enslaverTable.length) {
+					appendEnslaverRowsBatch(250);
+					if (renderedEnslaverCount < enslaverTable.length) {
+						bgEnslaverRenderTimer = requestAnimationFrame(renderNext);
+					}
+				}
+			};
+			bgEnslaverRenderTimer = requestAnimationFrame(renderNext);
+		}
+
+		// Render Results Table (Instant initial display + smooth background streaming)
 		async function renderResultsTable(data) {
+			if (bgEnslaverRenderTimer) cancelAnimationFrame(bgEnslaverRenderTimer);
 			const $tbody = $('#tableBody');
-			$tbody.empty();
 
 			if (!data || data.length === 0) {
 				$tbody.html('<tr><td colspan="9" class="empty-state">No matching enslaver records found.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
+				renderedEnslaverCount = 0;
 				return;
 			}
 
@@ -1754,120 +1922,24 @@
 
 			$('#resultCountBadge').text(`${data.length.toLocaleString()} Rows`);
 
-			const totalRows = data.length;
-			const chunkSize = 250;
-
-			for (let startIdx = 0; startIdx < totalRows; startIdx += chunkSize) {
-				const endIdx = Math.min(startIdx + chunkSize, totalRows);
-				const fragment = document.createDocumentFragment();
-
-				for (let i = startIdx; i < endIdx; i++) {
-					const row = data[i];
-					const tr = document.createElement('tr');
-					tr.className = 'row-clickable';
-					tr.dataset.index = i;
-
-					const activeMentions = [];
-					if (row.mention1 && row.mention1.mention_id) activeMentions.push({ label: 'Mention 1', ...row.mention1 });
-					if (row.mention2 && row.mention2.mention_id) activeMentions.push({ label: 'Mention 2', ...row.mention2 });
-					if (row.mention3 && row.mention3.mention_id) activeMentions.push({ label: 'Mention 3', ...row.mention3 });
-
-					let mentionsHtml = '';
-
-					if (activeMentions.length === 0) {
-						mentionsHtml = '<span style="color: var(--text-muted); font-size: 11px;">No candidate matches</span>';
-					} else {
-						mentionsHtml = activeMentions.map((m) => {
-							const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
-							const ns = m.scores && m.scores.name !== undefined ? m.scores.name : 0;
-							const ds = m.scores && m.scores.district !== undefined ? m.scores.district : 0;
-							const hs = m.scores && m.scores.head !== undefined ? m.scores.head : 0;
-							const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
-							const matchedName = m.full_name || '';
-
-							let probBadge = '';
-							if (m.probability !== null && m.probability !== undefined) {
-								const isPass = m.probability >= threshold;
-								const pillBg = isPass ? '#dcfce7' : '#fee2e2';
-								const pillColor = isPass ? '#15803d' : '#b91c1c';
-								const pillBorder = isPass ? '#86efac' : '#fca5a5';
-								probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:10px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
-							}
-
-							return `
-								<div class="mention-block" style="padding: 4px 6px; margin-bottom: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-									<div style="display: flex; justify-content: space-between; align-items: center;">
-										<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 11px;">${m.label}: ${m.mention_id} ${matchedName ? `<span>(${matchedName})</span>` : ''}</span>
-										<div>
-											<span class="badge badge-success">Conf: ${m.confidence}</span>
-											${probBadge}
-										</div>
-									</div>
-									<div style="display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap;">
-										<span class="score-chip chip-name" style="font-size: 10px;">Name: ${ns}</span>
-										<span class="score-chip chip-dist" style="font-size: 10px;">Dist: +${ds}</span>
-										<span class="score-chip chip-head" style="font-size: 10px;">Head: +${hs}</span>
-										<span class="score-chip chip-date" style="font-size: 10px;">Date: +${dts}</span>
-									</div>
-								</div>
-							`;
-						}).join('');
-					}
-
-					const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
-
-					const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
-						? row.mention1.probability
-						: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
-
-					let probPillHtml = '<span style="color: var(--text-muted); font-size: 11px;">-</span>';
-					if (topProb !== null && topProb !== undefined) {
-						const isPass = topProb >= threshold;
-						const pillBg = isPass ? '#dcfce7' : '#fee2e2';
-						const pillColor = isPass ? '#15803d' : '#b91c1c';
-						const pillBorder = isPass ? '#86efac' : '#fca5a5';
-						probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:11px;padding:2px 6px;border-radius:9999px;">${topProb}</span>`;
-					}
-
-					tr.innerHTML = `
-						<td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
-						<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
-						<td>
-							<strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
-							${row.matched_name ? `<div style="font-size: 10px; color: #059669; font-weight: 600;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
-						</td>
-						<td>${row.district || '-'}</td>
-						<td>${row.original_line || '-'}</td>
-						<td>${enumText}</td>
-						<td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
-						<td style="text-align: center;">${probPillHtml}</td>
-						<td class="mentions-cell">${mentionsHtml}</td>
-					`;
-
-					fragment.appendChild(tr);
-
-					// Details Row Placeholder
-					const detailTr = document.createElement('tr');
-					detailTr.className = 'details-row';
-					detailTr.id = `detail-${i}`;
-					detailTr.innerHTML = `<td colspan="9" style="padding: 8px 12px;" id="detail-content-${i}"></td>`;
-					fragment.appendChild(detailTr);
-				}
-
-				$tbody.append(fragment);
-
-				if (totalRows > chunkSize) {
-					const pct = 98 + (endIdx / totalRows) * 2;
-					updateProgress(pct, `Displaying results: ${endIdx.toLocaleString()} of ${totalRows.toLocaleString()} enslaver rows...`);
-					await new Promise(r => setTimeout(r, 0));
-				}
+			// Render initial 100 rows immediately for instant display
+			const initialCount = Math.min(100, data.length);
+			let initialHtml = '';
+			for (let i = 0; i < initialCount; i++) {
+				initialHtml += renderEnslaverRowHtml(data[i], i, threshold);
 			}
+			$tbody.html(initialHtml);
+			renderedEnslaverCount = initialCount;
+			$('.table-wrapper').scrollTop(0);
 
 			// Automatically select first row to populate Examine Sources
-			if (data.length > 0) {
-				const firstTr = $tbody.find('tr.row-clickable').first();
-				firstTr.addClass('selected-row');
-				updateExamineSourcesSection(data[0], 0);
+			const firstTr = $tbody.find('tr.row-clickable').first();
+			firstTr.addClass('selected-row');
+			updateExamineSourcesSection(data[0], 0);
+
+			// Stream remaining rows smoothly in background chunks
+			if (renderedEnslaverCount < data.length) {
+				scheduleEnslaverBackgroundRender();
 			}
 		}
 
@@ -1910,19 +1982,33 @@
 			document.body.removeChild(link);
 		}
 
+		let scheduleFilterDebounce = null;
 		$('#tableFilterInput').on('input', function () {
-			const term = $(this).val().toLowerCase().trim();
-			if (!term) {
-				$('#tableBody tr').show();
-				$('.details-row').hide();
-				return;
+			if (scheduleFilterDebounce) clearTimeout(scheduleFilterDebounce);
+			scheduleFilterDebounce = setTimeout(() => {
+				const term = $('#tableFilterInput').val().toLowerCase().trim();
+				if (!term) {
+					$('#tableBody tr.row-clickable').show();
+					$('.details-row').hide();
+					return;
+				}
+				enslaverTable.forEach((row, i) => {
+					const text = `${row.candidate_id} ${row.full_name} ${row.matched_name} ${row.district} ${row.enumerator} ${row.mention_id}`.toLowerCase();
+					const matches = text.includes(term);
+					$(`tr.row-clickable[data-index="${i}"]`).toggle(matches);
+					$(`#detail-${i}`).hide();
+				});
+			}, 120);
+		});
+
+		// Infinite / progressive scroll on table-wrapper
+		$('.table-wrapper').on('scroll', function () {
+			const el = this;
+			if (el.scrollHeight - el.scrollTop - el.clientHeight < 500) {
+				if (enslaverTable && renderedEnslaverCount < enslaverTable.length) {
+					appendEnslaverRowsBatch(200);
+				}
 			}
-			enslaverTable.forEach((row, i) => {
-				const text = `${row.candidate_id} ${row.full_name} ${row.matched_name} ${row.district} ${row.enumerator} ${row.mention_id}`.toLowerCase();
-				const matches = text.includes(term);
-				$(`tr[data-index="${i}"]`).toggle(matches);
-				$(`#detail-${i}`).hide();
-			});
 		});
 
 		$(document).on('click', '.row-clickable', function (e) {
@@ -1941,12 +2027,19 @@
 		$(document).on('click', '.why-pill-btn', function (e) {
 			e.stopPropagation();
 			const idx = $(this).data('index');
-			const $detail = $(`#detail-${idx}`);
+			const $row = $(`tr.row-clickable[data-index="${idx}"]`);
+			let $detail = $(`#detail-${idx}`);
+
+			if ($detail.length === 0) {
+				$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="9" style="padding: 8px 12px;" id="detail-content-${idx}"></td></tr>`);
+				$row.after($detail);
+			}
+
 			const $content = $(`#detail-content-${idx}`);
 			const row = enslaverTable[idx];
 
 			$('#tableBody tr.row-clickable').removeClass('selected-row');
-			$(`tr[data-index="${idx}"]`).addClass('selected-row');
+			$row.addClass('selected-row');
 			if (row) {
 				updateExamineSourcesSection(row, idx);
 			}

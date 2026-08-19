@@ -67,7 +67,7 @@ The people list contains a list of verified people from the census and contains 
 		Save match score in score field.
 		Save probability in probability field.
 		Why - details on the scoring.
-		If the score is below floor, set status as "NEW".
+		If the score is below floor, set status as "UN-MATCHED".
 		Else if score is above ceiling, set status as “MATCH”,
 		Else set status as “MAYBE”.
 		}
