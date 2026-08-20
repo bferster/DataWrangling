@@ -120,8 +120,20 @@ The people list contains a list of verified people from the census and contains 
 	}
 
 	Save table to disc as “HITL1860“.csv” 
-	
 
+**Review view mode**
+
+	- Add a new button to the results display control called "Review"
+	- If that is active, hide the status. score, why, and probability columns, otherwise show them.
+	- Add a pulldown to set HITL review mode to select "-" "MATCHED", "MAYBE", "UNMATCHED". (store in hitl_match field in output csv)
+	- Add checkbox for "Sample" to show 500 sampled rows using Neyman Allocation:
+
+		1. Stratify. It slices the candidates into 8 bins by match_probability, and — this is the clever part — it sets the bin boundaries to be exactly the thresholds you'd ever want to evaluate (0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99). Bin H is the 0.01–0.10 junk band; bin A is the 0.99+ near-certain band.
+
+		2. Allocate. It decides how many of the 300-pair budget to draw from each bin using Neyman allocation — sample more where the population is large and where the match rate is near 50% (most uncertain), fewer where it's lopsided. It uses each bin's mean posterior (pbar) as a stand-in for the true match rate, and enforces a floor of 35 per bin so no stratum is starved. Result: roughly 40–50 per bin.
+		3. Draw. Simple random sample within each bin, shuffle them together, and write two files: one with scores for you, and one without scores — just the two IDs and a blank label column — so the reviewer can't be anchored by what the model already thinks.
+
+		4. Estimate. Once labels come back (matched / unmatch / maybe), it estimates the true match rate in each bin from your ~40 reviews, scales it up by the bin's full population size, and — because the bin edges are the thresholds — every threshold's precision and recall falls out as a clean ratio of stratified totals. It adds bootstrap confidence intervals and a deterministic "ignorance band" from the unsure labels. The last cell is a smoke test with a fake reviewer.
 		
 
 

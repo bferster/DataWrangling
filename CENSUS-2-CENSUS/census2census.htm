@@ -296,6 +296,59 @@
 			cursor: not-allowed;
 		}
 
+		/* Review View Mode Styles */
+		.filter-tab.review-tab-btn.active {
+			background-color: var(--accent-purple);
+			color: #ffffff;
+			box-shadow: 0 1px 4px rgba(124, 58, 237, 0.35);
+		}
+
+		.col-hitl {
+			display: none;
+		}
+
+		.review-mode .col-status,
+		.review-mode .col-why,
+		.review-mode .col-prob {
+			display: none !important;
+		}
+
+		.review-mode .col-hitl {
+			display: table-cell !important;
+		}
+
+		.hitl-select {
+			padding: 3px 8px;
+			font-size: 11px;
+			font-weight: 700;
+			border-radius: 4px;
+			height: 26px;
+			border: 1px solid #cbd5e1;
+			background-color: #ffffff;
+			cursor: pointer;
+			outline: none;
+			font-family: inherit;
+			transition: all 0.15s ease;
+		}
+
+		.hitl-select.val-MATCHED {
+			background-color: #dcfce7;
+			color: #15803d;
+			border-color: #86efac;
+		}
+
+		.hitl-select.val-MAYBE {
+			background-color: #fef3c7;
+			color: #b45309;
+			border-color: #fcd34d;
+		}
+
+		.hitl-select.val-UNMATCHED {
+			background-color: #f1f5f9;
+			color: #64748b;
+			border-color: #cbd5e1;
+		}
+
 		/* Progress & Status Panel */
 		.status-panel {
 			display: none;
@@ -803,23 +856,14 @@
 					</div>
 					<div class="form-group">
 						<label for="marginInput">Margin (%)</label>
-						<input type="number" id="marginInput" class="form-control" value="15" min="0" max="100" step="1">
+						<input type="number" id="marginInput" class="form-control" value="15" min="0" max="100"
+							step="1">
 					</div>
 
-					<div class="form-group" style="grid-column: span 2;">
+					<div class="form-group" style="grid-column: span 3;">
 						<label for="vpFileInput">Verified CSV (e.g. AUG-VP.csv)</label>
 						<input type="file" id="vpFileInput" accept=".csv" class="form-control"
 							style="padding: 2px 4px;">
-					</div>
-
-					<div class="form-group" style="grid-column: span 2;">
-						<label for="mentionsFileInput">Mentions CSV (mentions.csv)</label>
-						<input type="file" id="mentionsFileInput" accept=".csv" class="form-control"
-							style="padding: 2px 4px;">
-					</div>
-					<div class="form-group" style="grid-column: span 2;">
-						<label for="labelsFileInput">Resolved labels CSV (optional — enables probability)</label>
-						<input type="file" id="labelsFileInput" accept=".csv" class="form-control" style="padding: 2px 4px;">
 					</div>
 
 					<div class="form-group"
@@ -904,7 +948,18 @@
 						<button class="filter-tab" data-filter="MATCH">Matches</button>
 						<button class="filter-tab" data-filter="MAYBE">Maybes</button>
 						<button class="filter-tab" data-filter="UN-MATCHED">Un-Matched</button>
+						<span
+							style="width: 1px; height: 16px; background: #cbd5e1; margin: 0 3px; align-self: center;"></span>
+						<button id="reviewModeBtn" class="filter-tab review-tab-btn"
+							title="Toggle HITL Review Mode (hide status/score, show review dropdowns)">Review</button>
 					</div>
+					<label class="sample-checkbox-label"
+						title="Show 500 sampled rows using Neyman Stratified Allocation across 8 probability bins"
+						style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none;">
+						<input type="checkbox" id="sampleCheckbox"
+							style="cursor: pointer; accent-color: var(--accent-purple);">
+						<span>Sample</span>
+					</label>
 					<input type="text" id="tableFilterInput" class="search-input"
 						placeholder="Search person, mention, name...">
 				</div>
@@ -914,10 +969,10 @@
 				<table id="resultsTable">
 					<thead>
 						<tr>
-							<th>Status</th>
-							<th>Why</th>
-							<th>Probability</th>
-							<th>Score</th>
+							<th class="col-status">Status</th>
+							<th class="col-why">Why</th>
+							<th class="col-prob">Probability</th>
+							<th class="col-hitl">HITL Match</th>
 							<th>Full Name (Census : Verified)</th>
 							<th>Birth Year (Census : Verified)</th>
 							<th>Gender (C : V)</th>
@@ -986,6 +1041,9 @@
 				this.matchedResults = [];
 				this.currentFilteredResults = [];
 				this.currentFilter = 'ALL';
+				this.isReviewMode = false;
+				this.isSampleMode = false;
+				this.sampledResults = null;
 				this.rawVpRows = [];
 				this.rawCensusMentions = [];
 
@@ -1013,6 +1071,118 @@
 				if (!n) return null;
 				const y = n.map(Number);
 				return [Math.min(...y), Math.max(...y)];
+			}
+
+			getProb(row) {
+				if (row.probability != null && !isNaN(row.probability)) return Number(row.probability);
+				if (row.score != null && !isNaN(row.score)) return Math.min(1.0, Math.max(0.0, Number(row.score)));
+				return 0.0;
+			}
+
+			// Neyman Stratified Allocation across 8 threshold-defined probability bins
+			generateNeymanSample(targetSize = 500, floor = 35) {
+				if (!this.matchedResults || this.matchedResults.length === 0) return [];
+				if (this.matchedResults.length <= targetSize) return [...this.matchedResults];
+
+				// 1. Stratify candidates into 8 evaluation threshold bins:
+				// Bin A: [0.99, 1.00], Bin B: [0.95, 0.99), Bin C: [0.90, 0.95), Bin D: [0.75, 0.90),
+				// Bin E: [0.50, 0.75), Bin F: [0.25, 0.50), Bin G: [0.10, 0.25), Bin H: [0.00, 0.10) (junk/low band)
+				const BINS = [
+					{ id: 'A', name: '0.99+', min: 0.99, max: 1.01 },
+					{ id: 'B', name: '0.95-0.99', min: 0.95, max: 0.99 },
+					{ id: 'C', name: '0.90-0.95', min: 0.90, max: 0.95 },
+					{ id: 'D', name: '0.75-0.90', min: 0.75, max: 0.90 },
+					{ id: 'E', name: '0.50-0.75', min: 0.50, max: 0.75 },
+					{ id: 'F', name: '0.25-0.50', min: 0.25, max: 0.50 },
+					{ id: 'G', name: '0.10-0.25', min: 0.10, max: 0.25 },
+					{ id: 'H', name: '0.01-0.10', min: 0.00, max: 0.10 }
+				];
+
+				const strata = BINS.map(b => ({ ...b, items: [] }));
+
+				for (const row of this.matchedResults) {
+					const p = this.getProb(row);
+					let placed = false;
+					for (const s of strata) {
+						if (p >= s.min && p < s.max) {
+							s.items.push(row);
+							placed = true;
+							break;
+						}
+					}
+					if (!placed) {
+						strata[strata.length - 1].items.push(row);
+					}
+				}
+
+				// 2. Allocate sample budget using Neyman optimal allocation:
+				// w_h = N_h * sqrt(pbar_h * (1 - pbar_h)) with minimum floor
+				let totalWeight = 0;
+				let allocatedTotal = 0;
+				for (const s of strata) {
+					const N_h = s.items.length;
+					s.N_h = N_h;
+					if (N_h === 0) {
+						s.pbar = 0;
+						s.sigma = 0;
+						s.weight = 0;
+						s.alloc = 0;
+						continue;
+					}
+					const sumP = s.items.reduce((acc, r) => acc + this.getProb(r), 0);
+					s.pbar = Math.max(0.01, Math.min(0.99, sumP / N_h));
+					s.sigma = Math.sqrt(s.pbar * (1 - s.pbar));
+					s.weight = N_h * s.sigma;
+					s.floor = Math.min(N_h, floor);
+					s.alloc = s.floor;
+					allocatedTotal += s.floor;
+					totalWeight += s.weight;
+				}
+
+				// Proportional distribution of remaining budget by Neyman weight
+				const remainingBudget = Math.max(0, targetSize - allocatedTotal);
+				if (totalWeight > 0 && remainingBudget > 0) {
+					let extraAllocated = 0;
+					for (const s of strata) {
+						if (s.N_h <= s.alloc || s.weight <= 0) continue;
+						const extra = Math.min(s.N_h - s.alloc, Math.round(remainingBudget * (s.weight / totalWeight)));
+						s.alloc += extra;
+						extraAllocated += extra;
+					}
+					let diff = targetSize - (allocatedTotal + extraAllocated);
+					if (diff !== 0) {
+						const available = strata.filter(s => s.alloc < s.N_h);
+						available.sort((a, b) => b.weight - a.weight);
+						for (let i = 0; i < Math.abs(diff) && available.length > 0; i++) {
+							const s = available[i % available.length];
+							if (diff > 0 && s.alloc < s.N_h) {
+								s.alloc += 1;
+							} else if (diff < 0 && s.alloc > s.floor) {
+								s.alloc -= 1;
+							}
+						}
+					}
+				}
+
+				// 3. Draw random samples within each bin without replacement
+				const sampled = [];
+				for (const s of strata) {
+					if (s.alloc <= 0 || s.items.length === 0) continue;
+					const pool = [...s.items];
+					for (let i = pool.length - 1; i > 0; i--) {
+						const j = Math.floor(Math.random() * (i + 1));
+						[pool[i], pool[j]] = [pool[j], pool[i]];
+					}
+					sampled.push(...pool.slice(0, s.alloc));
+				}
+
+				// Shuffle final combined sample
+				for (let i = sampled.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[sampled[i], sampled[j]] = [sampled[j], sampled[i]];
+				}
+
+				return sampled;
 			}
 
 			// Helper: Get context window of rows (up to 12 leading, center, 12 following)
@@ -1066,6 +1236,10 @@
 					'_parsedOriginalData',
 					'source',
 					'source_year',
+					'confidence',
+					'norm_first_name',
+					'enumerator',
+					'enumerator_date',
 					'norm_occupation',
 					'legal_status',
 					'nysiis_last_name',
@@ -1440,7 +1614,7 @@
 					// noise; household applied as a noisy-OR BOOST (beta) not a lever.
 					const BETA = 0.6;
 					const BIRTH_PROFILES = {
-						CENSUS_CENSUS:     { sigma: 3.0, knockout: 12 },
+						CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
 						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
 					};
 					const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
@@ -1534,10 +1708,18 @@
 								});
 								if (matchRes.tier === 'KNOCKOUT') continue;
 
+								let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
+								if (candProb == null && typeof matcher.nameProbability === 'function') {
+									candProb = matcher.nameProbability(matchRes.score);
+								}
+								if (candProb == null) {
+									candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
+								}
+
 								const entry = {
 									candidate: cand,
 									score: Number(matchRes.score.toFixed(4)),
-									probability: (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null,
+									probability: candProb,
 									tier: matchRes.tier,
 									why: matchRes.why
 								};
@@ -1624,7 +1806,7 @@
 
 						if (!a) {
 							rawResults.push({
-								person: person, status: 'UN-MATCHED', probability: null, score: 0, bestCandidate: null,
+								person: person, status: 'UN-MATCHED', probability: 0, score: 0, bestCandidate: null,
 								why: {
 									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
 									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
@@ -1647,7 +1829,7 @@
 
 						rawResults.push({
 							person: person, status: status,
-							probability: a.probability, score: best,
+							probability: a.probability != null ? a.probability : Number(Math.max(0, Math.min(1, best)).toFixed(3)), score: best,
 							bestCandidate: a.candidate, why: why, allCandidates: cands
 						});
 					}
@@ -1658,8 +1840,10 @@
 					// Format Why and Runner-ups
 					for (let idx = 0; idx < rawResults.length; idx++) {
 						const r = rawResults[idx];
+						r.hitl_match = '-';
 						const why = r.why || {};
-						const runnerUps = (r.allCandidates || []).slice(1, 4).map(c => ({
+						const candOffset = r.bestCandidate ? 1 : 0;
+						const runnerUps = (r.allCandidates || []).slice(candOffset, candOffset + 4).map(c => ({
 							mention_id: c.candidate.mention_id,
 							full_name: c.candidate.full_name,
 							nameScore: (c.why && c.why.name) || 0,
@@ -1667,7 +1851,8 @@
 							familyScore: (c.why && c.why.family) || 0,
 							rung: (c.why && c.why.rung) || 'NONE',
 							surnameKind: (c.why && c.why.surnameKind) || 'NONE',
-							runnerUpScore: c.score
+							probability: (c.probability != null && !isNaN(c.probability)) ? Number(c.probability).toFixed(3) : ((c.score != null && !isNaN(c.score)) ? Number(c.score).toFixed(3) : '0.000'),
+							runnerUpScore: c.score != null ? c.score.toFixed(3) : '0.000'
 						}));
 
 						r.formattedWhy = {
@@ -1687,7 +1872,7 @@
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
 								? why.familyMatches.join(', ')
 								: '',
-							runnerUps: r.status === 'MAYBE' ? runnerUps : [],
+							runnerUps: runnerUps,
 							reconciledNote: why.reconciledNote || ''
 						};
 					}
@@ -1735,10 +1920,13 @@
 
 				let runnerUpsHtml = '';
 				if (row.formattedWhy && row.formattedWhy.runnerUps && row.formattedWhy.runnerUps.length > 0) {
+					const sectionTitle = row.status === 'UN-MATCHED'
+						? 'Candidate Mentions Considered (Unmatched):'
+						: (row.status === 'MAYBE' ? 'Top Runner-Up Candidates (MAYBE review):' : 'Runner-Up Candidates:');
 					runnerUpsHtml = `
 						<div style="margin-top: 8px;">
 							<h5 style="font-size: 11px; text-transform: uppercase; color: #b45309; font-weight: 700; margin-bottom: 4px;">
-								Top Runner-Up Candidates (MAYBE review):
+								${sectionTitle}
 							</h5>
 							<div style="display: grid; gap: 6px;">
 								${row.formattedWhy.runnerUps.map((ru, ruIdx) => `
@@ -1747,7 +1935,7 @@
 											<span class="mono" style="color: #1d4ed8; font-weight: 700;">
 												#${ruIdx + 1} ${ru.mention_id} &mdash; ${ru.full_name}
 											</span>
-											<span class="badge badge-warning">Score: ${ru.runnerUpScore}</span>
+											<span class="badge badge-warning">Prob: ${ru.probability}</span>
 										</div>
 										<div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
 											<span class="score-chip chip-name">Name: ${ru.nameScore}</span>
@@ -1855,12 +2043,25 @@
 				const mentionIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
 				const personIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
 
+				const hitlVal = row.hitl_match || '-';
+				row.hitl_match = hitlVal;
+
+				const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
+				const hitlSelectHtml = `
+					<select class="hitl-select ${valClass}" data-index="${i}" title="Select HITL review decision">
+						<option value="-" ${hitlVal === '-' ? 'selected' : ''}>-</option>
+						<option value="MATCHED" ${hitlVal === 'MATCHED' ? 'selected' : ''}>MATCHED</option>
+						<option value="MAYBE" ${hitlVal === 'MAYBE' ? 'selected' : ''}>MAYBE</option>
+						<option value="UNMATCHED" ${hitlVal === 'UNMATCHED' ? 'selected' : ''}>UNMATCHED</option>
+					</select>
+				`;
+
 				return `
 					<tr class="row-clickable" data-index="${i}">
-						<td><span class="status-pill ${statusClass}">${row.status}</span></td>
-						<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
-						<td class="mono" style="font-weight: 700;">${row.probability != null ? row.probability.toFixed(3) : '-'}</td>
-						<td class="mono" style="font-weight: 700; color: #2563eb;">${row.score != null ? row.score.toFixed(3) : '0.000'}</td>
+						<td class="col-status"><span class="status-pill ${statusClass}">${row.status}</span></td>
+						<td class="col-why"><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+						<td class="col-prob mono" style="font-weight: 700;">${row.probability != null ? row.probability.toFixed(3) : '-'}</td>
+						<td class="col-hitl">${hitlSelectHtml}</td>
 						<td><strong>${nameDisplay}</strong></td>
 						<td class="mono">${birthDisplay}</td>
 						<td class="mono">${genderDisplay}</td>
@@ -1906,7 +2107,9 @@
 				if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
 				const $tbody = $('#tableBody');
 
-				if (!data || data.length === 0) {
+				const activeData = data || ((this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults);
+
+				if (!activeData || activeData.length === 0) {
 					$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found.</td></tr>');
 					$('#resultCountBadge').text('0 Rows');
 					this.currentFilteredResults = [];
@@ -1916,14 +2119,15 @@
 
 				const searchTerm = ($('#tableFilterInput').val() || '').toLowerCase().trim();
 
-				const filtered = data.filter(row => {
+				const filtered = activeData.filter(row => {
 					if (this.currentFilter !== 'ALL' && row.status !== this.currentFilter) return false;
 					if (!searchTerm) return true;
 					const candName = row.bestCandidate ? (row.bestCandidate.full_name || '') : '';
 					const vpName = row.person ? (row.person.full_name || '') : '';
 					const mid = row.bestCandidate ? (row.bestCandidate.mention_id || '') : '';
 					const pid = row.person ? (row.person.person_id || row.person.mention_id || '') : '';
-					const text = `${row.status} ${candName} ${vpName} ${mid} ${pid}`.toLowerCase();
+					const hitl = row.hitl_match || '';
+					const text = `${row.status} ${hitl} ${candName} ${vpName} ${mid} ${pid}`.toLowerCase();
 					return text.includes(searchTerm);
 				});
 
@@ -1936,7 +2140,8 @@
 					return;
 				}
 
-				$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows`);
+				const sampleSuffix = this.isSampleMode ? ' (Neyman 500 Sample)' : '';
+				$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows${sampleSuffix}`);
 
 				// Render initial 100 rows immediately for instant sub-10ms display
 				const initialCount = Math.min(100, filtered.length);
@@ -1961,26 +2166,29 @@
 
 			// Export to CSV for HITL Verification
 			exportToCsv() {
-				if (!this.matchedResults || this.matchedResults.length === 0) {
+				const dataset = (this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults;
+				if (!dataset || dataset.length === 0) {
 					alert('No matched results to export. Please run the matcher first.');
 					return;
 				}
 
 				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
 				const recordYear = $('#yearSelect').val() || '1860';
-				const filename = `HITL${recordYear}.csv`;
+				const filename = this.isSampleMode ? `HITL${recordYear}_Sample500.csv` : `HITL${recordYear}.csv`;
 
-				const exportData = this.matchedResults.map(r => {
+				const exportData = dataset.map(r => {
 					const cand = r.bestCandidate || {};
 					const vp = r.person || {};
 
 					// Format why field according to specification
 					const whyStr = JSON.stringify(r.formattedWhy || {});
+					const hitlMatch = r.hitl_match || '-';
+					const probVal = (r.probability != null && !isNaN(r.probability)) ? Number(r.probability).toFixed(3) : ((r.score != null && !isNaN(r.score)) ? Number(r.score).toFixed(3) : '0.000');
 
 					return {
+						hitl_match: hitlMatch,
 						status: r.status,
-						probability: r.probability != null ? r.probability.toFixed(3) : '0.000',
-						score: r.score != null ? r.score.toFixed(3) : '0.000',
+						probability: probVal,
 						full_name: `${cand.full_name || ''} : ${vp.full_name || ''}`,
 						birth_year: `${cand.birth_year || ''} : ${vp.birth_year || ''}`,
 						gender: `${cand.gender || ''} : ${vp.gender || ''}`,
@@ -2003,18 +2211,56 @@
 			}
 
 			initEventHandlers() {
-				$('.filter-tab').on('click', (e) => {
-					$('.filter-tab').removeClass('active');
+				$('#reviewModeBtn').on('click', (e) => {
+					this.isReviewMode = !this.isReviewMode;
+					$(e.currentTarget).toggleClass('active', this.isReviewMode);
+					$('#resultsTable').toggleClass('review-mode', this.isReviewMode);
+				});
+
+				$('#sampleCheckbox').on('change', (e) => {
+					this.isSampleMode = e.currentTarget.checked;
+					if (this.isSampleMode) {
+						if (!this.matchedResults || this.matchedResults.length === 0) {
+							alert('Please run the matcher first to generate results to sample.');
+							$(e.currentTarget).prop('checked', false);
+							this.isSampleMode = false;
+							return;
+						}
+						this.sampledResults = this.generateNeymanSample(500, 35);
+					} else {
+						this.sampledResults = null;
+					}
+					this.renderResultsTable();
+				});
+
+				$(document).on('change', '.hitl-select', (e) => {
+					const idx = $(e.currentTarget).data('index');
+					const newVal = e.currentTarget.value;
+					$(e.currentTarget).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
+					if (newVal !== '-') {
+						$(e.currentTarget).addClass(`val-${newVal}`);
+					}
+					if (this.currentFilteredResults && this.currentFilteredResults[idx]) {
+						this.currentFilteredResults[idx].hitl_match = newVal;
+					}
+				});
+
+				$(document).on('click', '.hitl-select', (e) => {
+					e.stopPropagation();
+				});
+
+				$('.filter-tab[data-filter]').on('click', (e) => {
+					$('.filter-tab[data-filter]').removeClass('active');
 					$(e.currentTarget).addClass('active');
 					this.currentFilter = $(e.currentTarget).data('filter');
-					this.renderResultsTable(this.matchedResults);
+					this.renderResultsTable();
 				});
 
 				let filterDebounce = null;
 				$('#tableFilterInput').on('input', () => {
 					if (filterDebounce) clearTimeout(filterDebounce);
 					filterDebounce = setTimeout(() => {
-						this.renderResultsTable(this.matchedResults);
+						this.renderResultsTable();
 					}, 120);
 				});
 
@@ -2029,8 +2275,8 @@
 				});
 
 				$(document).on('click', '.row-clickable', (e) => {
-					// Don't intercept if clicked directly on Why button
-					if ($(e.target).closest('.why-pill-btn').length > 0) return;
+					// Don't intercept if clicked directly on Why button or hitl select
+					if ($(e.target).closest('.why-pill-btn, .hitl-select').length > 0) return;
 
 					const idx = $(e.currentTarget).data('index');
 					$('#tableBody tr.row-clickable').removeClass('selected-row');
