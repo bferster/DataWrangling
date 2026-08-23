@@ -36,8 +36,7 @@
 		district
 		original_line
 		enumerator
-		enumerator (in the original_data object)
-		enumerator_date (original_data) 
+		enumerator_date
 		household_count
 		mention1 {}
 		mention2 {}
@@ -50,13 +49,13 @@
 		confidence	
 		scores {}
 		}
-	enumerator and enumerator_date are in the original_data object
 
 	For each row in mentions.csv {
 		if (source == county + ”-SS-“ + year), i.e. AUG-SS-1850 AND (head == TRUE)  {
 			- Add new row to table.`
 			- candidate_id = county + “-VP-SS-” + year + household_id (i.e. “AUG-VP-SS-1850-1234”.
 			- If there is more than one member in household, get number of people with same household_id and put in household_count after subtracting 1, else 0
+			- Extract enumerator and enumerator_date from the combined enumeration field separated by a colon (e.g. "JL:6.23" -> enumerator: "JL", enumerator_date: "6.23").
 			- add fields described above to the row.
 			}
 		}
@@ -88,15 +87,15 @@
 	birth_year
 	district
 	original_line
-	enumerator (in the original_data object)
-	enumerator_date (original_data) 
+	enumerator
+	enumerator_date
 	}
 
 	For each row in mentions.csv {
 		- If source == county+”-CN-“+ record_year (I.e. AUG-CN-1850)
 		AND birth_year is at least 12 years earlier that record_year
 		AND norm_race == “W”,
-		Add a row to censusCandidates using the fields mentioned above 
+		Extract enumerator and enumerator_date from enumeration (e.g. "JL:6.23") and add a row to censusCandidates using the fields mentioned above 
 		}
 
 *Find top schedule to census matches*

@@ -56,7 +56,6 @@
 
 	- The source_year field is set to 1850 or 1860.
 	- Source is set to county-SS-source_year (i.e ALB-SS-1880)
-	- The original_data field is set to the entire row as a JSONB object.
 	- The confidence field is set to 0.83 for both assertions and mentions.	
 	- Apply the normalization as described in @Normalize.md.
 	- Add mention to mentions table.

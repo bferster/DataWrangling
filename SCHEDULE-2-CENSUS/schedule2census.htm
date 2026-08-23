@@ -1102,6 +1102,22 @@
 			return 0;
 		}
 
+		function parseEnumeration(enumerationVal, fallbackEnumerator, fallbackDate) {
+			let enumerator = fallbackEnumerator || '';
+			let enumerator_date = fallbackDate || '';
+			if (enumerationVal !== undefined && enumerationVal !== null && String(enumerationVal).trim() !== '') {
+				const str = String(enumerationVal).trim();
+				const colonIdx = str.indexOf(':');
+				if (colonIdx !== -1) {
+					enumerator = str.slice(0, colonIdx).trim();
+					enumerator_date = str.slice(colonIdx + 1).trim();
+				} else {
+					enumerator = str;
+				}
+			}
+			return { enumerator, enumerator_date };
+		}
+
 		function parseOriginalData(orig) {
 			if (!orig) return {};
 			if (typeof orig === 'object') return orig;
@@ -1245,10 +1261,10 @@
 				for (let i = 0; i < rows.length; i++) {
 					const r = rows[i];
 					if (r.source === ssSource && isHeadTrue(r.head)) {
-						const od = parseOriginalData(r.original_data);
 						const hh = r.household_id || '';
 						const totalInHousehold = householdCounts[hh] || 1;
 						const household_count = Math.max(0, totalInHousehold - 1);
+						const { enumerator, enumerator_date } = parseEnumeration(r.enumeration, r.enumerator, r.enumerator_date);
 
 						const rowObj = {
 							candidate_id: `${county}-VP-SS-${record_year}-${hh}`,
@@ -1261,10 +1277,10 @@
 							nysiis_last_name: r.nysiis_last_name || '',
 							metaphone_last_name: r.metaphone_last_name || '',
 							head: r.head || 't',
-							district: od.district || r.district || '',
-							original_line: od.original_line || r.original_line || '',
-							enumerator: od.enumerator || r.enumerator || '',
-							enumerator_date: od.enumerator_date || r.enumerator_date || '',
+							district: r.district || '',
+							original_line: r.original_line || '',
+							enumerator: enumerator,
+							enumerator_date: enumerator_date,
 							household_count: household_count,
 							birth_year: '',
 							matched_name: '',
@@ -1289,7 +1305,7 @@
 						const by = parseInt(r.birth_year, 10);
 						const race = (r.norm_race || r.race || '').trim().toUpperCase();
 						if (!isNaN(by) && (yrNum - by >= 12) && race === 'W') {
-							const od = parseOriginalData(r.original_data);
+							const { enumerator, enumerator_date } = parseEnumeration(r.enumeration, r.enumerator, r.enumerator_date);
 							censusCandidates.push({
 								mention_id: r.mention_id || '',
 								full_name: r.full_name || '',
@@ -1301,10 +1317,10 @@
 								head: r.head || '',
 								metaphone_last_name: r.metaphone_last_name || '',
 								birth_year: by,
-								district: od.district || r.district || '',
-								original_line: od.original_line || r.original_line || '',
-								enumerator: od.enumerator || r.enumerator || '',
-								enumerator_date: od.enumerator_date || r.enumerator_date || ''
+								district: r.district || '',
+								original_line: r.original_line || '',
+								enumerator: enumerator,
+								enumerator_date: enumerator_date
 							});
 						}
 					}
