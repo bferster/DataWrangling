@@ -127,10 +127,19 @@
 
 *Save as CSV file*
 
-	- Columns to save: mention_id, full_name, birth_year, mention1, mention2, mention3
-	- (Exclude candidate_id, first_name, middle_name, last_name, norm_first_name, nysiis_last_name, metaphone_last_name, head, district, original_line, enumerator, enumerator_date, household_count)
+	- Columns to save: hitl_match, enslaver_id, full_name, birth_year, first_name, middle_name, last_name, mention_id, probability, mention1, mention2, mention3, original_line
 	- When saving mention1, mention2, and mention3 fields, encode each object as JSON (e.g. {} if no match).
-	- Save enslavers table to disc as county + “-VP-SS-“ + year + “.csv” (i.e “AUG-VP-SS-1850.csv”) 
+	- Save enslavers table to disc as county + “-VP-SS-“ + year + “.csv” (i.e “AUG-VP-SS-1850.csv”) or “..._Sample500.csv” if sample mode is active.
 
+**Review view mode**
 
+	- Add a new button to the results display control called "Review"
+	- If that is active, hide the why, probability, and score columns/chips, otherwise show them.
+	- Add a pulldown to set HITL review mode to select "-" "MATCHED", "MAYBE", "UNMATCHED". (store in hitl_match field in output csv)
+	- Add checkbox for "Sample" to show 500 sampled rows using Neyman Allocation:
 
+		1. Stratify. It slices the candidates into 8 bins by match_probability, with bin boundaries at key evaluation thresholds (0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99). Bin H is the 0.01–0.10 junk band; bin A is the 0.99+ near-certain band.
+
+		2. Allocate. It decides how many of the 500-sample budget to draw from each bin using Neyman allocation — sample more where the population is large and where the match rate is near 50% (most uncertain), fewer where it's lopsided. It uses each bin's mean posterior (pbar) as a stand-in for the true match rate, and enforces a floor of 35 per bin so no stratum is starved.
+
+		3. Draw. Simple random sample within each bin, shuffle them together, and allow the reviewer to evaluate without being anchored by model scores.

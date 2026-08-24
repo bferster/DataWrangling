@@ -248,11 +248,117 @@
 			background: #047857;
 		}
 
+		.btn-secondary {
+			background: var(--accent-purple);
+			color: white;
+			box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+		}
+
+		.btn-secondary:hover:not(:disabled) {
+			background: #6d28d9;
+		}
+
 		.btn:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
 			transform: none !important;
 			box-shadow: none !important;
+		}
+
+		/* Filter Tabs & Review View Mode Styles */
+		.table-actions {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-wrap: wrap;
+		}
+
+		.filter-tabs {
+			display: flex;
+			gap: 4px;
+			background: #f1f5f9;
+			padding: 2px;
+			border-radius: var(--radius-sm);
+			border: 1px solid var(--border-color);
+		}
+
+		.filter-tab {
+			padding: 3px 8px;
+			border-radius: 3px;
+			font-size: 11px;
+			font-weight: 600;
+			color: var(--text-secondary);
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			transition: all 0.15s ease;
+		}
+
+		.filter-tab:hover {
+			color: var(--text-primary);
+			background: rgba(255, 255, 255, 0.6);
+		}
+
+		.filter-tab.active {
+			background: var(--bg-card);
+			color: var(--accent-primary);
+			font-weight: 700;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		.filter-tab.review-tab-btn.active {
+			background-color: var(--accent-purple);
+			color: #ffffff;
+			box-shadow: 0 1px 4px rgba(124, 58, 237, 0.35);
+		}
+
+		.col-hitl {
+			display: none;
+		}
+
+		.review-mode .col-status,
+		.review-mode .col-why,
+		.review-mode .col-prob,
+		.review-mode .scores-raw-array,
+		.review-mode .score-chip,
+		.review-mode .mention-block .badge {
+			display: none !important;
+		}
+
+		.review-mode .col-hitl {
+			display: table-cell !important;
+		}
+
+		.hitl-select {
+			padding: 3px 8px;
+			font-size: 11px;
+			font-weight: 700;
+			border-radius: 4px;
+			height: 26px;
+			border: 1px solid #cbd5e1;
+			background-color: #ffffff;
+			cursor: pointer;
+			outline: none;
+			font-family: inherit;
+			transition: all 0.15s ease;
+		}
+
+		.hitl-select.val-MATCHED {
+			background-color: #dcfce7;
+			color: #15803d;
+			border-color: #86efac;
+		}
+
+		.hitl-select.val-MAYBE {
+			background-color: #fef3c7;
+			color: #b45309;
+			border-color: #fcd34d;
+		}
+
+		.hitl-select.val-UNMATCHED {
+			background-color: #f1f5f9;
+			color: #64748b;
+			border-color: #cbd5e1;
 		}
 
 		/* Stats Right Side Grid */
@@ -717,6 +823,16 @@
 							</svg>
 							Save CSV
 						</button>
+						<button id="loadHitlBtn" class="btn btn-secondary" style="flex: 1;">
+							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+								<path
+									d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+								<path
+									d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+							</svg>
+							Load HITL CSV
+						</button>
+						<input type="file" id="hitlFileInput" accept=".csv" style="display: none;">
 					</div>
 				</div>
 
@@ -770,6 +886,22 @@
 					<span id="resultCountBadge" class="badge badge-primary">0 Rows</span>
 				</h2>
 				<div class="table-actions">
+					<div class="filter-tabs">
+						<button class="filter-tab active" data-filter="ALL">All</button>
+						<button class="filter-tab" data-filter="MATCH">Matches</button>
+						<button class="filter-tab" data-filter="UN-MATCHED">Un-Matched</button>
+						<span
+							style="width: 1px; height: 16px; background: #cbd5e1; margin: 0 3px; align-self: center;"></span>
+						<button id="reviewModeBtn" class="filter-tab review-tab-btn"
+							title="Toggle HITL Review Mode (hide status/score, show review dropdowns)">Review</button>
+					</div>
+					<label class="sample-checkbox-label"
+						title="Show 500 sampled rows using Neyman Stratified Allocation across 8 probability bins"
+						style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none;">
+						<input type="checkbox" id="sampleCheckbox"
+							style="cursor: pointer; accent-color: var(--accent-purple);">
+						<span>Sample</span>
+					</label>
 					<input type="text" id="tableFilterInput" class="search-input"
 						placeholder="Filter by enslaver, matched name, district, ID...">
 				</div>
@@ -779,20 +911,22 @@
 				<table id="resultsTable">
 					<thead>
 						<tr>
+							<th class="col-num" style="width: 44px; text-align: right;">#</th>
 							<th>Candidate ID</th>
-							<th>Why</th>
+							<th class="col-why">Why</th>
+							<th class="col-prob">Probability</th>
+							<th class="col-hitl">HITL Match</th>
 							<th>Enslaver Name</th>
 							<th>District</th>
 							<th>Line</th>
 							<th>Enumerator / Date</th>
 							<th>Slaves</th>
-							<th>Probability</th>
 							<th>Matched Census Mentions & Scores [Name, Dist, Head, Date]</th>
 						</tr>
 					</thead>
 					<tbody id="tableBody">
 						<tr>
-							<td colspan="9">
+							<td colspan="11">
 								<div class="empty-state">
 									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1035,10 +1169,19 @@
 
 		// State management
 		let rawMentions = [];
+		let rawSsMentions = [];
+		let rawCnMentions = [];
 		let enslaverTable = [];
 		let censusCandidates = [];
 		let nameMatcher = new window.Match();
 		let currentTableName = '';
+		let currentFilteredResults = [];
+		let currentFilter = 'ALL';
+		let isReviewMode = false;
+		let isSampleMode = false;
+		let sampledResults = null;
+		let renderedEnslaverCount = 0;
+		let bgEnslaverRenderTimer = null;
 
 		function MatchName(objA, objB) {
 			return nameMatcher.MatchName(objA, objB);
@@ -1134,6 +1277,8 @@
 			return (s === 't' || s === 'true' || s === '1' || s === 'y' || s === 'yes');
 		}
 
+		let loadedHitlData = null;
+
 		function updateProgress(pct, message) {
 			$('#statusPanel').show();
 			$('#progressBar').css('width', pct + '%');
@@ -1193,8 +1338,123 @@
 						// try next path representation
 					}
 				}
-				throw new Error('Could not load mentions.csv automatically from COMMON/mentions.csv. Please select mentions.csv using the "Source CSV" file picker above.');
 			}
+		}
+
+		function getProb(row) {
+			if (row.probability != null && !isNaN(row.probability)) return Number(row.probability);
+			if (row.mention1 && row.mention1.probability != null && !isNaN(row.mention1.probability)) return Number(row.mention1.probability);
+			if (row._fullMatches && row._fullMatches.length > 0 && row._fullMatches[0].probability != null && !isNaN(row._fullMatches[0].probability)) {
+				return Number(row._fullMatches[0].probability);
+			}
+			if (row.mention1 && row.mention1.confidence != null && !isNaN(row.mention1.confidence)) {
+				return Math.min(1.0, Math.max(0.0, Number(row.mention1.confidence)));
+			}
+			return 0.0;
+		}
+
+		// Neyman Stratified Allocation across 8 threshold-defined probability bins
+		function generateNeymanSample(targetSize = 500, floor = 35) {
+			if (!enslaverTable || enslaverTable.length === 0) return [];
+			if (enslaverTable.length <= targetSize) return [...enslaverTable];
+
+			// 1. Stratify candidates into 8 evaluation threshold bins
+			const BINS = [
+				{ id: 'A', name: '0.99+', min: 0.99, max: 1.01 },
+				{ id: 'B', name: '0.95-0.99', min: 0.95, max: 0.99 },
+				{ id: 'C', name: '0.90-0.95', min: 0.90, max: 0.95 },
+				{ id: 'D', name: '0.75-0.90', min: 0.75, max: 0.90 },
+				{ id: 'E', name: '0.50-0.75', min: 0.50, max: 0.75 },
+				{ id: 'F', name: '0.25-0.50', min: 0.25, max: 0.50 },
+				{ id: 'G', name: '0.10-0.25', min: 0.10, max: 0.25 },
+				{ id: 'H', name: '0.01-0.10', min: 0.00, max: 0.10 }
+			];
+
+			const strata = BINS.map(b => ({ ...b, items: [] }));
+
+			for (const row of enslaverTable) {
+				const p = getProb(row);
+				let placed = false;
+				for (const s of strata) {
+					if (p >= s.min && p < s.max) {
+						s.items.push(row);
+						placed = true;
+						break;
+					}
+				}
+				if (!placed) {
+					strata[strata.length - 1].items.push(row);
+				}
+			}
+
+			// 2. Allocate sample budget using Neyman optimal allocation:
+			// w_h = N_h * sqrt(pbar_h * (1 - pbar_h)) with minimum floor
+			let totalWeight = 0;
+			let allocatedTotal = 0;
+			for (const s of strata) {
+				const N_h = s.items.length;
+				s.N_h = N_h;
+				if (N_h === 0) {
+					s.pbar = 0;
+					s.sigma = 0;
+					s.weight = 0;
+					s.alloc = 0;
+					continue;
+				}
+				const sumP = s.items.reduce((acc, r) => acc + getProb(r), 0);
+				s.pbar = Math.max(0.01, Math.min(0.99, sumP / N_h));
+				s.sigma = Math.sqrt(s.pbar * (1 - s.pbar));
+				s.weight = N_h * s.sigma;
+				s.floor = Math.min(N_h, floor);
+				s.alloc = s.floor;
+				allocatedTotal += s.floor;
+				totalWeight += s.weight;
+			}
+
+			// Proportional distribution of remaining budget by Neyman weight
+			const remainingBudget = Math.max(0, targetSize - allocatedTotal);
+			if (totalWeight > 0 && remainingBudget > 0) {
+				let extraAllocated = 0;
+				for (const s of strata) {
+					if (s.N_h <= s.alloc || s.weight <= 0) continue;
+					const extra = Math.min(s.N_h - s.alloc, Math.round(remainingBudget * (s.weight / totalWeight)));
+					s.alloc += extra;
+					extraAllocated += extra;
+				}
+				let diff = targetSize - (allocatedTotal + extraAllocated);
+				if (diff !== 0) {
+					const available = strata.filter(s => s.alloc < s.N_h);
+					available.sort((a, b) => b.weight - a.weight);
+					for (let i = 0; i < Math.abs(diff) && available.length > 0; i++) {
+						const s = available[i % available.length];
+						if (diff > 0 && s.alloc < s.N_h) {
+							s.alloc += 1;
+						} else if (diff < 0 && s.alloc > s.floor) {
+							s.alloc -= 1;
+						}
+					}
+				}
+			}
+
+			// 3. Draw random samples within each bin without replacement
+			const sampled = [];
+			for (const s of strata) {
+				if (s.alloc <= 0 || s.items.length === 0) continue;
+				const pool = [...s.items];
+				for (let i = pool.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[pool[i], pool[j]] = [pool[j], pool[i]];
+				}
+				sampled.push(...pool.slice(0, s.alloc));
+			}
+
+			// Shuffle final combined sample
+			for (let i = sampled.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[sampled[i], sampled[j]] = [sampled[j], sampled[i]];
+			}
+
+			return sampled;
 		}
 
 		// Main matching workflow
@@ -1206,6 +1466,10 @@
 			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
+			isSampleMode = false;
+			sampledResults = null;
+			$('#sampleCheckbox').prop('checked', false);
+
 			currentTableName = `${county}-VP-SS-${record_year}`;
 			$('#statTableTarget').text(`Target: ${currentTableName}`);
 
@@ -1215,7 +1479,7 @@
 
 			$('#tableBody').html(`
 				<tr>
-					<td colspan="9">
+					<td colspan="11">
 						<div class="empty-state" style="padding: 40px 20px;">
 							<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
 							<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
@@ -1262,12 +1526,14 @@
 					const r = rows[i];
 					if (r.source === ssSource && isHeadTrue(r.head)) {
 						const hh = r.household_id || '';
+						const cleanHh = hh.replace(/^HS\d*-?/i, '').replace(/^HS-?/i, '');
 						const totalInHousehold = householdCounts[hh] || 1;
 						const household_count = Math.max(0, totalInHousehold - 1);
 						const { enumerator, enumerator_date } = parseEnumeration(r.enumeration, r.enumerator, r.enumerator_date);
 
 						const rowObj = {
-							candidate_id: `${county}-VP-SS-${record_year}-${hh}`,
+							candidate_id: `${county}-SS-${record_year}-${cleanHh}`,
+							household_id: hh,
 							mention_id: r.mention_id || '',
 							full_name: r.full_name || '',
 							first_name: r.first_name || '',
@@ -1284,6 +1550,8 @@
 							household_count: household_count,
 							birth_year: '',
 							matched_name: '',
+							probability: null,
+							hitl_match: '-',
 							mention1: {},
 							mention2: {},
 							mention3: {}
@@ -1293,9 +1561,6 @@
 				}
 
 				// Step 3: Extract Census Candidates Table
-				// Filter: source == county + "-CN-" + record_year
-				// AND birth_year is at least 12 years earlier than record_year
-				// AND norm_race == "W"
 				censusCandidates = [];
 				const yrNum = parseInt(record_year, 10);
 
@@ -1499,7 +1764,7 @@
 									name: match.scores.name,
 									district: match.scores.district,
 									head: match.scores.head,
-date: match.scores.date
+									date: match.scores.date
 								}
 							};
 						}
@@ -1514,6 +1779,12 @@ date: match.scores.date
 							? candidateMatches[0]._candidate.birth_year
 							: '';
 						enslaver._fullMatches = candidateMatches;
+
+						const topProb = (candidateMatches.length > 0 && candidateMatches[0].probability !== undefined)
+							? candidateMatches[0].probability
+							: null;
+						enslaver.probability = topProb;
+						enslaver.hitl_match = '-';
 
 						const linkedCount = [enslaver.mention1, enslaver.mention2, enslaver.mention3].filter(m => m && m.mention_id).length;
 						if (linkedCount > 0) {
@@ -1537,6 +1808,9 @@ date: match.scores.date
 				$('#statTotalMentions').text(totalMentionsLinked.toLocaleString());
 
 				updateProgress(98, 'Displaying results...');
+				if (loadedHitlData) {
+					applyLoadedHitl(enslaverTable);
+				}
 				await renderResultsTable(enslaverTable);
 				$('#downloadBtn').prop('disabled', false);
 
@@ -1583,19 +1857,61 @@ date: match.scores.date
 				return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 			}
 
+			const currYear = parseInt($('#yearSelect').val()) || 1850;
+			// Unpack original_data and flatten fields for every row in window
+			const unpackedSlice = win.slice.map(r => {
+				if (!r || typeof r !== 'object') return {};
+				let orig = {};
+				if (r.original_data) {
+					if (typeof r.original_data === 'string') {
+						try {
+							orig = JSON.parse(r.original_data);
+						} catch (e) { }
+					} else if (typeof r.original_data === 'object') {
+						orig = r.original_data;
+					}
+				}
+				const merged = Object.assign({}, orig, r);
+				delete merged.original_data;
+				for (const k of Object.keys(orig)) {
+					if ((merged[k] === undefined || merged[k] === null || merged[k] === '') && orig[k] !== undefined && orig[k] !== null && orig[k] !== '') {
+						merged[k] = orig[k];
+					}
+				}
+
+				// Ensure age is populated if birth_year exists, or birth_year if age exists
+				if (merged.age === undefined || merged.age === null || merged.age === '') {
+					if (merged.birth_year != null && merged.birth_year !== '') {
+						const by = parseInt(merged.birth_year);
+						if (!isNaN(by)) {
+							merged.age = Math.max(0, currYear - by);
+						}
+					}
+				} else if (merged.birth_year === undefined || merged.birth_year === null || merged.birth_year === '') {
+					const ag = parseInt(merged.age);
+					if (!isNaN(ag)) {
+						merged.birth_year = currYear - ag;
+					}
+				}
+
+				return merged;
+			});
+
 			// Gather all unique keys from the rows excluding original_data, source, source_year, norm_occupation, legal_status, phonetic, and internal fields
-			const allKeys = [];
 			const seen = new Set([
 				'original_data',
+				'mentions',
+				'confidence',
 				'source',
 				'source_year',
+				'norm_first_name',
 				'norm_occupation',
-				'legal_status',
+				'norm_race',
 				'nysiis_last_name',
 				'metaphone_last_name',
 				'narrative',
 				'narrrative',
-				'norm_race',
+				'legal_status',
 				'_candidate',
 				'_fullMatches',
 				'scores',
@@ -1603,27 +1919,44 @@ date: match.scores.date
 				'formattedWhy',
 				'allCandidates'
 			]);
-			for (const r of win.slice) {
+
+			const collectedKeys = new Set();
+			for (const r of unpackedSlice) {
 				if (r && typeof r === 'object') {
 					for (const k of Object.keys(r)) {
 						if (!seen.has(k) && !k.startsWith('_')) {
-							seen.add(k);
-							allKeys.push(k);
+							collectedKeys.add(k);
 						}
 					}
 				}
 			}
 
+			// Preferred standard ordering for census/source columns
+			const PREFERRED_ORDER = [
+				'person_id', 'mention_id', 'full_name', 'first_name', 'middle_name', 'last_name',
+				'age', 'birth_year', 'birth_date', 'gender', 'race', 'relation', 'marital', 'occupation',
+				'district', 'dwelling', 'family', 'sheet', 'line', 'original_line', 'head', 'household_id', 'family_id',
+				'birth_place', 'fathers_birthplace', 'mothers_birthplace',
+				'years_married', 'number_of_children', 'number_of_living_children',
+				'enumerator', 'enumerator_date', 'real_estate', 'personal_estate', 'read_write', 'deaf_dumb'
+			];
+
+			const orderMap = new Map(PREFERRED_ORDER.map((k, i) => [k, i]));
+			const allKeys = Array.from(collectedKeys).sort((a, b) => {
+				const posA = orderMap.has(a) ? orderMap.get(a) : 999;
+				const posB = orderMap.has(b) ? orderMap.get(b) : 999;
+				if (posA !== posB) return posA - posB;
+				return a.localeCompare(b);
+			});
+
 			const theadHtml = `
 				<tr>
-					<th style="width: 44px; text-align: right; position: sticky; left: 0; z-index: 3; background: #f1f5f9; box-shadow: 1px 0 0 #cbd5e1;">#</th>
 					${allKeys.map(k => `<th>${k}</th>`).join('')}
 				</tr>
 			`;
 
-			const tbodyHtml = win.slice.map((r, relIdx) => {
+			const tbodyHtml = unpackedSlice.map((r, relIdx) => {
 				const isCenter = relIdx === win.centerRelIdx;
-				const lineNum = win.startIdx + relIdx + 1;
 				const centerAttr = isCenter ? `id="${centerIdPrefix}-${paneId}" class="highlight-center"` : '';
 
 				const cellsHtml = allKeys.map(k => {
@@ -1635,7 +1968,6 @@ date: match.scores.date
 
 				return `
 					<tr ${centerAttr}>
-						<td style="color: var(--text-muted); width: 44px; text-align: right; position: sticky; left: 0; z-index: 1; background: ${isCenter ? '#fef08a' : '#f8fafc'}; font-weight: 700; box-shadow: 1px 0 0 #cbd5e1;">${lineNum}</td>
 						${cellsHtml}
 					</tr>
 				`;
@@ -1661,9 +1993,10 @@ date: match.scores.date
 		function renderSsContextWindowHtml(row, paneId) {
 			const targetMid = row.mention_id;
 			const targetHh = row.candidate_id ? row.candidate_id.split('-').pop() : '';
+			const rawHh = row.household_id || '';
 			return renderSourceContextWindowHtml(
 				rawSsMentions,
-				(m) => m.mention_id === targetMid || (targetHh && m.household_id === targetHh),
+				(m) => m.mention_id === targetMid || (rawHh && m.household_id === rawHh) || (targetHh && m.household_id && (m.household_id === targetHh || m.household_id.replace(/^HS\d*-?/i, '').replace(/^HS-?/i, '') === targetHh)),
 				'Original Slave Schedule (SS) Table',
 				paneId,
 				'No Slave Schedule context rows loaded.',
@@ -1799,9 +2132,6 @@ date: match.scores.date
 			}, 40);
 		}
 
-		let renderedEnslaverCount = 0;
-		let bgEnslaverRenderTimer = null;
-
 		// Fast HTML builder for single enslaver row
 		function renderEnslaverRowHtml(row, i, threshold) {
 			const activeMentions = [];
@@ -1853,9 +2183,11 @@ date: match.scores.date
 
 			const enumText = [row.enumerator, row.enumerator_date].filter(Boolean).join(' / ') || '<span style="color: var(--text-muted);">-</span>';
 
-			const topProb = (row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
-				? row.mention1.probability
-				: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null);
+			const topProb = (row.probability !== null && row.probability !== undefined)
+				? row.probability
+				: ((row.mention1 && row.mention1.probability !== null && row.mention1.probability !== undefined)
+					? row.mention1.probability
+					: (row._fullMatches && row._fullMatches[0] && row._fullMatches[0].probability !== undefined ? row._fullMatches[0].probability : null));
 
 			let probPillHtml = '<span style="color: var(--text-muted); font-size: 11px;">-</span>';
 			if (topProb !== null && topProb !== undefined) {
@@ -1866,10 +2198,25 @@ date: match.scores.date
 				probPillHtml = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-weight:700;font-size:11px;padding:2px 6px;border-radius:9999px;">${topProb}</span>`;
 			}
 
+			const hitlVal = row.hitl_match || '-';
+			row.hitl_match = hitlVal;
+			const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
+			const hitlSelectHtml = `
+				<select class="hitl-select ${valClass}" data-index="${i}" title="Select HITL review decision">
+					<option value="-" ${hitlVal === '-' ? 'selected' : ''}>-</option>
+					<option value="MATCHED" ${hitlVal === 'MATCHED' ? 'selected' : ''}>MATCHED</option>
+					<option value="MAYBE" ${hitlVal === 'MAYBE' ? 'selected' : ''}>MAYBE</option>
+					<option value="UNMATCHED" ${hitlVal === 'UNMATCHED' ? 'selected' : ''}>UNMATCHED</option>
+				</select>
+			`;
+
 			return `
 				<tr class="row-clickable" data-index="${i}">
+					<td class="col-num mono" style="color: var(--text-muted); font-size: 11px; text-align: right; font-weight: 600; width: 44px;">${i + 1}</td>
 					<td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
-					<td><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+					<td class="col-why"><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
+					<td class="col-prob" style="text-align: center;">${probPillHtml}</td>
+					<td class="col-hitl">${hitlSelectHtml}</td>
 					<td>
 						<strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
 						${row.matched_name ? `<div style="font-size: 10px; color: #059669; font-weight: 600;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
@@ -1878,7 +2225,6 @@ date: match.scores.date
 					<td>${row.original_line || '-'}</td>
 					<td>${enumText}</td>
 					<td><span class="badge ${row.household_count > 0 ? 'badge-primary' : 'badge-warning'}">${row.household_count}</span></td>
-					<td style="text-align: center;">${probPillHtml}</td>
 					<td class="mentions-cell">${mentionsHtml}</td>
 				</tr>
 			`;
@@ -1886,17 +2232,17 @@ date: match.scores.date
 
 		// Append next batch of rows via fast insertAdjacentHTML
 		function appendEnslaverRowsBatch(count = 200) {
-			if (!enslaverTable || renderedEnslaverCount >= enslaverTable.length) return;
+			if (!currentFilteredResults || renderedEnslaverCount >= currentFilteredResults.length) return;
 			const rawVal = $('#thresholdInput').val();
 			const parsedNum = parseFloat(rawVal);
 			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
 			const start = renderedEnslaverCount;
-			const end = Math.min(start + count, enslaverTable.length);
+			const end = Math.min(start + count, currentFilteredResults.length);
 			let batchHtml = '';
 			for (let i = start; i < end; i++) {
-				batchHtml += renderEnslaverRowHtml(enslaverTable[i], i, threshold);
+				batchHtml += renderEnslaverRowHtml(currentFilteredResults[i], i, threshold);
 			}
 			const tbody = document.getElementById('tableBody');
 			if (tbody) {
@@ -1909,9 +2255,9 @@ date: match.scores.date
 		function scheduleEnslaverBackgroundRender() {
 			if (bgEnslaverRenderTimer) cancelAnimationFrame(bgEnslaverRenderTimer);
 			const renderNext = () => {
-				if (enslaverTable && renderedEnslaverCount < enslaverTable.length) {
+				if (currentFilteredResults && renderedEnslaverCount < currentFilteredResults.length) {
 					appendEnslaverRowsBatch(250);
-					if (renderedEnslaverCount < enslaverTable.length) {
+					if (renderedEnslaverCount < currentFilteredResults.length) {
 						bgEnslaverRenderTimer = requestAnimationFrame(renderNext);
 					}
 				}
@@ -1924,9 +2270,12 @@ date: match.scores.date
 			if (bgEnslaverRenderTimer) cancelAnimationFrame(bgEnslaverRenderTimer);
 			const $tbody = $('#tableBody');
 
-			if (!data || data.length === 0) {
-				$tbody.html('<tr><td colspan="9" class="empty-state">No matching enslaver records found.</td></tr>');
+			const activeData = data || ((isSampleMode && sampledResults) ? sampledResults : enslaverTable);
+
+			if (!activeData || activeData.length === 0) {
+				$tbody.html('<tr><td colspan="11" class="empty-state">No matching enslaver records found.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
+				currentFilteredResults = [];
 				renderedEnslaverCount = 0;
 				return;
 			}
@@ -1936,13 +2285,43 @@ date: match.scores.date
 			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
-			$('#resultCountBadge').text(`${data.length.toLocaleString()} Rows`);
+			const searchTerm = ($('#tableFilterInput').val() || '').toLowerCase().trim();
+
+			const filtered = activeData.filter(row => {
+				const hasMatch = (row.mention1 && row.mention1.mention_id) || (row._fullMatches && row._fullMatches.length > 0);
+				if (currentFilter === 'MATCH' && !hasMatch) return false;
+				if (currentFilter === 'UN-MATCHED' && hasMatch) return false;
+				if (!searchTerm) return true;
+
+				const candId = (row.candidate_id || '').toLowerCase();
+				const fullName = (row.full_name || '').toLowerCase();
+				const matchedName = (row.matched_name || '').toLowerCase();
+				const district = (row.district || '').toLowerCase();
+				const origLine = (row.original_line || '').toLowerCase();
+				const enumerator = (row.enumerator || '').toLowerCase();
+				const mentionId = (row.mention_id || '').toLowerCase();
+				const hitl = (row.hitl_match || '').toLowerCase();
+				const text = `${candId} ${fullName} ${matchedName} ${district} ${origLine} ${enumerator} ${mentionId} ${hitl}`;
+				return text.includes(searchTerm);
+			});
+
+			currentFilteredResults = filtered;
+
+			if (filtered.length === 0) {
+				$tbody.html('<tr><td colspan="11" class="empty-state">No matching records found for active filters.</td></tr>');
+				$('#resultCountBadge').text('0 Rows');
+				renderedEnslaverCount = 0;
+				return;
+			}
+
+			const sampleSuffix = isSampleMode ? ' (Neyman 500 Sample)' : '';
+			$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows${sampleSuffix}`);
 
 			// Render initial 100 rows immediately for instant display
-			const initialCount = Math.min(100, data.length);
+			const initialCount = Math.min(100, filtered.length);
 			let initialHtml = '';
 			for (let i = 0; i < initialCount; i++) {
-				initialHtml += renderEnslaverRowHtml(data[i], i, threshold);
+				initialHtml += renderEnslaverRowHtml(filtered[i], i, threshold);
 			}
 			$tbody.html(initialHtml);
 			renderedEnslaverCount = initialCount;
@@ -1951,39 +2330,41 @@ date: match.scores.date
 			// Automatically select first row to populate Examine Sources
 			const firstTr = $tbody.find('tr.row-clickable').first();
 			firstTr.addClass('selected-row');
-			updateExamineSourcesSection(data[0], 0);
+			updateExamineSourcesSection(filtered[0], 0);
 
 			// Stream remaining rows smoothly in background chunks
-			if (renderedEnslaverCount < data.length) {
+			if (renderedEnslaverCount < filtered.length) {
 				scheduleEnslaverBackgroundRender();
 			}
 		}
 
 		function exportToCsv() {
-			if (!enslaverTable || enslaverTable.length === 0) {
+			const dataset = (isSampleMode && sampledResults) ? sampledResults : enslaverTable;
+			if (!dataset || dataset.length === 0) {
 				alert('No data to export. Please run matching first.');
 				return;
 			}
 
 			const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
 			const record_year = $('#yearSelect').val() || '1850';
-			const filename = `${county}-VP-SS-${record_year}.csv`;
+			const filename = isSampleMode ? `${county}-VP-SS-${record_year}_Sample500.csv` : `${county}-VP-SS-${record_year}.csv`;
 
-			const exportData = enslaverTable.map(row => {
-				const censusMentionId = (row.mention1 && row.mention1.mention_id) ? row.mention1.mention_id : '';
+			const exportData = dataset.map(row => {
+				const censusMentionId = (row.mention1 && row.mention1.mention_id)
+					? row.mention1.mention_id
+					: ((row._fullMatches && row._fullMatches[0]) ? row._fullMatches[0].mention_id : '');
+				const hitlMatch = row.hitl_match || '-';
+				const matchedName = row.matched_name || ((row._fullMatches && row._fullMatches[0]) ? row._fullMatches[0].matched_name : '');
+				const hasMatch = (row.mention1 && row.mention1.mention_id) || (row._fullMatches && row._fullMatches.length > 0);
+				const status = row.status || (hasMatch ? 'MATCH' : 'UNMATCHED');
 
 				return {
-					enslaver_id: row.mention_id,
-					full_name: row.full_name,
-					birth_year: row.birth_year || '',
-					first_name: row.first_name,
-					middle_name: row.middle_name,
-					last_name: row.last_name,
-					mention_id: censusMentionId,
-					mention1: row.mention1 && row.mention1.mention_id ? JSON.stringify(row.mention1) : '',
-					mention2: row.mention2 && row.mention2.mention_id ? JSON.stringify(row.mention2) : '',
-					mention3: row.mention3 && row.mention3.mention_id ? JSON.stringify(row.mention3) : '',
-					original_line: row.original_line
+					hitl_match: hitlMatch,
+					status: status,
+					person_id: row.candidate_id || row.mention_id || '',
+					mention_id: censusMentionId || '',
+					person_full_name: row.full_name || `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+					mention_full_name: matchedName || ''
 				};
 			});
 
@@ -1998,22 +2379,135 @@ date: match.scores.date
 			document.body.removeChild(link);
 		}
 
+		// Apply loaded HITL decisions to dataset
+		function applyLoadedHitl(dataset) {
+			if (!dataset || !loadedHitlData) return 0;
+			const { mapExact, mapPerson, mapMention } = loadedHitlData;
+			let count = 0;
+			for (const r of dataset) {
+				const pId = String(r.candidate_id || r.mention_id || '').trim();
+				const mId = String((r.mention1 && r.mention1.mention_id) ? r.mention1.mention_id : (r._fullMatches && r._fullMatches[0] ? r._fullMatches[0].mention_id : '')).trim();
+				const keyExact = `${pId}|${mId}`;
+
+				let hitlVal = null;
+				if (pId && mId && mapExact.has(keyExact)) {
+					hitlVal = mapExact.get(keyExact);
+				} else if (pId && mapPerson.has(pId)) {
+					hitlVal = mapPerson.get(pId);
+				} else if (mId && mapMention.has(mId)) {
+					hitlVal = mapMention.get(mId);
+				}
+
+				if (hitlVal && hitlVal !== '-') {
+					r.hitl_match = hitlVal;
+					count++;
+				}
+			}
+			return count;
+		}
+
+		// Load HITL CSV from file and update current verified census list
+		async function loadHitlCsv(file) {
+			if (!file) return;
+			try {
+				const results = await new Promise((resolve, reject) => {
+					Papa.parse(file, {
+						header: true,
+						skipEmptyLines: true,
+						transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+						complete: resolve,
+						error: reject
+					});
+				});
+
+				const rows = results.data || [];
+				const mapExact = new Map();
+				const mapPerson = new Map();
+				const mapMention = new Map();
+
+				for (const row of rows) {
+					const rawHitl = String(row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
+					if (!rawHitl || rawHitl === '-') continue;
+					const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
+						: (rawHitl === 'MAYBE' ? 'MAYBE'
+						: (rawHitl === 'UNMATCHED' || rawHitl === 'UN-MATCHED' ? 'UNMATCHED' : rawHitl));
+
+					const pId = String(row.person_id || row.candidate_id || row.enslaver_id || row.id || '').trim();
+					const mId = String(row.mention_id || row.census_mention_id || '').trim();
+
+					if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
+					if (pId) mapPerson.set(pId, validHitl);
+					if (mId) mapMention.set(mId, validHitl);
+				}
+
+				loadedHitlData = { mapExact, mapPerson, mapMention };
+
+				let updated = 0;
+				if (enslaverTable && enslaverTable.length > 0) {
+					updated = applyLoadedHitl(enslaverTable) || 0;
+					if (sampledResults) applyLoadedHitl(sampledResults);
+					renderResultsTable();
+					alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} records with HITL decisions.`);
+				} else {
+					alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run matching.`);
+				}
+			} catch (err) {
+				console.error('Error loading HITL CSV:', err);
+				alert(`Failed to load HITL CSV: ${err.message}`);
+			}
+		}
+
+		// Event Handlers
+		$('#reviewModeBtn').on('click', function (e) {
+			isReviewMode = !isReviewMode;
+			$(this).toggleClass('active', isReviewMode);
+			$('#resultsTable').toggleClass('review-mode', isReviewMode);
+		});
+
+		$('#sampleCheckbox').on('change', function (e) {
+			isSampleMode = this.checked;
+			if (isSampleMode) {
+				if (!enslaverTable || enslaverTable.length === 0) {
+					alert('Please run matching first to generate results to sample.');
+					$(this).prop('checked', false);
+					isSampleMode = false;
+					return;
+				}
+				sampledResults = generateNeymanSample(500, 35);
+			} else {
+				sampledResults = null;
+			}
+			renderResultsTable();
+		});
+
+		$('.filter-tab[data-filter]').on('click', function (e) {
+			$('.filter-tab[data-filter]').removeClass('active');
+			$(this).addClass('active');
+			currentFilter = $(this).data('filter');
+			renderResultsTable();
+		});
+
+		$(document).on('change', '.hitl-select', function (e) {
+			const idx = $(this).data('index');
+			const newVal = this.value;
+			$(this).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
+			if (newVal !== '-') {
+				$(this).addClass(`val-${newVal}`);
+			}
+			if (currentFilteredResults && currentFilteredResults[idx]) {
+				currentFilteredResults[idx].hitl_match = newVal;
+			}
+		});
+
+		$(document).on('click', '.hitl-select', function (e) {
+			e.stopPropagation();
+		});
+
 		let scheduleFilterDebounce = null;
 		$('#tableFilterInput').on('input', function () {
 			if (scheduleFilterDebounce) clearTimeout(scheduleFilterDebounce);
 			scheduleFilterDebounce = setTimeout(() => {
-				const term = $('#tableFilterInput').val().toLowerCase().trim();
-				if (!term) {
-					$('#tableBody tr.row-clickable').show();
-					$('.details-row').hide();
-					return;
-				}
-				enslaverTable.forEach((row, i) => {
-					const text = `${row.candidate_id} ${row.full_name} ${row.matched_name} ${row.district} ${row.enumerator} ${row.mention_id}`.toLowerCase();
-					const matches = text.includes(term);
-					$(`tr.row-clickable[data-index="${i}"]`).toggle(matches);
-					$(`#detail-${i}`).hide();
-				});
+				renderResultsTable();
 			}, 120);
 		});
 
@@ -2021,20 +2515,20 @@ date: match.scores.date
 		$('.table-wrapper').on('scroll', function () {
 			const el = this;
 			if (el.scrollHeight - el.scrollTop - el.clientHeight < 500) {
-				if (enslaverTable && renderedEnslaverCount < enslaverTable.length) {
+				if (currentFilteredResults && renderedEnslaverCount < currentFilteredResults.length) {
 					appendEnslaverRowsBatch(200);
 				}
 			}
 		});
 
 		$(document).on('click', '.row-clickable', function (e) {
-			if ($(e.target).closest('.why-pill-btn').length > 0) return;
+			if ($(e.target).closest('.why-pill-btn, .hitl-select').length > 0) return;
 
 			const idx = $(this).data('index');
 			$('#tableBody tr.row-clickable').removeClass('selected-row');
 			$(this).addClass('selected-row');
 
-			const row = enslaverTable[idx];
+			const row = currentFilteredResults[idx] || enslaverTable[idx];
 			if (row) {
 				updateExamineSourcesSection(row, idx);
 			}
@@ -2047,12 +2541,12 @@ date: match.scores.date
 			let $detail = $(`#detail-${idx}`);
 
 			if ($detail.length === 0) {
-				$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="9" style="padding: 8px 12px;" id="detail-content-${idx}"></td></tr>`);
+				$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="11" style="padding: 8px 12px;" id="detail-content-${idx}"></td></tr>`);
 				$row.after($detail);
 			}
 
 			const $content = $(`#detail-content-${idx}`);
-			const row = enslaverTable[idx];
+			const row = currentFilteredResults[idx] || enslaverTable[idx];
 
 			$('#tableBody tr.row-clickable').removeClass('selected-row');
 			$row.addClass('selected-row');
@@ -2076,6 +2570,13 @@ date: match.scores.date
 
 		$('#runBtn').on('click', runMatching);
 		$('#downloadBtn').on('click', exportToCsv);
+		$('#loadHitlBtn').on('click', function () { $('#hitlFileInput').trigger('click'); });
+		$('#hitlFileInput').on('change', function (e) {
+			if (e.target.files && e.target.files.length > 0) {
+				loadHitlCsv(e.target.files[0]);
+				e.target.value = '';
+			}
+		});
 	</script>
 </body>
 

@@ -291,6 +291,16 @@
 			box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 		}
 
+		.btn-secondary {
+			background-color: var(--accent-purple);
+			color: #ffffff;
+		}
+
+		.btn-secondary:hover:not(:disabled) {
+			background-color: #6d28d9;
+			box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+		}
+
 		.btn:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
@@ -884,6 +894,16 @@
 							</svg>
 							Save HITL CSV
 						</button>
+						<button id="loadHitlBtn" class="btn btn-secondary" style="flex: 1;">
+							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+								<path
+									d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+								<path
+									d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+							</svg>
+							Load HITL CSV
+						</button>
+						<input type="file" id="hitlFileInput" accept=".csv" style="display: none;">
 					</div>
 				</div>
 
@@ -969,11 +989,13 @@
 				<table id="resultsTable">
 					<thead>
 						<tr>
+							<th class="col-num" style="width: 44px; text-align: right;">#</th>
 							<th class="col-status">Status</th>
 							<th class="col-why">Why</th>
 							<th class="col-prob">Probability</th>
 							<th class="col-hitl">HITL Match</th>
 							<th>Full Name (Census : Verified)</th>
+							<th>Age (C : V)</th>
 							<th>Birth Year (Census : Verified)</th>
 							<th>Gender (C : V)</th>
 							<th>Race (C : V)</th>
@@ -983,7 +1005,7 @@
 					</thead>
 					<tbody id="tableBody">
 						<tr>
-							<td colspan="10">
+							<td colspan="12">
 								<div class="empty-state">
 									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1044,6 +1066,7 @@
 				this.isReviewMode = false;
 				this.isSampleMode = false;
 				this.sampledResults = null;
+				this.loadedHitlData = null;
 				this.rawVpRows = [];
 				this.rawCensusMentions = [];
 
@@ -1214,6 +1237,7 @@
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 				}
 
+				const currYear = parseInt($('#yearSelect').val()) || 1860;
 				// Unpack original_data and flatten fields for every row in window
 				const unpackedSlice = win.slice.map(r => {
 					if (!r || typeof r !== 'object') return {};
@@ -1234,6 +1258,22 @@
 							merged[k] = orig[k];
 						}
 					}
+
+					// Ensure age is populated if birth_year exists, or birth_year if age exists
+					if (merged.age === undefined || merged.age === null || merged.age === '') {
+						if (merged.birth_year != null && merged.birth_year !== '') {
+							const by = parseInt(merged.birth_year);
+							if (!isNaN(by)) {
+								merged.age = Math.max(0, currYear - by);
+							}
+						}
+					} else if (merged.birth_year === undefined || merged.birth_year === null || merged.birth_year === '') {
+						const ag = parseInt(merged.age);
+						if (!isNaN(ag)) {
+							merged.birth_year = currYear - ag;
+						}
+					}
+
 					return merged;
 				});
 
@@ -1293,14 +1333,12 @@
 
 				const theadHtml = `
 					<tr>
-						<th style="width: 44px; text-align: right; position: sticky; left: 0; z-index: 3; background: #f1f5f9; box-shadow: 1px 0 0 #cbd5e1;">#</th>
 						${allKeys.map(k => `<th>${k}</th>`).join('')}
 					</tr>
 				`;
 
 				const tbodyHtml = unpackedSlice.map((r, relIdx) => {
 					const isCenter = relIdx === win.centerRelIdx;
-					const lineNum = win.startIdx + relIdx + 1;
 					const centerAttr = isCenter ? `id="${centerIdPrefix}-${paneId}" class="highlight-center"` : '';
 
 					const cellsHtml = allKeys.map(k => {
@@ -1312,7 +1350,6 @@
 
 					return `
 						<tr ${centerAttr}>
-							<td style="color: var(--text-muted); width: 44px; text-align: right; position: sticky; left: 0; z-index: 1; background: ${isCenter ? '#fef08a' : '#f8fafc'}; font-weight: 700; box-shadow: 1px 0 0 #cbd5e1;">${lineNum}</td>
 							${cellsHtml}
 						</tr>
 					`;
@@ -1443,7 +1480,7 @@
 						// Show spinning indicator in the results table during matching
 						$('#tableBody').html(`
 					<tr>
-						<td colspan="10">
+						<td colspan="12">
 							<div class="empty-state" style="padding: 40px 20px;">
 								<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
 								<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
@@ -1906,6 +1943,9 @@
 							}
 
 							this.matchedResults = rawResults;
+							if (this.loadedHitlData) {
+								this.applyLoadedHitl(this.matchedResults);
+							}
 
 							this.updateProgress(97, 'Aggregating match statistics and KPIs...');
 							await new Promise(r => setTimeout(r, 0));
@@ -2064,7 +2104,21 @@
 						const cand = row.bestCandidate || {};
 						const vp = row.person || {};
 
+						// Compute or retrieve age for candidate and verified person
+						const currYear = parseInt($('#yearSelect').val()) || 1860;
+						let candAge = cand.age != null && cand.age !== '' ? cand.age : '';
+						if (candAge === '' && cand.birth_year != null && cand.birth_year !== '') {
+							const by = parseInt(cand.birth_year);
+							if (!isNaN(by)) candAge = Math.max(0, currYear - by);
+						}
+						let vpAge = vp.age != null && vp.age !== '' ? vp.age : '';
+						if (vpAge === '' && vp.birth_year != null && vp.birth_year !== '') {
+							const by = parseInt(vp.birth_year);
+							if (!isNaN(by)) vpAge = Math.max(0, currYear - by);
+						}
+
 						const nameDisplay = cand.full_name ? `${cand.full_name} : ${vp.full_name || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.full_name || '-'}</span>`;
+						const ageDisplay = `${candAge !== '' ? candAge : '-'} : ${vpAge !== '' ? vpAge : '-'}`;
 						const birthDisplay = cand.birth_year ? `${cand.birth_year} : ${vp.birth_year || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.birth_year || '-'}</span>`;
 						const genderDisplay = `${cand.gender || '-'} : ${vp.gender || '-'}`;
 						const raceDisplay = `${cand.norm_race || cand.race || '-'} : ${vp.norm_race || vp.race || '-'}`;
@@ -2086,11 +2140,13 @@
 
 						return `
 					<tr class="row-clickable" data-index="${i}">
+						<td class="col-num mono" style="color: var(--text-muted); font-size: 11px; text-align: right; font-weight: 600; width: 44px;">${i + 1}</td>
 						<td class="col-status"><span class="status-pill ${statusClass}">${row.status}</span></td>
 						<td class="col-why"><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
 						<td class="col-prob mono" style="font-weight: 700;">${row.probability != null ? row.probability.toFixed(3) : '-'}</td>
 						<td class="col-hitl">${hitlSelectHtml}</td>
 						<td><strong>${nameDisplay}</strong></td>
+						<td class="mono">${ageDisplay}</td>
 						<td class="mono">${birthDisplay}</td>
 						<td class="mono">${genderDisplay}</td>
 						<td class="mono">${raceDisplay}</td>
@@ -2138,7 +2194,7 @@
 						const activeData = data || ((this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults);
 
 						if (!activeData || activeData.length === 0) {
-							$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found.</td></tr>');
+							$tbody.html('<tr><td colspan="12" class="empty-state">No matching records found.</td></tr>');
 							$('#resultCountBadge').text('0 Rows');
 							this.currentFilteredResults = [];
 							this.renderedRowCount = 0;
@@ -2162,7 +2218,7 @@
 						this.currentFilteredResults = filtered;
 
 						if (filtered.length === 0) {
-							$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found for active filters.</td></tr>');
+							$tbody.html('<tr><td colspan="12" class="empty-state">No matching records found for active filters.</td></tr>');
 							$('#resultCountBadge').text('0 Rows');
 							this.renderedRowCount = 0;
 							return;
@@ -2207,23 +2263,15 @@
 						const exportData = dataset.map(r => {
 							const cand = r.bestCandidate || {};
 							const vp = r.person || {};
-
-							// Format why field according to specification
-							const whyStr = JSON.stringify(r.formattedWhy || {});
 							const hitlMatch = r.hitl_match || '-';
-							const probVal = (r.probability != null && !isNaN(r.probability)) ? Number(r.probability).toFixed(3) : ((r.score != null && !isNaN(r.score)) ? Number(r.score).toFixed(3) : '0.000');
 
 							return {
 								hitl_match: hitlMatch,
-								status: r.status,
-								probability: probVal,
-								full_name: `${cand.full_name || ''} : ${vp.full_name || ''}`,
-								birth_year: `${cand.birth_year || ''} : ${vp.birth_year || ''}`,
-								gender: `${cand.gender || ''} : ${vp.gender || ''}`,
-								norm_race: `${cand.norm_race || cand.race || ''} : ${vp.norm_race || vp.race || ''}`,
-								mention_id: cand.mention_id || '',
+								status: r.status || '',
 								person_id: vp.person_id || vp.mention_id || '',
-								why: whyStr
+								mention_id: cand.mention_id || '',
+								person_full_name: vp.full_name || '',
+								mention_full_name: cand.full_name || ''
 							};
 						});
 
@@ -2236,6 +2284,86 @@
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
+					}
+
+					// Apply loaded HITL decisions to dataset
+					applyLoadedHitl(dataset) {
+						if (!dataset || !this.loadedHitlData) return 0;
+						const { mapExact, mapPerson, mapMention } = this.loadedHitlData;
+						let count = 0;
+						for (const r of dataset) {
+							const vp = r.person || {};
+							const cand = r.bestCandidate || {};
+							const pId = String(vp.person_id || vp.mention_id || '').trim();
+							const mId = String(cand.mention_id || '').trim();
+							const keyExact = `${pId}|${mId}`;
+
+							let hitlVal = null;
+							if (pId && mId && mapExact.has(keyExact)) {
+								hitlVal = mapExact.get(keyExact);
+							} else if (pId && mapPerson.has(pId)) {
+								hitlVal = mapPerson.get(pId);
+							} else if (mId && mapMention.has(mId)) {
+								hitlVal = mapMention.get(mId);
+							}
+
+							if (hitlVal && hitlVal !== '-') {
+								r.hitl_match = hitlVal;
+								count++;
+							}
+						}
+						return count;
+					}
+
+					// Load HITL CSV from file and update current verified census list
+					async loadHitlCsv(file) {
+						if (!file) return;
+						try {
+							const results = await new Promise((resolve, reject) => {
+								Papa.parse(file, {
+									header: true,
+									skipEmptyLines: true,
+									transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+									complete: resolve,
+									error: reject
+								});
+							});
+
+							const rows = results.data || [];
+							const mapExact = new Map();
+							const mapPerson = new Map();
+							const mapMention = new Map();
+
+							for (const row of rows) {
+								const rawHitl = String(row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
+								if (!rawHitl || rawHitl === '-') continue;
+								const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
+									: (rawHitl === 'MAYBE' ? 'MAYBE'
+									: (rawHitl === 'UNMATCHED' || rawHitl === 'UN-MATCHED' ? 'UNMATCHED' : rawHitl));
+
+								const pId = String(row.person_id || row.verified_person_id || row.id || '').trim();
+								const mId = String(row.mention_id || row.census_mention_id || '').trim();
+
+								if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
+								if (pId) mapPerson.set(pId, validHitl);
+								if (mId) mapMention.set(mId, validHitl);
+							}
+
+							this.loadedHitlData = { mapExact, mapPerson, mapMention };
+
+							let updated = 0;
+							if (this.matchedResults && this.matchedResults.length > 0) {
+								updated = this.applyLoadedHitl(this.matchedResults) || 0;
+								if (this.sampledResults) this.applyLoadedHitl(this.sampledResults);
+								this.renderResultsTable();
+								alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} verified census records with HITL decisions.`);
+							} else {
+								alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run the matcher.`);
+							}
+						} catch (err) {
+							console.error('Error loading HITL CSV:', err);
+							alert(`Failed to load HITL CSV: ${err.message}`);
+						}
 					}
 
 					initEventHandlers() {
@@ -2323,7 +2451,7 @@
 							let $detail = $(`#detail-${idx}`);
 
 							if ($detail.length === 0) {
-								$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="10" style="padding: 6px 10px;" id="detail-content-${idx}"></td></tr>`);
+								$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="12" style="padding: 6px 10px;" id="detail-content-${idx}"></td></tr>`);
 								$row.after($detail);
 							}
 
@@ -2355,6 +2483,13 @@
 
 						$('#runBtn').on('click', () => this.runMatcher());
 						$('#downloadBtn').on('click', () => this.exportToCsv());
+						$('#loadHitlBtn').on('click', () => $('#hitlFileInput').trigger('click'));
+						$('#hitlFileInput').on('change', (e) => {
+							if (e.target.files && e.target.files.length > 0) {
+								this.loadHitlCsv(e.target.files[0]);
+								e.target.value = '';
+							}
+						});
 					}
 				}
 
