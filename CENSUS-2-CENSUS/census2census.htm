@@ -690,18 +690,74 @@
 			margin-top: 6px;
 		}
 
-		/* 24-Row Context Window Displays */
+		/* Resizable Splitter Divider */
+		.panel-divider {
+			height: 10px;
+			margin: 2px 0;
+			cursor: row-resize;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			flex-shrink: 0;
+			user-select: none;
+			-webkit-user-select: none;
+			transition: background-color 0.15s ease;
+			z-index: 20;
+		}
+
+		.panel-divider:hover,
+		.panel-divider.dragging {
+			background: rgba(99, 102, 241, 0.08);
+		}
+
+		.divider-handle {
+			width: 44px;
+			height: 4px;
+			background: #cbd5e1;
+			border-radius: 9999px;
+			transition: all 0.2s ease;
+		}
+
+		.panel-divider:hover .divider-handle,
+		.panel-divider.dragging .divider-handle {
+			background: var(--accent-primary);
+			width: 64px;
+			height: 5px;
+			box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+		}
+
+		body.resizing-active {
+			cursor: row-resize !important;
+			user-select: none !important;
+			-webkit-user-select: none !important;
+		}
+
+		body.resizing-active * {
+			cursor: row-resize !important;
+			user-select: none !important;
+		}
+
+		/* 48-Row Context Window Displays */
 		.examine-sources-card {
 			flex-shrink: 0;
+			height: 280px;
+			min-height: 80px;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
 		}
 
 		.context-windows-wrapper {
-			margin-top: 10px;
-			padding-top: 8px;
-			border-top: 1px solid #cbd5e1;
+			margin-top: 4px;
+			padding-top: 0;
+			border-top: none;
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 6px;
+			flex: 1;
+			min-height: 0;
+			overflow-y: auto;
 		}
 
 		.context-box {
@@ -710,6 +766,10 @@
 			border-radius: var(--radius-sm);
 			overflow: hidden;
 			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			min-height: 60px;
 		}
 
 		.context-box-header {
@@ -724,12 +784,14 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+			flex-shrink: 0;
 		}
 
 		.context-scroll-pane {
-			height: 100px;
-			/* tall enough for 3 visible lines */
-			max-height: 108px;
+			flex: 1;
+			min-height: 30px;
+			height: auto;
+			max-height: none;
 			overflow-y: auto;
 			overflow-x: auto;
 			background: #ffffff;
@@ -1021,8 +1083,13 @@
 			</div>
 		</div>
 
+		<!-- Resizable Drag Divider -->
+		<div id="dragDivider" class="panel-divider" title="Drag up/down to resize results and examine sources (Double-click to reset)">
+			<div class="divider-handle"></div>
+		</div>
+
 		<!-- Examine Sources Card (Underneath Results Section) -->
-		<div id="examineSourcesCard" class="card examine-sources-card" style="margin-top: 10px;">
+		<div id="examineSourcesCard" class="card examine-sources-card">
 			<div
 				style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 6px;">
 				<h3
@@ -1032,7 +1099,7 @@
 						<path
 							d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
 					</svg>
-					Examine Sources &mdash; 24 Rows Surrounding Selection
+					Examine Sources &mdash; 48 Rows Surrounding Selection
 				</h3>
 				<span id="examineSelectionInfo" class="mono"
 					style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">
@@ -1042,7 +1109,7 @@
 			<div id="examineSourcesContainer" class="context-windows-wrapper"
 				style="margin-top: 0; border-top: none; padding-top: 0;">
 				<div class="empty-state" style="padding: 20px 10px; font-size: 12px; color: var(--text-muted);">
-					Click any row in the table above to view the 24 surrounding Verified Person and Census source rows.
+					Click any row in the table above to view the 48 surrounding Verified Person and Census source rows.
 				</div>
 			</div>
 		</div>
@@ -1208,8 +1275,8 @@
 				return sampled;
 			}
 
-			// Helper: Get context window of rows (up to 12 leading, center, 12 following)
-			getContextWindow(items, matchFn, radius = 12) {
+			// Helper: Get context window of rows (up to 24 leading, center, 24 following = 48 surrounding rows)
+			getContextWindow(items, matchFn, radius = 24) {
 				if (!items || items.length === 0) return { slice: [], centerRelIdx: -1, centerAbsIdx: -1, startIdx: 0, total: 0, matched: false };
 				let centerIdx = items.findIndex(matchFn);
 				const matched = centerIdx !== -1;
@@ -1226,13 +1293,13 @@
 				};
 			}
 
-			// Generic function to render all source fields in 24-row context window
+			// Generic function to render all source fields in 48-row context window
 			renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix) {
 				if (!items || items.length === 0) {
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No context rows available.'}</div></div>`;
 				}
 
-				const win = this.getContextWindow(items, matchFn, 12);
+				const win = this.getContextWindow(items, matchFn, 24);
 				if (win.slice.length === 0) {
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 				}
@@ -1356,7 +1423,7 @@
 				}).join('');
 
 				const headerTitle = win.matched
-					? `<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [12 Leading & 12 Following]</span>`
+					? `<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [24 Leading & 24 Following]</span>`
 					: `<span>${titlePrefix} &mdash; Census Pool Records 1 &ndash; ${win.slice.length} of ${win.total}</span>`;
 
 				return `
@@ -2489,6 +2556,109 @@
 								this.loadHitlCsv(e.target.files[0]);
 								e.target.value = '';
 							}
+						});
+
+						this.initResizableDivider();
+					}
+
+					// Draggable and resizable division between Results table and Examine Sources
+					initResizableDivider() {
+						const divider = document.getElementById('dragDivider');
+						const bottomCard = document.getElementById('examineSourcesCard');
+						const topCard = document.querySelector('.table-container');
+						const container = document.querySelector('.container');
+
+						if (!divider || !bottomCard || !container) return;
+
+						// Restore saved height preference from localStorage
+						const savedHeight = localStorage.getItem('c2c_examine_card_height');
+						if (savedHeight) {
+							const h = parseInt(savedHeight, 10);
+							if (!isNaN(h) && h >= 70 && h <= window.innerHeight - 200) {
+								bottomCard.style.height = `${h}px`;
+							}
+						}
+
+						let isDragging = false;
+						let startY = 0;
+						let startBottomHeight = 0;
+
+						const onMouseDown = (e) => {
+							isDragging = true;
+							startY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+							startBottomHeight = bottomCard.getBoundingClientRect().height;
+
+							divider.classList.add('dragging');
+							document.body.classList.add('resizing-active');
+
+							document.addEventListener('mousemove', onMouseMove);
+							document.addEventListener('mouseup', onMouseUp);
+							document.addEventListener('touchmove', onTouchMove, { passive: false });
+							document.addEventListener('touchend', onTouchEnd);
+							if (e.preventDefault) e.preventDefault();
+						};
+
+						const onMouseMove = (e) => {
+							if (!isDragging) return;
+							const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+							const deltaY = clientY - startY;
+
+							const containerRect = container.getBoundingClientRect();
+							const minBottomHeight = 70;
+							const maxBottomHeight = Math.max(minBottomHeight, containerRect.height - 180);
+
+							let newBottomHeight = startBottomHeight - deltaY;
+							if (newBottomHeight < minBottomHeight) newBottomHeight = minBottomHeight;
+							if (newBottomHeight > maxBottomHeight) newBottomHeight = maxBottomHeight;
+
+							bottomCard.style.height = `${newBottomHeight}px`;
+							if (e.preventDefault) e.preventDefault();
+						};
+
+						const onTouchMove = (e) => {
+							if (!isDragging) return;
+							onMouseMove(e);
+						};
+
+						const onMouseUp = () => {
+							if (!isDragging) return;
+							isDragging = false;
+							divider.classList.remove('dragging');
+							document.body.classList.remove('resizing-active');
+
+							document.removeEventListener('mousemove', onMouseMove);
+							document.removeEventListener('mouseup', onMouseUp);
+							document.removeEventListener('touchmove', onTouchMove);
+							document.removeEventListener('touchend', onTouchEnd);
+
+							const finalH = Math.round(bottomCard.getBoundingClientRect().height);
+							localStorage.setItem('c2c_examine_card_height', finalH);
+						};
+
+						const onTouchEnd = () => {
+							onMouseUp();
+						};
+
+						divider.addEventListener('mousedown', onMouseDown);
+						divider.addEventListener('touchstart', onMouseDown, { passive: false });
+
+						// Double-click to cycle through default (280px), large (480px), and compact (110px) heights
+						divider.addEventListener('dblclick', () => {
+							const currentH = bottomCard.getBoundingClientRect().height;
+							let targetH = 280;
+							if (Math.abs(currentH - 280) < 30) {
+								targetH = 480;
+							} else if (currentH > 350) {
+								targetH = 110;
+							} else {
+								targetH = 280;
+							}
+							bottomCard.style.transition = 'height 0.2s ease';
+							bottomCard.style.height = `${targetH}px`;
+							localStorage.setItem('c2c_examine_card_height', targetH);
+							setTimeout(() => {
+								bottomCard.style.transition = '';
+							}, 220);
 						});
 					}
 				}
