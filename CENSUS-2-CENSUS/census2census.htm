@@ -214,7 +214,7 @@
 
 		.controls-grid {
 			display: grid;
-			grid-template-columns: repeat(4, 1fr);
+			grid-template-columns: repeat(6, 1fr);
 			gap: 6px 8px;
 			align-items: flex-end;
 		}
@@ -891,7 +891,7 @@
 					Census to Census Matcher
 					<span class="badge badge-primary">HITL Linkage</span>
 				</h1>
-				<p>Match verified person list against target Census mentions with multi-lever scoring and calibrated
+				<p>Match source person list against target Census mentions with multi-lever scoring and calibrated
 					probabilities.</p>
 			</div>
 		</header>
@@ -907,8 +907,19 @@
 					</div>
 
 					<div class="form-group">
-						<label for="yearSelect">Census Year</label>
-						<select id="yearSelect" class="form-control">
+						<label for="sourceYearSelect">SOURCE</label>
+						<select id="sourceYearSelect" class="form-control">
+							<option value="1850" selected>1850</option>
+							<option value="1860">1860</option>
+							<option value="1870">1870</option>
+							<option value="1880">1880</option>
+							<option value="1900">1900</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="censusYearSelect">TARGET</label>
+						<select id="censusYearSelect" class="form-control">
 							<option value="1860" selected>1860</option>
 							<option value="1870">1870</option>
 							<option value="1880">1880</option>
@@ -932,14 +943,8 @@
 							step="1">
 					</div>
 
-					<div class="form-group" style="grid-column: span 3;">
-						<label for="vpFileInput">Verified CSV (e.g. AUG-VP.csv)</label>
-						<input type="file" id="vpFileInput" accept=".csv" class="form-control"
-							style="padding: 2px 4px;">
-					</div>
-
 					<div class="form-group"
-						style="display: flex; flex-direction: row; gap: 6px; grid-column: span 4; margin-top: 2px;">
+						style="display: flex; flex-direction: row; gap: 6px; grid-column: 1 / -1; margin-top: 6px;">
 						<button id="runBtn" class="btn btn-primary" style="flex: 1;">
 							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 								<path
@@ -985,13 +990,13 @@
 			<div class="stats-panel-right">
 				<div class="stats-grid-right">
 					<div class="stat-card" style="--stat-accent: #3b82f6;">
-						<div class="stat-title">Verified Persons</div>
+						<div class="stat-title">Source Pool</div>
 						<div class="stat-value" id="statVerified">0</div>
 						<div class="stat-sub" id="statTargetSource">Target: AUG-VP</div>
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #8b5cf6;">
-						<div class="stat-title">Census Pool</div>
+						<div class="stat-title">Target Pool</div>
 						<div class="stat-value" id="statCensusPool">0</div>
 						<div class="stat-sub" id="statCensusTarget">Source: AUG-CN-1860</div>
 					</div>
@@ -1056,13 +1061,13 @@
 							<th class="col-why">Why</th>
 							<th class="col-prob">Probability</th>
 							<th class="col-hitl">HITL Match</th>
-							<th>Full Name (Census : Verified)</th>
-							<th>Age (C : V)</th>
-							<th>Birth Year (Census : Verified)</th>
-							<th>Gender (C : V)</th>
-							<th>Race (C : V)</th>
-							<th>Mention ID</th>
-							<th>Person ID</th>
+							<th>Name (Source : Target)</th>
+							<th>Age (S : T)</th>
+							<th>Birth Year (S : T)</th>
+							<th>Gender (S : T)</th>
+							<th>Race (S : T)</th>
+							<th>Source ID</th>
+							<th>Target ID</th>
 						</tr>
 					</thead>
 					<tbody id="tableBody">
@@ -1073,8 +1078,8 @@
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
 											d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
 									</svg>
-									<p>Click <strong>"Run Matcher"</strong> above to load data and link verified persons
-										to the census.</p>
+									<p>Click <strong>"Run Matcher"</strong> above to load data and link peopleto the
+										census.</p>
 								</div>
 							</td>
 						</tr>
@@ -1084,7 +1089,8 @@
 		</div>
 
 		<!-- Resizable Drag Divider -->
-		<div id="dragDivider" class="panel-divider" title="Drag up/down to resize results and examine sources (Double-click to reset)">
+		<div id="dragDivider" class="panel-divider"
+			title="Drag up/down to resize results and examine sources (Double-click to reset)">
 			<div class="divider-handle"></div>
 		</div>
 
@@ -1109,7 +1115,7 @@
 			<div id="examineSourcesContainer" class="context-windows-wrapper"
 				style="margin-top: 0; border-top: none; padding-top: 0;">
 				<div class="empty-state" style="padding: 20px 10px; font-size: 12px; color: var(--text-muted);">
-					Click any row in the table above to view the 48 surrounding Verified Person and Census source rows.
+					Click any row in the table above to view the 48 surrounding Source and Census source rows.
 				</div>
 			</div>
 		</div>
@@ -1346,6 +1352,8 @@
 
 				// Internal / wrangling fields to suppress from source view
 				const seen = new Set([
+					'person_id',
+					'source_id',
 					'original_data',
 					'mentions',
 					'confidence',
@@ -1382,7 +1390,7 @@
 
 				// Preferred standard ordering for census/source columns
 				const PREFERRED_ORDER = [
-					'person_id', 'mention_id', 'full_name', 'first_name', 'middle_name', 'last_name',
+					'mention_id', 'full_name', 'first_name', 'middle_name', 'last_name',
 					'age', 'birth_year', 'birth_date', 'gender', 'race', 'relation', 'marital', 'occupation',
 					'district', 'dwelling', 'family', 'sheet', 'line', 'original_line', 'head', 'household_id', 'family_id',
 					'birth_place', 'fathers_birthplace', 'mothers_birthplace',
@@ -1424,7 +1432,7 @@
 
 				const headerTitle = win.matched
 					? `<span>${titlePrefix} &mdash; Row ${win.centerAbsIdx + 1} of ${win.total} [24 Leading & 24 Following]</span>`
-					: `<span>${titlePrefix} &mdash; Census Pool Records 1 &ndash; ${win.slice.length} of ${win.total}</span>`;
+					: `<span>${titlePrefix} &mdash; Target Pool Records 1 &ndash; ${win.slice.length} of ${win.total}</span>`;
 
 				return `
 					<div class="context-box">
@@ -1442,623 +1450,568 @@
 				`;
 			}
 
-					// Render Top Div: Original lines from Verified Persons Table
-					renderVpContextWindowHtml(person, paneId) {
-						const targetId = person.person_id || person.mention_id;
-						return this.renderSourceContextWindowHtml(
-							this.rawVpRows,
-							(p) => (p.person_id && p.person_id === targetId) || (p.mention_id && p.mention_id === targetId) || p === person,
-							'Original Verified Persons (VP) Table',
-							paneId,
-							'No Verified Persons context rows loaded.',
-							'vp-center'
-						);
-					}
+			// Render Top Div: Original lines from Source Census Table
+			renderVpContextWindowHtml(person, paneId) {
+				const targetId = person.mention_id || person.person_id;
+				return this.renderSourceContextWindowHtml(
+					this.rawVpRows,
+					(p) => (p.mention_id && p.mention_id === targetId) || (p.person_id && p.person_id === targetId) || p === person,
+					'Source Census Table',
+					paneId,
+					'No Source Census context rows loaded.',
+					'vp-center'
+				);
+			}
 
-					// Render Bottom Div: Original lines from Census Table
-					renderCensusContextWindowHtml(candidate, person, paneId, allCandidates = []) {
-						if (!this.rawCensusMentions || this.rawCensusMentions.length === 0) {
-							return `
+			// Render Bottom Div: Original lines from Census Table
+			renderCensusContextWindowHtml(candidate, person, paneId, allCandidates = []) {
+				if (!this.rawCensusMentions || this.rawCensusMentions.length === 0) {
+					return `
 						<div class="context-box">
 							<div class="context-box-header">
-								<span>Original Census (CN) Population Table</span>
+								<span>Target Census (CN) Population Table</span>
 							</div>
 							<div style="padding: 12px; color: var(--text-muted); font-size: 12px;">No Census mentions loaded. Please run the matcher to load census records.</div>
 						</div>
 					`;
-						}
+				}
 
-						// Find target candidate if passed or from allCandidates
-						let targetCand = (candidate && candidate.mention_id) ? candidate : null;
-						let subNote = '';
+				// Find target candidate if passed or from allCandidates
+				let targetCand = (candidate && candidate.mention_id) ? candidate : null;
+				let subNote = '';
 
-						if (!targetCand && allCandidates && allCandidates.length > 0 && allCandidates[0] && allCandidates[0].candidate) {
-							targetCand = allCandidates[0].candidate;
-							subNote = ` [Top Candidate: ${targetCand.full_name || targetCand.mention_id}]`;
-						}
+				if (!targetCand && allCandidates && allCandidates.length > 0 && allCandidates[0] && allCandidates[0].candidate) {
+					targetCand = allCandidates[0].candidate;
+					subNote = ` [Top Candidate: ${targetCand.full_name || targetCand.mention_id}]`;
+				}
 
-						const targetMid = targetCand ? (targetCand.mention_id || '') : '';
-						const pLastName = (person && (person.last_name || person.full_name)) ? (person.last_name || person.full_name).trim().toUpperCase() : '';
+				const targetMid = targetCand ? (targetCand.mention_id || '') : '';
+				const pLastName = (person && (person.last_name || person.full_name)) ? (person.last_name || person.full_name).trim().toUpperCase() : '';
 
-						return this.renderSourceContextWindowHtml(
-							this.rawCensusMentions,
-							(m) => {
-								if (targetMid && m.mention_id && String(m.mention_id).trim() === String(targetMid).trim()) return true;
-								if (targetCand && m === targetCand) return true;
-								if (!targetMid && pLastName && m.last_name && m.last_name.trim().toUpperCase() === pLastName) return true;
-								return false;
-							},
-							`Original Census (CN) Population Table${subNote}`,
-							paneId,
-							'No Census context rows loaded.',
-							'cn-center'
-						);
-					}
+				return this.renderSourceContextWindowHtml(
+					this.rawCensusMentions,
+					(m) => {
+						if (targetMid && m.mention_id && String(m.mention_id).trim() === String(targetMid).trim()) return true;
+						if (targetCand && m === targetCand) return true;
+						if (!targetMid && pLastName && m.last_name && m.last_name.trim().toUpperCase() === pLastName) return true;
+						return false;
+					},
+					`Target Census (CN) Population Table${subNote}`,
+					paneId,
+					'No Census context rows loaded.',
+					'cn-center'
+				);
+			}
 
 			// Load CSV with fallback paths
 			async loadCsv(fileInputId, defaultFilenames) {
-						const fileInput = document.getElementById(fileInputId);
-						if (fileInput && fileInput.files && fileInput.files.length > 0) {
-							return new Promise((resolve, reject) => {
-								Papa.parse(fileInput.files[0], {
-									header: true,
-									skipEmptyLines: true,
-									transformHeader: h => h.replace(/^\ufeff/, '').trim(),
-									complete: results => resolve(results.data),
-									error: err => reject(err)
-								});
-							});
-						}
+				const fileInput = document.getElementById(fileInputId);
+				if (fileInput && fileInput.files && fileInput.files.length > 0) {
+					return new Promise((resolve, reject) => {
+						Papa.parse(fileInput.files[0], {
+							header: true,
+							skipEmptyLines: true,
+							transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+							complete: results => resolve(results.data),
+							error: err => reject(err)
+						});
+					});
+				}
 
-						// Try default paths
-						for (const path of defaultFilenames) {
-							try {
-								const data = await new Promise((resolve, reject) => {
-									Papa.parse(path, {
-										download: true,
-										header: true,
-										skipEmptyLines: true,
-										transformHeader: h => h.replace(/^\ufeff/, '').trim(),
-										complete: results => resolve(results.data),
-										error: err => reject(err)
-									});
-								});
-								if (data && data.length > 0) return data;
-							} catch (e) { }
-						}
-						return null;
-					}
+				// Try default paths
+				for (const path of defaultFilenames) {
+					try {
+						const data = await new Promise((resolve, reject) => {
+							Papa.parse(path, {
+								download: true,
+								header: true,
+								skipEmptyLines: true,
+								transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+								complete: results => resolve(results.data),
+								error: err => reject(err)
+							});
+						});
+						if (data && data.length > 0) return data;
+					} catch (e) { }
+				}
+				return null;
+			}
 
 			// Main Matching Runner
 			async runMatcher() {
-						const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
-						const recordYear = $('#yearSelect').val() || '1860';
-						const yrNum = parseInt(recordYear, 10);
-						const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
-						const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
-						const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
+				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
+				const sourceYear = $('#sourceYearSelect').val() || '1850';
+				const censusYear = $('#censusYearSelect').val() || '1860';
+				const yrNum = parseInt(censusYear, 10);
+				const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
+				const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
+				const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
 
-						$('#statTargetSource').text(`Target: ${county}-VP`);
-						$('#statCensusTarget').text(`Source: ${county}-CN-${recordYear}`);
-						$('#runBtn').prop('disabled', true).html('<span class="spinner spinner-sm" style="width: 12px; height: 12px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.3); margin-right: 6px;"></span> Matching...');
-						$('#downloadBtn').prop('disabled', true);
-						$('#resultCountBadge').html('<span class="spinner spinner-sm" style="width: 10px; height: 10px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.4); margin-right: 4px; display: inline-block; vertical-align: middle;"></span> Matching...');
+				const sourceSource = `${county}-CN-${sourceYear}`;
+				const targetSource = `${county}-CN-${censusYear}`;
 
-						// Show spinning indicator in the results table during matching
-						$('#tableBody').html(`
+				$('#statTargetSource').text(`Source: ${sourceSource}`);
+				$('#statCensusTarget').text(`Target: ${targetSource}`);
+				$('#runBtn').prop('disabled', true).html('<span class="spinner spinner-sm" style="width: 12px; height: 12px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.3); margin-right: 6px;"></span> Matching...');
+				$('#downloadBtn').prop('disabled', true);
+				$('#resultCountBadge').html('<span class="spinner spinner-sm" style="width: 10px; height: 10px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.4); margin-right: 4px; display: inline-block; vertical-align: middle;"></span> Matching...');
+
+				// Show spinning indicator in the results table during matching
+				$('#tableBody').html(`
 					<tr>
 						<td colspan="12">
 							<div class="empty-state" style="padding: 40px 20px;">
 								<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
 								<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
-								<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Loading data and scoring verified persons against census pool</div>
+								<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Loading data and scoring source persons against target pool</div>
 							</div>
 						</td>
 					</tr>
 				`);
 
-						$('#examineSourcesContainer').html(`
+				$('#examineSourcesContainer').html(`
 					<div class="empty-state" style="padding: 24px 10px; font-size: 12px; color: var(--text-muted);">
 						<div class="spinner" style="margin: 0 auto 8px auto; width: 20px; height: 20px; border-width: 2px;"></div>
 						Awaiting match results...
 					</div>
 				`);
 
-						try {
-							$('#statusPanel').slideDown(150);
-							this.updateProgress(5, `Locating and loading verified person list (${county}-VP.csv)...`);
+				try {
+					$('#statusPanel').slideDown(150);
+					this.updateProgress(10, `Loading census mentions (mentions.csv)...`);
 
-							const vpFilenames = [
-								`${county}-VP.csv`,
-								`../${county}-VP.csv`,
-								`../../${county}-VP.csv`,
-								`../COMMON/${county}-VP.csv`,
-								`../../COMMON/${county}-VP.csv`,
-								`COMMON/${county}-VP.csv`,
-								`AUG-VP.csv`
-							];
+					const mentionsFilenames = [
+						`../../COMMON/mentions.csv`,
+						`../COMMON/mentions.csv`,
+						`COMMON/mentions.csv`,
+						`mentions.csv`,
+						`../mentions.csv`
+					];
 
-							const mentionsFilenames = [
-								`../../COMMON/mentions.csv`,
-								`../COMMON/mentions.csv`,
-								`COMMON/mentions.csv`,
-								`mentions.csv`,
-								`../mentions.csv`
-							];
+					let mentionsRows = await this.loadCsv('mentionsFileInput', mentionsFilenames);
+					if (!mentionsRows || mentionsRows.length === 0) {
+						throw new Error('Could not load mentions.csv. Please ensure mentions.csv is in the COMMON folder.');
+					}
 
-							let vpRows = await this.loadCsv('vpFileInput', vpFilenames);
-
-							// Filter verified persons to only include rows where county matches set county
-							if (vpRows && vpRows.length > 0) {
-								const countyPrefix = `${county}-`;
-								vpRows = vpRows.filter(r => {
-									const c = this.normStr(r.county).toUpperCase();
-									if (c && c === county) return true;
-									const s = this.normStr(r.source).toUpperCase();
-									if (s && (s.startsWith(countyPrefix) || s === county)) return true;
-									const pid = this.normStr(r.person_id).toUpperCase();
-									if (pid && pid.startsWith(countyPrefix)) return true;
-									const mid = this.normStr(r.mention_id).toUpperCase();
-									if (mid && mid.startsWith(countyPrefix)) return true;
-									const mentions = this.normStr(r.mentions).toUpperCase();
-									if (mentions && mentions.includes(countyPrefix)) return true;
-									return false;
-								});
-							}
-
-							const vpCount = vpRows ? vpRows.length : 0;
-							this.updateProgress(25, `Loaded ${vpCount.toLocaleString()} verified persons for county ${county}. Loading census mentions (mentions.csv)...`);
-
-							let mentionsRows = await this.loadCsv('mentionsFileInput', mentionsFilenames);
-							const mentionsCount = mentionsRows ? mentionsRows.length : 0;
-
-							this.updateProgress(45, `Loaded ${mentionsCount.toLocaleString()} mentions. Filtering ${county}-CN-${recordYear}...`);
-
-							// If mentions loaded but no verified list file exists yet, extract seed verified persons from baseline earlier census for set county
-							if (!vpRows || vpRows.length === 0) {
-								if (mentionsRows && mentionsRows.length > 0) {
-									this.updateProgress(15, `No ${county}-VP.csv found. Seeding initial verified list for ${county} from baseline census...`);
-									const baseSource = `${county}-CN-1850`;
-									const seedRows = mentionsRows.filter(r => {
-										const s = this.normStr(r.source).toUpperCase();
-										const c = this.normStr(r.county).toUpperCase();
-										const mid = this.normStr(r.mention_id).toUpperCase();
-										return c === county || s === baseSource || s.startsWith(`${county}-CN-`) || mid.startsWith(`${county}-`);
-									});
-									vpRows = seedRows.map((r, i) => ({
-										person_id: `${county}-VP-${1000 + i}`,
-										confidence: '1.0',
-										full_name: r.full_name || `${r.first_name || ''} ${r.last_name || ''}`.trim(),
-										first_name: r.first_name || '',
-										middle_name: r.middle_name || '',
-										last_name: r.last_name || '',
-										birth_year: r.birth_year || '',
-										death_year: '',
-										race: r.race || '',
-										gender: r.gender || '',
-										occupation: r.occupation || '',
-										norm_first_name: r.norm_first_name || '',
-										nysiis_last_name: r.nysiis_last_name || '',
-										metaphone_last_name: r.metaphone_last_name || '',
-										norm_race: r.norm_race || (r.race === 'B' || r.race === 'Black' || r.race === 'M' ? 'B' : 'W'),
-										norm_occupation: r.norm_occupation || '',
-										mentions: JSON.stringify([r.mention_id]),
-										household_id: r.household_id || ''
-									}));
-								} else {
-									throw new Error(`Could not load ${county}-VP.csv or mentions.csv. Please select the CSV files using the file pickers above.`);
-								}
-							}
-
-							if (!mentionsRows || mentionsRows.length === 0) {
-								throw new Error('Could not load mentions.csv. Please select mentions.csv using the file picker above.');
-							}
-
-							// Unpack original_data fields onto row objects if present
-							const unpackOriginalData = (rows) => {
-								if (!rows) return;
-								for (const r of rows) {
-									if (r.original_data && typeof r.original_data === 'string') {
-										try {
-											const orig = JSON.parse(r.original_data);
-											for (const [k, v] of Object.entries(orig)) {
-												if ((r[k] === undefined || r[k] === null || r[k] === '') && v !== undefined && v !== null && v !== '') {
-													r[k] = v;
-												}
-											}
-										} catch (e) { }
-									}
-								}
-							};
-							unpackOriginalData(vpRows);
-							unpackOriginalData(mentionsRows);
-
-							this.updateProgress(30, `Loaded ${vpRows.length.toLocaleString()} verified persons and ${mentionsRows.length.toLocaleString()} total mentions.`);
-
-							this.rawVpRows = vpRows;
-
-							// Filter census candidate mentions for current county and record year
-							const targetSource = `${county}-CN-${recordYear}`;
-							const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
-							this.rawCensusMentions = censusMentions;
-
-							$('#statVerified').text(vpRows.length.toLocaleString());
-							$('#statCensusPool').text(censusMentions.length.toLocaleString());
-
-							if (censusMentions.length === 0) {
-								this.updateProgress(100, `Warning: No mentions found with source "${targetSource}".`);
-								this.renderResultsTable([]);
-								return;
-							}
-
-							this.updateProgress(40, `Building census household rosters and phonetic index for ${censusMentions.length.toLocaleString()} records...`);
-
-							// 1. Group census records by household
-							const censusHouseholds = new Map();
-							for (const m of censusMentions) {
-								const hh = this.normStr(m.household_id);
-								if (hh) {
-									if (!censusHouseholds.has(hh)) censusHouseholds.set(hh, []);
-									censusHouseholds.get(hh).push(m);
-								}
-							}
-
-							// 2. Build verified household groups (if household_id or co-mentions present)
-							const vpHouseholds = new Map();
-							for (const vp of vpRows) {
-								const hh = this.normStr(vp.household_id);
-								if (hh) {
-									if (!vpHouseholds.has(hh)) vpHouseholds.set(hh, []);
-									vpHouseholds.get(hh).push(vp);
-								}
-							}
-
-							// 3. Phonetic indexing for candidate retrieval
-							const phoneticIndex = new Map();
-							const makeIndexKey = (prefix, val) => {
-								const clean = val ? String(val).trim().toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
-								return clean ? (prefix + ':' + clean) : '';
-							};
-
-							const addToIndex = (prefix, val, item) => {
-								const key = makeIndexKey(prefix, val);
-								if (!key) return;
-								if (!phoneticIndex.has(key)) phoneticIndex.set(key, []);
-								phoneticIndex.get(key).push(item);
-							};
-
-							for (const m of censusMentions) {
-								if (m.last_name) addToIndex('L', m.last_name, m);
-								if (m.nysiis_last_name) addToIndex('N', m.nysiis_last_name, m);
-								if (m.full_name) addToIndex('F', m.full_name, m);
-								if (m.metaphone_last_name) {
-									const parts = String(m.metaphone_last_name).split(':');
-									if (parts[0]) addToIndex('M', parts[0], m);
-									if (parts[1]) addToIndex('M', parts[1], m);
-								}
-							}
-
-							// Instantiate + configure the shared Match engine for this pass
-							const matcher = new Match();
-							if (typeof matcher.usePool === 'function') matcher.usePool(censusMentions);
-
-							// Tunables (see design notes): birth sigma loosened for age-report
-							// noise; household applied as a noisy-OR BOOST (beta) not a lever.
-							const BETA = 0.6;
-							const BIRTH_PROFILES = {
-								CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
-								SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
-							};
-							const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
-							const promoteFloor = Math.max(floor, ceiling - 0.25);
-							const SECOND_MAX = 0.50;
-
-							// Optional resolved-label CSV -> REAL probability calibration.
-							// Columns: person_id, mention_id, label (1=same person, 0=not).
-							const labelRows = await this.loadCsv('labelsFileInput', [
-								`${county}-LABELS.csv`, `../COMMON/${county}-LABELS.csv`, `labels.csv`
-							]);
-							const labelKey = (pid, mid) => `${this.normStr(pid)}|${this.normStr(mid)}`;
-							const labelMap = new Map();
-							if (labelRows && labelRows.length) {
-								for (const l of labelRows) {
-									const lab = parseInt(l.label, 10);
-									if (l.person_id && l.mention_id && (lab === 0 || lab === 1))
-										labelMap.set(labelKey(l.person_id, l.mention_id), lab);
-								}
-							}
-
-							this.updateProgress(55, 'Scoring verified persons against census pool...');
-
-							const totalVp = vpRows.length;
-							const chunkSize = 150;
-
-							// ---- PASS 1: score every surviving (person, candidate) edge ----
-							const perPerson = new Array(totalVp).fill(null).map(() => []);
-							const edges = [];
-							const calibRows = [];
-
-							for (let idx = 0; idx < totalVp; idx += chunkSize) {
-								const endIdx = Math.min(idx + chunkSize, totalVp);
-								for (let i = idx; i < endIdx; i++) {
-									const person = vpRows[i];
-
-									const pGender = matcher._gender(person);
-									const pRaceCls = matcher._raceClass(person);
-									const pBirthRange = this.parseRange(person.birth_year);
-									const pDeathRange = this.parseRange(person.death_year);
-
-									// died before this census -> cannot be present (leave empty -> UN-MATCHED)
-									if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
-
-									// candidate retrieval via phonetic/surname block
-									const candidateSet = new Set();
-									const addKeys = (prefix, val) => {
-										const k = makeIndexKey(prefix, val);
-										if (!k) return;
-										const list = phoneticIndex.get(k);
-										if (list) for (let c = 0; c < list.length; c++) candidateSet.add(list[c]);
-									};
-									if (person.last_name) addKeys('L', person.last_name);
-									if (person.nysiis_last_name) addKeys('N', person.nysiis_last_name);
-									if (person.full_name) addKeys('F', person.full_name);
-									if (person.metaphone_last_name) {
-										const parts = String(person.metaphone_last_name).split(':');
-										if (parts[0]) addKeys('M', parts[0]);
-										if (parts[1]) addKeys('M', parts[1]);
-									}
-
-									const personKin = (person.household_id && vpHouseholds.get(person.household_id))
-										? vpHouseholds.get(person.household_id).filter(p => p !== person)
-										: [];
-
-									for (const cand of candidateSet) {
-										// blocking knockouts (race collapses B<->M via _raceClass)
-										const cGender = matcher._gender(cand);
-										if (pGender && cGender && pGender !== cGender) continue;
-										const cRaceCls = matcher._raceClass(cand);
-										if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
-										const cBirthRange = this.parseRange(cand.birth_year);
-										if (pBirthRange && cBirthRange) {
-											const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
-												: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
-											if (gap > 12) continue;   // aligned with MatchPerson knockout
-										}
-
-										const candHh = this.normStr(cand.household_id);
-										const candHousehold = (candHh && censusHouseholds.has(candHh))
-											? censusHouseholds.get(candHh).filter(m => m !== cand)
-											: [];
-
-										const matchRes = matcher.MatchPerson(person, cand, {
-											censusYear: yrNum,
-											personKin: personKin,
-											candidateHousehold: candHousehold,
-											weights: LEVER_WEIGHTS,
-											birthProfiles: BIRTH_PROFILES,
-											householdBoost: BETA
-										});
-										if (matchRes.tier === 'KNOCKOUT') continue;
-
-										let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
-										if (candProb == null && typeof matcher.nameProbability === 'function') {
-											candProb = matcher.nameProbability(matchRes.score);
-										}
-										if (candProb == null) {
-											candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
-										}
-
-										const entry = {
-											candidate: cand,
-											score: Number(matchRes.score.toFixed(4)),
-											probability: candProb,
-											tier: matchRes.tier,
-											why: matchRes.why
-										};
-										perPerson[i].push(entry);
-										edges.push({ pi: i, mid: this.normStr(cand.mention_id), entry: entry });
-
-										const lab = labelMap.get(labelKey(person.person_id || person.mention_id, cand.mention_id));
-										if (lab === 0 || lab === 1)
-											calibRows.push({ features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family], label: lab });
-									}
-									perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
-								}
-								this.updateProgress(55 + (endIdx / totalVp) * 25, `Scoring: ${endIdx} of ${totalVp}...`);
-								await new Promise(r => setTimeout(r, 0));
-							}
-
-							// ---- optional REAL calibration on resolved labels ----
-							let calibrated = false;
-							if (calibRows.length >= 8 && typeof matcher.fitCalibration === 'function') {
+					// Unpack original_data fields onto row objects if present
+					const unpackOriginalData = (rows) => {
+						if (!rows) return;
+						for (const r of rows) {
+							if (r.original_data && typeof r.original_data === 'string') {
 								try {
-									matcher.fitCalibration(calibRows);
-									calibrated = true;
-									for (const e of edges) {
-										try {
-											e.entry.probability = Number(matcher.probability(
-												[e.entry.why.name, e.entry.why.birth, e.entry.why.family]).toFixed(3));
-										} catch (_) { }
+									const orig = JSON.parse(r.original_data);
+									for (const [k, v] of Object.entries(orig)) {
+										if ((r[k] === undefined || r[k] === null || r[k] === '') && v !== undefined && v !== null && v !== '') {
+											r[k] = v;
+										}
 									}
-								} catch (err) { console.warn('fitCalibration skipped:', err.message); }
+								} catch (e) { }
 							}
+						}
+					};
+					unpackOriginalData(mentionsRows);
 
-							// ---- PASS 2: global one-to-one assignment (confident-first + slack) ----
-							this.updateProgress(82, 'Assigning: deconflicting contested census mentions...');
-							await new Promise(r => setTimeout(r, 0));
+					// Source records for the selected source year (e.g. AUG-CN-1850)
+					const sourceRows = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === sourceSource);
+					for (const r of sourceRows) {
+						r.person_id = r.person_id || r.mention_id;
+						r.source_id = r.person_id || r.mention_id;
+					}
 
-							const usedMention = new Set();
-							const assigned = new Array(totalVp).fill(null);
-							const locked = new Set();
+					// Target census candidate mentions for the selected census target year (e.g. AUG-CN-1860)
+					const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
 
-							// order persons by best score so the strongest confident claim wins a mention
-							const order = [];
-							for (let i = 0; i < totalVp; i++) if (perPerson[i].length) order.push(i);
-							order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
+					this.updateProgress(30, `Loaded ${sourceRows.length.toLocaleString()} source records (${sourceSource}) and ${censusMentions.length.toLocaleString()} candidate mentions (${targetSource}).`);
 
-							// 1) lock confident, clear winners
-							for (const i of order) {
-								const cands = perPerson[i];
-								const best = cands[0];
-								const second = cands[1] ? cands[1].score : 0;
-								const bmid = this.normStr(best.candidate.mention_id);
-								if (best.score >= ceiling && (best.score - second) >= 0.05 && !usedMention.has(bmid)) {
-									assigned[i] = best;
-									usedMention.add(bmid);
-									locked.add(i);
-								}
-							}
+					const vpRows = sourceRows;
+					this.rawVpRows = vpRows;
+					this.rawCensusMentions = censusMentions;
 
-							// 2) deconflict the rest greedily by score, WITH SLACK (never force sub-floor)
-							const rem = edges
-								.filter(e => !locked.has(e.pi) && !usedMention.has(e.mid) && e.entry.score >= floor)
-								.sort((a, b) => b.entry.score - a.entry.score);
-							for (const e of rem) {
-								if (assigned[e.pi] || usedMention.has(e.mid)) continue;
-								assigned[e.pi] = e.entry;
-								usedMention.add(e.mid);
-							}
+					$('#statVerified').text(sourceRows.length.toLocaleString());
+					$('#statTargetSource').text(`Source: ${sourceSource}`);
+					$('#statCensusPool').text(censusMentions.length.toLocaleString());
+					$('#statCensusTarget').text(`Target: ${targetSource}`);
 
-							// ---- PASS 3: classify MATCH / MAYBE / NEW by margin over assigned edge ----
-							this.updateProgress(90, 'Classifying by margin (best vs runner-up)...');
-							await new Promise(r => setTimeout(r, 0));
+					if (sourceRows.length === 0) {
+						this.updateProgress(100, `Warning: No mentions found for source "${sourceSource}".`);
+						this.renderResultsTable([]);
+						return;
+					}
 
-							const classify = (best, second) => {
-								if (best >= ceiling) return 'MATCH';
-								if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
-								if (best >= floor) return 'MAYBE';
-								return 'UN-MATCHED';
+					if (censusMentions.length === 0) {
+						this.updateProgress(100, `Warning: No candidate mentions found for target census "${targetSource}".`);
+						this.renderResultsTable([]);
+						return;
+					}
+
+					this.updateProgress(40, `Building census household rosters and phonetic index for ${censusMentions.length.toLocaleString()} records...`);
+
+					// 1. Group census records by household
+					const censusHouseholds = new Map();
+					for (const m of censusMentions) {
+						const hh = this.normStr(m.household_id);
+						if (hh) {
+							if (!censusHouseholds.has(hh)) censusHouseholds.set(hh, []);
+							censusHouseholds.get(hh).push(m);
+						}
+					}
+
+					// 2. Build source household groups (if household_id or co-mentions present)
+					const vpHouseholds = new Map();
+					for (const vp of vpRows) {
+						const hh = this.normStr(vp.household_id);
+						if (hh) {
+							if (!vpHouseholds.has(hh)) vpHouseholds.set(hh, []);
+							vpHouseholds.get(hh).push(vp);
+						}
+					}
+
+					// 3. Phonetic indexing for candidate retrieval
+					const phoneticIndex = new Map();
+					const makeIndexKey = (prefix, val) => {
+						const clean = val ? String(val).trim().toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+						return clean ? (prefix + ':' + clean) : '';
+					};
+
+					const addToIndex = (prefix, val, item) => {
+						const key = makeIndexKey(prefix, val);
+						if (!key) return;
+						if (!phoneticIndex.has(key)) phoneticIndex.set(key, []);
+						phoneticIndex.get(key).push(item);
+					};
+
+					for (const m of censusMentions) {
+						if (m.last_name) addToIndex('L', m.last_name, m);
+						if (m.nysiis_last_name) addToIndex('N', m.nysiis_last_name, m);
+						if (m.full_name) addToIndex('F', m.full_name, m);
+						if (m.metaphone_last_name) {
+							const parts = String(m.metaphone_last_name).split(':');
+							if (parts[0]) addToIndex('M', parts[0], m);
+							if (parts[1]) addToIndex('M', parts[1], m);
+						}
+					}
+
+					// Instantiate + configure the shared Match engine for this pass
+					const matcher = new Match();
+					if (typeof matcher.usePool === 'function') matcher.usePool(censusMentions);
+
+					// Tunables (see design notes): birth sigma loosened for age-report
+					// noise; household applied as a noisy-OR BOOST (beta) not a lever.
+					const BETA = 0.6;
+					const BIRTH_PROFILES = {
+						CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
+						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
+					};
+					const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
+					const promoteFloor = Math.max(floor, ceiling - 0.25);
+					const SECOND_MAX = 0.50;
+
+					// Optional resolved-label CSV -> REAL probability calibration.
+					// Columns: person_id, mention_id, label (1=same person, 0=not).
+					const labelRows = await this.loadCsv('labelsFileInput', [
+						`${county}-LABELS.csv`, `../COMMON/${county}-LABELS.csv`, `labels.csv`
+					]);
+					const labelKey = (pid, mid) => `${this.normStr(pid)}|${this.normStr(mid)}`;
+					const labelMap = new Map();
+					if (labelRows && labelRows.length) {
+						for (const l of labelRows) {
+							const lab = parseInt(l.label, 10);
+							if (l.person_id && l.mention_id && (lab === 0 || lab === 1))
+								labelMap.set(labelKey(l.person_id, l.mention_id), lab);
+						}
+					}
+
+					this.updateProgress(55, 'Scoring source persons against target pool...');
+
+					const totalVp = vpRows.length;
+					const chunkSize = 150;
+
+					// ---- PASS 1: score every surviving (person, candidate) edge ----
+					const perPerson = new Array(totalVp).fill(null).map(() => []);
+					const edges = [];
+					const calibRows = [];
+
+					for (let idx = 0; idx < totalVp; idx += chunkSize) {
+						const endIdx = Math.min(idx + chunkSize, totalVp);
+						for (let i = idx; i < endIdx; i++) {
+							const person = vpRows[i];
+
+							const pGender = matcher._gender(person);
+							const pRaceCls = matcher._raceClass(person);
+							const pBirthRange = this.parseRange(person.birth_year);
+							const pDeathRange = this.parseRange(person.death_year);
+
+							// died before this census -> cannot be present (leave empty -> UN-MATCHED)
+							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
+
+							// candidate retrieval via phonetic/surname block
+							const candidateSet = new Set();
+							const addKeys = (prefix, val) => {
+								const k = makeIndexKey(prefix, val);
+								if (!k) return;
+								const list = phoneticIndex.get(k);
+								if (list) for (let c = 0; c < list.length; c++) candidateSet.add(list[c]);
 							};
+							if (person.last_name) addKeys('L', person.last_name);
+							if (person.nysiis_last_name) addKeys('N', person.nysiis_last_name);
+							if (person.full_name) addKeys('F', person.full_name);
+							if (person.metaphone_last_name) {
+								const parts = String(person.metaphone_last_name).split(':');
+								if (parts[0]) addKeys('M', parts[0]);
+								if (parts[1]) addKeys('M', parts[1]);
+							}
 
-							const rawResults = [];
-							for (let i = 0; i < totalVp; i++) {
-								const person = vpRows[i];
-								const cands = perPerson[i];
-								const a = assigned[i];
+							const personKin = (person.household_id && vpHouseholds.get(person.household_id))
+								? vpHouseholds.get(person.household_id).filter(p => p !== person)
+								: [];
 
-								if (!a) {
-									rawResults.push({
-										person: person, status: 'UN-MATCHED', probability: 0, score: 0, bestCandidate: null,
-										why: {
-											name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
-											needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
-											note: cands.length ? 'Lost assignment to a better-fitting person' : 'No candidate cleared blocking'
-										},
-										allCandidates: cands
-									});
-									continue;
+							for (const cand of candidateSet) {
+								// blocking knockouts (race collapses B<->M via _raceClass)
+								const cGender = matcher._gender(cand);
+								if (pGender && cGender && pGender !== cGender) continue;
+								const cRaceCls = matcher._raceClass(cand);
+								if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
+								const cBirthRange = this.parseRange(cand.birth_year);
+								if (pBirthRange && cBirthRange) {
+									const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
+										: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
+									if (gap > 12) continue;   // aligned with MatchPerson knockout
 								}
 
-								const best = a.score;
-								const secondEntry = cands.find(c => this.normStr(c.candidate.mention_id) !== this.normStr(a.candidate.mention_id));
-								const second = secondEntry ? secondEntry.score : 0;
-								const status = classify(best, second);
+								const candHh = this.normStr(cand.household_id);
+								const candHousehold = (candHh && censusHouseholds.has(candHh))
+									? censusHouseholds.get(candHh).filter(m => m !== cand)
+									: [];
 
-								const why = Object.assign({}, a.why, {
-									margin: Number((best - second).toFixed(3)),
-									secondBest: Number(second.toFixed(3))
+								const matchRes = matcher.MatchPerson(person, cand, {
+									censusYear: yrNum,
+									personKin: personKin,
+									candidateHousehold: candHousehold,
+									weights: LEVER_WEIGHTS,
+									birthProfiles: BIRTH_PROFILES,
+									householdBoost: BETA
 								});
+								if (matchRes.tier === 'KNOCKOUT') continue;
 
-								rawResults.push({
-									person: person, status: status,
-									probability: a.probability != null ? a.probability : Number(Math.max(0, Math.min(1, best)).toFixed(3)), score: best,
-									bestCandidate: a.candidate, why: why, allCandidates: cands
-								});
-							}
+								let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
+								if (candProb == null && typeof matcher.nameProbability === 'function') {
+									candProb = matcher.nameProbability(matchRes.score);
+								}
+								if (candProb == null) {
+									candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
+								}
 
-							this.updateProgress(95, 'Formatting explanation levers and top candidate runner-ups...');
-							await new Promise(r => setTimeout(r, 0));
-
-							// Format Why and Runner-ups
-							for (let idx = 0; idx < rawResults.length; idx++) {
-								const r = rawResults[idx];
-								r.hitl_match = '-';
-								const why = r.why || {};
-								const candOffset = r.bestCandidate ? 1 : 0;
-								const runnerUps = (r.allCandidates || []).slice(candOffset, candOffset + 4).map(c => ({
-									mention_id: c.candidate.mention_id,
-									full_name: c.candidate.full_name,
-									nameScore: (c.why && c.why.name) || 0,
-									birthScore: (c.why && c.why.birth) || 0,
-									familyScore: (c.why && c.why.family) || 0,
-									rung: (c.why && c.why.rung) || 'NONE',
-									surnameKind: (c.why && c.why.surnameKind) || 'NONE',
-									probability: (c.probability != null && !isNaN(c.probability)) ? Number(c.probability).toFixed(3) : ((c.score != null && !isNaN(c.score)) ? Number(c.score).toFixed(3) : '0.000'),
-									runnerUpScore: c.score != null ? c.score.toFixed(3) : '0.000'
-								}));
-
-								r.formattedWhy = {
-									levers: {
-										name: why.name != null ? why.name : 0,
-										birth: why.birth != null ? why.birth : 0,
-										family: why.family != null ? why.family : 0,
-										rung: why.rung || 'NONE',
-										surnameKind: why.surnameKind || 'NONE',
-										needsCorroboration: !!why.needsCorroboration,
-										birthGap: why.birthGap != null ? why.birthGap : '',
-										familyCount: why.familyCount != null ? why.familyCount : 0,
-										householdH: why.householdH != null ? why.householdH : 0,
-										margin: why.margin != null ? why.margin : '',
-										secondBest: why.secondBest != null ? why.secondBest : ''
-									},
-									familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
-										? why.familyMatches.join(', ')
-										: '',
-									runnerUps: runnerUps,
-									reconciledNote: why.reconciledNote || ''
+								const entry = {
+									candidate: cand,
+									score: Number(matchRes.score.toFixed(4)),
+									probability: candProb,
+									tier: matchRes.tier,
+									why: matchRes.why
 								};
+								perPerson[i].push(entry);
+								edges.push({ pi: i, mid: this.normStr(cand.mention_id), entry: entry });
+
+								const lab = labelMap.get(labelKey(person.person_id || person.mention_id, cand.mention_id));
+								if (lab === 0 || lab === 1)
+									calibRows.push({ features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family], label: lab });
 							}
+							perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
+						}
+						this.updateProgress(55 + (endIdx / totalVp) * 25, `Scoring: ${endIdx} of ${totalVp}...`);
+						await new Promise(r => setTimeout(r, 0));
+					}
 
-							this.matchedResults = rawResults;
-							if (this.loadedHitlData) {
-								this.applyLoadedHitl(this.matchedResults);
+					// ---- optional REAL calibration on resolved labels ----
+					let calibrated = false;
+					if (calibRows.length >= 8 && typeof matcher.fitCalibration === 'function') {
+						try {
+							matcher.fitCalibration(calibRows);
+							calibrated = true;
+							for (const e of edges) {
+								try {
+									e.entry.probability = Number(matcher.probability(
+										[e.entry.why.name, e.entry.why.birth, e.entry.why.family]).toFixed(3));
+								} catch (_) { }
 							}
+						} catch (err) { console.warn('fitCalibration skipped:', err.message); }
+					}
 
-							this.updateProgress(97, 'Aggregating match statistics and KPIs...');
-							await new Promise(r => setTimeout(r, 0));
+					// ---- PASS 2: global one-to-one assignment (confident-first + slack) ----
+					this.updateProgress(82, 'Assigning: deconflicting contested census mentions...');
+					await new Promise(r => setTimeout(r, 0));
 
-							// Summary stats
-							const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
-							const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
-							const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
+					const usedMention = new Set();
+					const assigned = new Array(totalVp).fill(null);
+					const locked = new Set();
 
-							$('#statMatches').text(matchCount.toLocaleString());
-							$('#statMatchPct').text(`${((matchCount / (totalVp || 1)) * 100).toFixed(1)}% of verified list`);
-							$('#statMaybes').text(maybeCount.toLocaleString());
-							$('#statUnmatched, #statNew').text(unmatchedCount.toLocaleString());
+					// order persons by best score so the strongest confident claim wins a mention
+					const order = [];
+					for (let i = 0; i < totalVp; i++) if (perPerson[i].length) order.push(i);
+					order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
 
-							this.updateProgress(98, 'Displaying results...');
-							await this.renderResultsTable(this.matchedResults);
-							$('#downloadBtn').prop('disabled', false);
+					// 1) lock confident, clear winners
+					for (const i of order) {
+						const cands = perPerson[i];
+						const best = cands[0];
+						const second = cands[1] ? cands[1].score : 0;
+						const bmid = this.normStr(best.candidate.mention_id);
+						if (best.score >= ceiling && (best.score - second) >= 0.05 && !usedMention.has(bmid)) {
+							assigned[i] = best;
+							usedMention.add(bmid);
+							locked.add(i);
+						}
+					}
 
-							this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.`);
+					// 2) deconflict the rest greedily by score, WITH SLACK (never force sub-floor)
+					const rem = edges
+						.filter(e => !locked.has(e.pi) && !usedMention.has(e.mid) && e.entry.score >= floor)
+						.sort((a, b) => b.entry.score - a.entry.score);
+					for (const e of rem) {
+						if (assigned[e.pi] || usedMention.has(e.mid)) continue;
+						assigned[e.pi] = e.entry;
+						usedMention.add(e.mid);
+					}
 
-						} catch (err) {
-							console.error(err);
-							alert(`Error: ${err.message}`);
-							$('#statusText').text(`Error: ${err.message}`);
-						} finally {
-							$('#runBtn').prop('disabled', false).html(`
+					// ---- PASS 3: classify MATCH / MAYBE / NEW by margin over assigned edge ----
+					this.updateProgress(90, 'Classifying by margin (best vs runner-up)...');
+					await new Promise(r => setTimeout(r, 0));
+
+					const classify = (best, second) => {
+						if (best >= ceiling) return 'MATCH';
+						if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
+						if (best >= floor) return 'MAYBE';
+						return 'UN-MATCHED';
+					};
+
+					const rawResults = [];
+					for (let i = 0; i < totalVp; i++) {
+						const person = vpRows[i];
+						const cands = perPerson[i];
+						const a = assigned[i];
+
+						if (!a) {
+							rawResults.push({
+								person: person, status: 'UN-MATCHED', probability: 0, score: 0, bestCandidate: null,
+								why: {
+									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
+									note: cands.length ? 'Lost assignment to a better-fitting person' : 'No candidate cleared blocking'
+								},
+								allCandidates: cands
+							});
+							continue;
+						}
+
+						const best = a.score;
+						const secondEntry = cands.find(c => this.normStr(c.candidate.mention_id) !== this.normStr(a.candidate.mention_id));
+						const second = secondEntry ? secondEntry.score : 0;
+						const status = classify(best, second);
+
+						const why = Object.assign({}, a.why, {
+							margin: Number((best - second).toFixed(3)),
+							secondBest: Number(second.toFixed(3))
+						});
+
+						rawResults.push({
+							person: person, status: status,
+							probability: a.probability != null ? a.probability : Number(Math.max(0, Math.min(1, best)).toFixed(3)), score: best,
+							bestCandidate: a.candidate, why: why, allCandidates: cands
+						});
+					}
+
+					this.updateProgress(95, 'Formatting explanation levers and top candidate runner-ups...');
+					await new Promise(r => setTimeout(r, 0));
+
+					// Format Why and Runner-ups
+					for (let idx = 0; idx < rawResults.length; idx++) {
+						const r = rawResults[idx];
+						r.hitl_match = '-';
+						const why = r.why || {};
+						const candOffset = r.bestCandidate ? 1 : 0;
+						const runnerUps = (r.allCandidates || []).slice(candOffset, candOffset + 4).map(c => ({
+							mention_id: c.candidate.mention_id,
+							full_name: c.candidate.full_name,
+							nameScore: (c.why && c.why.name) || 0,
+							birthScore: (c.why && c.why.birth) || 0,
+							familyScore: (c.why && c.why.family) || 0,
+							rung: (c.why && c.why.rung) || 'NONE',
+							surnameKind: (c.why && c.why.surnameKind) || 'NONE',
+							probability: (c.probability != null && !isNaN(c.probability)) ? Number(c.probability).toFixed(3) : ((c.score != null && !isNaN(c.score)) ? Number(c.score).toFixed(3) : '0.000'),
+							runnerUpScore: c.score != null ? c.score.toFixed(3) : '0.000'
+						}));
+
+						r.formattedWhy = {
+							levers: {
+								name: why.name != null ? why.name : 0,
+								birth: why.birth != null ? why.birth : 0,
+								family: why.family != null ? why.family : 0,
+								rung: why.rung || 'NONE',
+								surnameKind: why.surnameKind || 'NONE',
+								needsCorroboration: !!why.needsCorroboration,
+								birthGap: why.birthGap != null ? why.birthGap : '',
+								familyCount: why.familyCount != null ? why.familyCount : 0,
+								householdH: why.householdH != null ? why.householdH : 0,
+								margin: why.margin != null ? why.margin : '',
+								secondBest: why.secondBest != null ? why.secondBest : ''
+							},
+							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
+								? why.familyMatches.join(', ')
+								: '',
+							runnerUps: runnerUps,
+							reconciledNote: why.reconciledNote || ''
+						};
+					}
+
+					this.matchedResults = rawResults;
+					if (this.loadedHitlData) {
+						this.applyLoadedHitl(this.matchedResults);
+					}
+
+					this.updateProgress(97, 'Aggregating match statistics and KPIs...');
+					await new Promise(r => setTimeout(r, 0));
+
+					// Summary stats
+					const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
+					const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
+					const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
+
+					$('#statMatches').text(matchCount.toLocaleString());
+					$('#statMatchPct').text(`${((matchCount / (totalVp || 1)) * 100).toFixed(1)}% of source list`);
+					$('#statMaybes').text(maybeCount.toLocaleString());
+					$('#statUnmatched, #statNew').text(unmatchedCount.toLocaleString());
+
+					this.updateProgress(98, 'Displaying results...');
+					await this.renderResultsTable(this.matchedResults);
+					$('#downloadBtn').prop('disabled', false);
+
+					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.`);
+
+				} catch (err) {
+					console.error(err);
+					alert(`Error: ${err.message}`);
+					$('#statusText').text(`Error: ${err.message}`);
+				} finally {
+					$('#runBtn').prop('disabled', false).html(`
 						<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 							<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
 						</svg>
 						Run Matcher
 					`);
-						}
-					}
+				}
+			}
 
-					// Render Details Accordion Content on demand
-					renderDetailDrawerHtml(row, i) {
-						const levers = (row.formattedWhy && row.formattedWhy.levers) || {};
-						const famCorr = (row.formattedWhy && row.formattedWhy.familyCorroborated) || 'None';
-						const reconciledNote = (row.formattedWhy && row.formattedWhy.reconciledNote) || '';
+			// Render Details Accordion Content on demand
+			renderDetailDrawerHtml(row, i) {
+				const levers = (row.formattedWhy && row.formattedWhy.levers) || {};
+				const famCorr = (row.formattedWhy && row.formattedWhy.familyCorroborated) || 'None';
+				const reconciledNote = (row.formattedWhy && row.formattedWhy.reconciledNote) || '';
 
-						let runnerUpsHtml = '';
-						if (row.formattedWhy && row.formattedWhy.runnerUps && row.formattedWhy.runnerUps.length > 0) {
-							const sectionTitle = row.status === 'UN-MATCHED'
-								? 'Candidate Mentions Considered (Unmatched):'
-								: (row.status === 'MAYBE' ? 'Top Runner-Up Candidates (MAYBE review):' : 'Runner-Up Candidates:');
-							runnerUpsHtml = `
+				let runnerUpsHtml = '';
+				if (row.formattedWhy && row.formattedWhy.runnerUps && row.formattedWhy.runnerUps.length > 0) {
+					const sectionTitle = row.status === 'UN-MATCHED'
+						? 'Candidate Mentions Considered (Unmatched):'
+						: (row.status === 'MAYBE' ? 'Top Runner-Up Candidates (MAYBE review):' : 'Runner-Up Candidates:');
+					runnerUpsHtml = `
 						<div style="margin-top: 8px;">
 							<h5 style="font-size: 11px; text-transform: uppercase; color: #b45309; font-weight: 700; margin-bottom: 4px;">
 								${sectionTitle}
@@ -2083,9 +2036,9 @@
 							</div>
 						</div>
 					`;
-						}
+				}
 
-						return `
+				return `
 					<div class="breakdown-card">
 						<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
 							<span style="font-weight: 700; color: #1e293b; font-size: 12px;">
@@ -2134,78 +2087,80 @@
 						${runnerUpsHtml}
 					</div>
 				`;
+			}
+
+			// Update Examine Sources Section underneath Results Table
+			updateExamineSourcesSection(row, idx) {
+				const cand = row.bestCandidate || (row.allCandidates && row.allCandidates[0] ? row.allCandidates[0].candidate : null) || {};
+				const vp = row.person || {};
+				const vpMid = vp.mention_id || '-';
+				const candMid = cand.mention_id || (row.status === 'UN-MATCHED' ? 'UN-MATCHED (No Candidate)' : '-');
+				const candName = cand.full_name || (row.status === 'UN-MATCHED' ? 'UN-MATCHED' : '-');
+
+				$('#examineSelectionInfo').html(`Selected Row #${idx + 1}: <strong style="color: #7c3aed;">${vp.full_name || '-'}</strong> [${vpMid}] &harr; <strong style="color: #2563eb;">${candName}</strong> [${candMid}]`);
+
+				const vpContextHtml = this.renderVpContextWindowHtml(vp, `examine-vp-${idx}`);
+				const cnContextHtml = this.renderCensusContextWindowHtml(cand, vp, `examine-cn-${idx}`, row.allCandidates);
+
+				$('#examineSourcesContainer').html(vpContextHtml + cnContextHtml);
+
+				setTimeout(() => {
+					const vpPane = document.getElementById(`examine-vp-${idx}`);
+					const vpCenter = document.getElementById(`vp-center-examine-vp-${idx}`);
+					if (vpPane && vpCenter) {
+						vpPane.scrollTop = vpCenter.offsetTop - (vpPane.clientHeight / 2) + (vpCenter.clientHeight / 2);
 					}
-
-					// Update Examine Sources Section underneath Results Table
-					updateExamineSourcesSection(row, idx) {
-						const cand = row.bestCandidate || (row.allCandidates && row.allCandidates[0] ? row.allCandidates[0].candidate : null) || {};
-						const vp = row.person || {};
-						const vpPid = vp.person_id || vp.mention_id || '-';
-						const candMid = cand.mention_id || (row.status === 'UN-MATCHED' ? 'UN-MATCHED (No Candidate)' : '-');
-						const candName = cand.full_name || (row.status === 'UN-MATCHED' ? 'UN-MATCHED' : '-');
-
-						$('#examineSelectionInfo').html(`Selected Row #${idx + 1}: <strong style="color: #7c3aed;">${vp.full_name || '-'}</strong> [${vpPid}] &harr; <strong style="color: #2563eb;">${candName}</strong> [${candMid}]`);
-
-						const vpContextHtml = this.renderVpContextWindowHtml(vp, `examine-vp-${idx}`);
-						const cnContextHtml = this.renderCensusContextWindowHtml(cand, vp, `examine-cn-${idx}`, row.allCandidates);
-
-						$('#examineSourcesContainer').html(vpContextHtml + cnContextHtml);
-
-						setTimeout(() => {
-							const vpPane = document.getElementById(`examine-vp-${idx}`);
-							const vpCenter = document.getElementById(`vp-center-examine-vp-${idx}`);
-							if (vpPane && vpCenter) {
-								vpPane.scrollTop = vpCenter.offsetTop - (vpPane.clientHeight / 2) + (vpCenter.clientHeight / 2);
-							}
-							const cnPane = document.getElementById(`examine-cn-${idx}`);
-							const cnCenter = document.getElementById(`cn-center-examine-cn-${idx}`);
-							if (cnPane && cnCenter) {
-								cnPane.scrollTop = cnCenter.offsetTop - (cnPane.clientHeight / 2) + (cnCenter.clientHeight / 2);
-							}
-						}, 40);
+					const cnPane = document.getElementById(`examine-cn-${idx}`);
+					const cnCenter = document.getElementById(`cn-center-examine-cn-${idx}`);
+					if (cnPane && cnCenter) {
+						cnPane.scrollTop = cnCenter.offsetTop - (cnPane.clientHeight / 2) + (cnCenter.clientHeight / 2);
 					}
+				}, 40);
+			}
+			// Fast HTML row builder
+			renderRowHtml(row, i) {
+				const statusClass = row.status === 'MATCH' ? 'status-match' : (row.status === 'MAYBE' ? 'status-maybe' : 'status-unmatched');
+				const cand = row.bestCandidate || {};
+				const vp = row.person || {};
 
-					// Fast HTML row builder
-					renderRowHtml(row, i) {
-						const statusClass = row.status === 'MATCH' ? 'status-match' : (row.status === 'MAYBE' ? 'status-maybe' : 'status-unmatched');
-						const cand = row.bestCandidate || {};
-						const vp = row.person || {};
+				// Compute or retrieve age for source person and candidate using respective census years
+				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1850;
+				const censusYear = parseInt($('#censusYearSelect').val()) || 1860;
 
-						// Compute or retrieve age for candidate and verified person
-						const currYear = parseInt($('#yearSelect').val()) || 1860;
-						let candAge = cand.age != null && cand.age !== '' ? cand.age : '';
-						if (candAge === '' && cand.birth_year != null && cand.birth_year !== '') {
-							const by = parseInt(cand.birth_year);
-							if (!isNaN(by)) candAge = Math.max(0, currYear - by);
-						}
-						let vpAge = vp.age != null && vp.age !== '' ? vp.age : '';
-						if (vpAge === '' && vp.birth_year != null && vp.birth_year !== '') {
-							const by = parseInt(vp.birth_year);
-							if (!isNaN(by)) vpAge = Math.max(0, currYear - by);
-						}
+				let vpAge = vp.age != null && vp.age !== '' ? vp.age : '';
+				if (vpAge === '' && vp.birth_year != null && vp.birth_year !== '') {
+					const by = parseInt(vp.birth_year);
+					if (!isNaN(by)) vpAge = Math.max(0, sourceYear - by);
+				}
 
-						const nameDisplay = cand.full_name ? `${cand.full_name} : ${vp.full_name || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.full_name || '-'}</span>`;
-						const ageDisplay = `${candAge !== '' ? candAge : '-'} : ${vpAge !== '' ? vpAge : '-'}`;
-						const birthDisplay = cand.birth_year ? `${cand.birth_year} : ${vp.birth_year || '-'}` : `<span style="color: var(--text-muted);">- : ${vp.birth_year || '-'}</span>`;
-						const genderDisplay = `${cand.gender || '-'} : ${vp.gender || '-'}`;
-						const raceDisplay = `${cand.norm_race || cand.race || '-'} : ${vp.norm_race || vp.race || '-'}`;
-						const mentionIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
-						const personIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
+				let candAge = cand.age != null && cand.age !== '' ? cand.age : '';
+				if (candAge === '' && cand.birth_year != null && cand.birth_year !== '') {
+					const by = parseInt(cand.birth_year);
+					if (!isNaN(by)) candAge = Math.max(0, censusYear - by);
+				}
 
-						const hitlVal = row.hitl_match || '-';
-						row.hitl_match = hitlVal;
+				const nameDisplay = vp.full_name ? `${vp.full_name} : ${cand.full_name || '-'}` : `<span style="color: var(--text-muted);">${vp.full_name || '-'} : -</span>`;
+				const ageDisplay = `${vpAge !== '' ? vpAge : '-'} : ${candAge !== '' ? candAge : '-'}`;
+				const birthDisplay = `${vp.birth_year || '-'} : ${cand.birth_year || '-'}`;
+				const genderDisplay = `${vp.gender || '-'} : ${cand.gender || '-'}`;
+				const raceDisplay = `${vp.norm_race || vp.race || '-'} : ${cand.norm_race || cand.race || '-'}`;
+				const sourceIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
+				const censusIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
 
-						const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
-						const hitlSelectHtml = `
+				const hitlVal = row.hitl_match || '-';
+				row.hitl_match = hitlVal;
+
+				const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
+				const hitlSelectHtml = `
 					<select class="hitl-select ${valClass}" data-index="${i}" title="Select HITL review decision">
 						<option value="-" ${hitlVal === '-' ? 'selected' : ''}>-</option>
 						<option value="MATCHED" ${hitlVal === 'MATCHED' ? 'selected' : ''}>MATCHED</option>
 						<option value="MAYBE" ${hitlVal === 'MAYBE' ? 'selected' : ''}>MAYBE</option>
-						<option value="UNMATCHED" ${hitlVal === 'UNMATCHED' ? 'selected' : ''}>UNMATCHED</option>
+						<option value="UN-MATCHED" ${hitlVal === 'UN-MATCHED' ? 'selected' : ''}>UN-MATCHED</option>
 					</select>
 				`;
 
-						return `
+				return `
 					<tr class="row-clickable" data-index="${i}">
 						<td class="col-num mono" style="color: var(--text-muted); font-size: 11px; text-align: right; font-weight: 600; width: 44px;">${i + 1}</td>
 						<td class="col-status"><span class="status-pill ${statusClass}">${row.status}</span></td>
@@ -2217,456 +2172,506 @@
 						<td class="mono">${birthDisplay}</td>
 						<td class="mono">${genderDisplay}</td>
 						<td class="mono">${raceDisplay}</td>
-						<td>${mentionIdDisplay}</td>
-						<td>${personIdDisplay}</td>
+						<td>${sourceIdDisplay}</td>
+						<td>${censusIdDisplay}</td>
 					</tr>
 				`;
-					}
+			}
 
-					// Append next batch of rows via fast insertAdjacentHTML
-					appendRowsBatch(count = 200) {
-						if (!this.currentFilteredResults || this.renderedRowCount >= this.currentFilteredResults.length) return;
-						const start = this.renderedRowCount;
-						const end = Math.min(start + count, this.currentFilteredResults.length);
-						let batchHtml = '';
-						for (let i = start; i < end; i++) {
-							batchHtml += this.renderRowHtml(this.currentFilteredResults[i], i);
+			// Append next batch of rows via fast insertAdjacentHTML
+			appendRowsBatch(count = 200) {
+				if (!this.currentFilteredResults || this.renderedRowCount >= this.currentFilteredResults.length) return;
+				const start = this.renderedRowCount;
+				const end = Math.min(start + count, this.currentFilteredResults.length);
+				let batchHtml = '';
+				for (let i = start; i < end; i++) {
+					batchHtml += this.renderRowHtml(this.currentFilteredResults[i], i);
+				}
+				const tbody = document.getElementById('tableBody');
+				if (tbody) {
+					tbody.insertAdjacentHTML('beforeend', batchHtml);
+				}
+				this.renderedRowCount = end;
+			}
+
+			// Background streaming render loop to avoid UI freezing
+			scheduleBackgroundRender() {
+				if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
+				const renderNextChunk = () => {
+					if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
+						this.appendRowsBatch(250);
+						if (this.renderedRowCount < this.currentFilteredResults.length) {
+							this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
 						}
-						const tbody = document.getElementById('tableBody');
-						if (tbody) {
-							tbody.insertAdjacentHTML('beforeend', batchHtml);
-						}
-						this.renderedRowCount = end;
+					}
+				};
+				this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
+			}
+
+			// Render and filter results table
+			async renderResultsTable(results = null) {
+				if (results) {
+					this.matchedResults = results;
+				}
+
+				if (!this.matchedResults) {
+					$('#tableBody').html(`
+						<tr>
+							<td colspan="12">
+								<div class="empty-state">
+									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+											d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									No records matched yet. Click "Run Matcher" above to start linkage.
+								</div>
+							</td>
+						</tr>
+					`);
+					$('#resultCountBadge').text('0 matches');
+					return;
+				}
+
+				// Filter by active tab and search query
+				const query = ($('#tableFilterInput').val() || '').toLowerCase().trim();
+				let filtered = this.matchedResults;
+
+				if (this.isSampleMode && this.sampledResults) {
+					filtered = this.sampledResults;
+				}
+
+				if (this.currentFilter !== 'ALL') {
+					filtered = filtered.filter(r => r.status === this.currentFilter);
+				}
+
+				if (query) {
+					filtered = filtered.filter(row => {
+						const cand = row.bestCandidate || {};
+						const vp = row.person || {};
+						const candName = cand.full_name || '';
+						const vpName = vp.full_name || '';
+						const mid = cand.mention_id || '';
+						const pid = vp.person_id || vp.mention_id || '';
+						const hitl = row.hitl_match || '';
+						const text = `${row.status} ${hitl} ${candName} ${vpName} ${mid} ${pid}`.toLowerCase();
+						return text.includes(query);
+					});
+				}
+
+				this.currentFilteredResults = filtered;
+				const sampleBadge = (this.isSampleMode && this.sampledResults) ? ' (Neyman Sample 500)' : '';
+				$('#resultCountBadge').text(`${filtered.length.toLocaleString()} records displayed${sampleBadge}`);
+
+				const tbody = document.getElementById('tableBody');
+				if (tbody) tbody.innerHTML = '';
+				this.renderedRowCount = 0;
+
+				if (filtered.length === 0) {
+					$('#tableBody').html(`
+						<tr>
+							<td colspan="12">
+								<div class="empty-state">No matching records found.</div>
+							</td>
+						</tr>
+					`);
+					return;
+				}
+
+				// Render initial chunk immediately, stream the remainder
+				this.appendRowsBatch(120);
+				if (this.renderedRowCount < filtered.length) {
+					this.scheduleBackgroundRender();
+				}
+			}
+
+			// Export to CSV for HITL Verification
+			exportToCsv() {
+				const dataset = (this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults;
+				if (!dataset || dataset.length === 0) {
+					alert('No matched results to export. Please run the matcher first.');
+					return;
+				}
+
+				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
+				const recordYear = $('#censusYearSelect').val() || '1860';
+				const filename = this.isSampleMode ? `review_Sample500.csv` : `review.csv`;
+
+				const exportData = dataset.map(r => {
+					const cand = r.bestCandidate || {};
+					const vp = r.person || {};
+					const reviewerStatus = r.hitl_match || '-';
+					const prob = (r.probability != null && !isNaN(r.probability)) ? Number(r.probability) : (r.probability !== undefined ? r.probability : '');
+					const whyStr = (typeof r.why === 'object' && r.why !== null) ? JSON.stringify(r.why) : (r.why || '');
+
+					return {
+						reviewer_status: reviewerStatus,
+						verity_status: r.status || '',
+						probability: prob,
+						source_id: vp.person_id || vp.mention_id || '',
+						target_id: cand.mention_id || '',
+						source_full_name: vp.full_name || '',
+						target_full_name: cand.full_name || '',
+						why: whyStr,
+						source_first_name: vp.first_name || '',
+						source_middle_name: vp.middle_name || '',
+						source_last_name: vp.last_name || '',
+						source_birth_year: vp.birth_year || '',
+						source_death_year: vp.death_year || '',
+						source_race: vp.race || '',
+						source_gender: vp.gender || '',
+						source_occupation: vp.occupation || '',
+						source_legal_status: vp.legal_status || '',
+						source_norm_first_name: vp.norm_first_name || '',
+						source_head: vp.head || '',
+						source_household_id: vp.household_id || '',
+						source_family_id: vp.family_id || '',
+						source_birth_place: vp.birth_place || '',
+						source_enumeration: vp.enumeration || '',
+						source_district: vp.district || '',
+						target_first_name: cand.first_name || '',
+						target_middle_name: cand.middle_name || '',
+						target_last_name: cand.last_name || '',
+						target_birth_year: cand.birth_year || '',
+						target_death_year: cand.death_year || '',
+						target_race: cand.race || '',
+						target_gender: cand.gender || '',
+						target_occupation: cand.occupation || '',
+						target_legal_status: cand.legal_status || '',
+						target_head: cand.head || '',
+						target_household_id: cand.household_id || '',
+						target_family_id: cand.family_id || '',
+						target_birth_place: cand.birth_place || '',
+						target_enumeration: cand.enumeration || '',
+						target_district: cand.district || ''
+					};
+				});
+
+				const csvString = Papa.unparse(exportData);
+				const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.setAttribute('href', url);
+				link.setAttribute('download', filename);
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			}
+
+			// Apply loaded HITL decisions to dataset
+			applyLoadedHitl(dataset) {
+				if (!dataset || !this.loadedHitlData) return 0;
+				const { mapExact, mapPerson, mapMention } = this.loadedHitlData;
+				let count = 0;
+				for (const r of dataset) {
+					const vp = r.person || {};
+					const cand = r.bestCandidate || {};
+					const pId = String(vp.person_id || vp.mention_id || '').trim();
+					const mId = String(cand.mention_id || '').trim();
+					const keyExact = `${pId}|${mId}`;
+
+					let hitlVal = null;
+					if (pId && mId && mapExact.has(keyExact)) {
+						hitlVal = mapExact.get(keyExact);
+					} else if (pId && mapPerson.has(pId)) {
+						hitlVal = mapPerson.get(pId);
+					} else if (mId && mapMention.has(mId)) {
+						hitlVal = mapMention.get(mId);
 					}
 
-					// Background streaming render loop to avoid UI freezing
-					scheduleBackgroundRender() {
-						if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
-						const renderNextChunk = () => {
-							if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
-								this.appendRowsBatch(250);
-								if (this.renderedRowCount < this.currentFilteredResults.length) {
-									this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
-								}
-							}
-						};
-						this._bgRenderTimer = requestAnimationFrame(renderNextChunk);
+					if (hitlVal && hitlVal !== '-') {
+						r.hitl_match = hitlVal;
+						count++;
+					}
+				}
+				return count;
+			}
+
+			// Load HITL CSV from file and update current source census list
+			async loadHitlCsv(file) {
+				if (!file) return;
+				try {
+					const results = await new Promise((resolve, reject) => {
+						Papa.parse(file, {
+							header: true,
+							skipEmptyLines: true,
+							transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+							complete: resolve,
+							error: reject
+						});
+					});
+
+					const rows = results.data || [];
+					const mapExact = new Map();
+					const mapPerson = new Map();
+					const mapMention = new Map();
+
+					for (const row of rows) {
+						const rawHitl = String(row.reviewer_status || row.hitl_match || '').trim().toUpperCase();
+						if (!rawHitl || rawHitl === '-') continue;
+						const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
+							: (rawHitl === 'MAYBE' ? 'MAYBE'
+								: (rawHitl === 'UN-MATCHED' ? 'UN-MATCHED' : rawHitl));
+
+						const pId = String(row.source_id || row.source_mention_id || '').trim();
+						const mId = String(row.target_id || row.census_id || row.mention_id || '').trim();
+
+						if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
+						if (pId) mapPerson.set(pId, validHitl);
+						if (mId) mapMention.set(mId, validHitl);
 					}
 
-			// Render Results Table (Instant initial display + smooth background streaming)
-			async renderResultsTable(data) {
-						if (this._bgRenderTimer) cancelAnimationFrame(this._bgRenderTimer);
-						const $tbody = $('#tableBody');
+					this.loadedHitlData = { mapExact, mapPerson, mapMention };
 
-						const activeData = data || ((this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults);
+					let updated = 0;
+					if (this.matchedResults && this.matchedResults.length > 0) {
+						updated = this.applyLoadedHitl(this.matchedResults) || 0;
+						if (this.sampledResults) this.applyLoadedHitl(this.sampledResults);
+						this.renderResultsTable();
+						alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} source census records with HITL decisions.`);
+					} else {
+						alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run the matcher.`);
+					}
+				} catch (err) {
+					console.error('Error loading HITL CSV:', err);
+					alert(`Failed to load HITL CSV: ${err.message}`);
+				}
+			}
 
-						if (!activeData || activeData.length === 0) {
-							$tbody.html('<tr><td colspan="12" class="empty-state">No matching records found.</td></tr>');
-							$('#resultCountBadge').text('0 Rows');
-							this.currentFilteredResults = [];
-							this.renderedRowCount = 0;
+			initEventHandlers() {
+				$('#reviewModeBtn').on('click', (e) => {
+					this.isReviewMode = !this.isReviewMode;
+					$(e.currentTarget).toggleClass('active', this.isReviewMode);
+					$('#resultsTable').toggleClass('review-mode', this.isReviewMode);
+				});
+
+				$('#sampleCheckbox').on('change', (e) => {
+					this.isSampleMode = e.currentTarget.checked;
+					if (this.isSampleMode) {
+						if (!this.matchedResults || this.matchedResults.length === 0) {
+							alert('Please run the matcher first to generate results to sample.');
+							$(e.currentTarget).prop('checked', false);
+							this.isSampleMode = false;
 							return;
 						}
+						this.sampledResults = this.generateNeymanSample(500, 35);
+					} else {
+						this.sampledResults = null;
+					}
+					this.renderResultsTable();
+				});
 
-						const searchTerm = ($('#tableFilterInput').val() || '').toLowerCase().trim();
+				$(document).on('change', '.hitl-select', (e) => {
+					const idx = $(e.currentTarget).data('index');
+					const newVal = e.currentTarget.value;
+					$(e.currentTarget).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
+					if (newVal !== '-') {
+						$(e.currentTarget).addClass(`val-${newVal}`);
+					}
+					if (this.currentFilteredResults && this.currentFilteredResults[idx]) {
+						this.currentFilteredResults[idx].hitl_match = newVal;
+					}
+				});
 
-						const filtered = activeData.filter(row => {
-							if (this.currentFilter !== 'ALL' && row.status !== this.currentFilter) return false;
-							if (!searchTerm) return true;
-							const candName = row.bestCandidate ? (row.bestCandidate.full_name || '') : '';
-							const vpName = row.person ? (row.person.full_name || '') : '';
-							const mid = row.bestCandidate ? (row.bestCandidate.mention_id || '') : '';
-							const pid = row.person ? (row.person.person_id || row.person.mention_id || '') : '';
-							const hitl = row.hitl_match || '';
-							const text = `${row.status} ${hitl} ${candName} ${vpName} ${mid} ${pid}`.toLowerCase();
-							return text.includes(searchTerm);
-						});
+				$(document).on('click', '.hitl-select', (e) => {
+					e.stopPropagation();
+				});
 
-						this.currentFilteredResults = filtered;
+				$('.filter-tab[data-filter]').on('click', (e) => {
+					$('.filter-tab[data-filter]').removeClass('active');
+					$(e.currentTarget).addClass('active');
+					this.currentFilter = $(e.currentTarget).data('filter');
+					this.renderResultsTable();
+				});
 
-						if (filtered.length === 0) {
-							$tbody.html('<tr><td colspan="12" class="empty-state">No matching records found for active filters.</td></tr>');
-							$('#resultCountBadge').text('0 Rows');
-							this.renderedRowCount = 0;
-							return;
-						}
+				let filterDebounce = null;
+				$('#tableFilterInput').on('input', () => {
+					if (filterDebounce) clearTimeout(filterDebounce);
+					filterDebounce = setTimeout(() => {
+						this.renderResultsTable();
+					}, 120);
+				});
 
-						const sampleSuffix = this.isSampleMode ? ' (Neyman 500 Sample)' : '';
-						$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows${sampleSuffix}`);
-
-						// Render initial 100 rows immediately for instant sub-10ms display
-						const initialCount = Math.min(100, filtered.length);
-						let initialHtml = '';
-						for (let i = 0; i < initialCount; i++) {
-							initialHtml += this.renderRowHtml(filtered[i], i);
-						}
-						$tbody.html(initialHtml);
-						this.renderedRowCount = initialCount;
-						$('.table-wrapper').scrollTop(0);
-
-						// Automatically select first row to populate Examine Sources
-						const firstTr = $tbody.find('tr.row-clickable').first();
-						firstTr.addClass('selected-row');
-						this.updateExamineSourcesSection(filtered[0], 0);
-
-						// Stream remaining rows smoothly in background chunks
-						if (this.renderedRowCount < filtered.length) {
-							this.scheduleBackgroundRender();
+				// Infinite / progressive scroll on table-wrapper
+				$('.table-wrapper').on('scroll', (e) => {
+					const el = e.currentTarget;
+					if (el.scrollHeight - el.scrollTop - el.clientHeight < 500) {
+						if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
+							this.appendRowsBatch(200);
 						}
 					}
+				});
 
-					// Export to CSV for HITL Verification
-					exportToCsv() {
-						const dataset = (this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults;
-						if (!dataset || dataset.length === 0) {
-							alert('No matched results to export. Please run the matcher first.');
-							return;
-						}
+				$(document).on('click', '.row-clickable', (e) => {
+					// Don't intercept if clicked directly on Why button or hitl select
+					if ($(e.target).closest('.why-pill-btn, .hitl-select').length > 0) return;
 
-						const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
-						const recordYear = $('#yearSelect').val() || '1860';
-						const filename = this.isSampleMode ? `HITL${recordYear}_Sample500.csv` : `HITL${recordYear}.csv`;
+					const idx = $(e.currentTarget).data('index');
+					$('#tableBody tr.row-clickable').removeClass('selected-row');
+					$(e.currentTarget).addClass('selected-row');
 
-						const exportData = dataset.map(r => {
-							const cand = r.bestCandidate || {};
-							const vp = r.person || {};
-							const hitlMatch = r.hitl_match || '-';
+					const row = this.currentFilteredResults[idx];
+					if (row) {
+						this.updateExamineSourcesSection(row, idx);
+					}
+				});
 
-							return {
-								hitl_match: hitlMatch,
-								status: r.status || '',
-								person_id: vp.person_id || vp.mention_id || '',
-								mention_id: cand.mention_id || '',
-								person_full_name: vp.full_name || '',
-								mention_full_name: cand.full_name || ''
-							};
-						});
+				$(document).on('click', '.why-pill-btn', (e) => {
+					e.stopPropagation();
+					const idx = $(e.currentTarget).data('index');
+					const $row = $(`tr.row-clickable[data-index="${idx}"]`);
+					let $detail = $(`#detail-${idx}`);
 
-						const csvString = Papa.unparse(exportData);
-						const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-						const url = URL.createObjectURL(blob);
-						const link = document.createElement('a');
-						link.setAttribute('href', url);
-						link.setAttribute('download', filename);
-						document.body.appendChild(link);
-						link.click();
-						document.body.removeChild(link);
+					if ($detail.length === 0) {
+						$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="12" style="padding: 6px 10px;" id="detail-content-${idx}"></td></tr>`);
+						$row.after($detail);
 					}
 
-					// Apply loaded HITL decisions to dataset
-					applyLoadedHitl(dataset) {
-						if (!dataset || !this.loadedHitlData) return 0;
-						const { mapExact, mapPerson, mapMention } = this.loadedHitlData;
-						let count = 0;
-						for (const r of dataset) {
-							const vp = r.person || {};
-							const cand = r.bestCandidate || {};
-							const pId = String(vp.person_id || vp.mention_id || '').trim();
-							const mId = String(cand.mention_id || '').trim();
-							const keyExact = `${pId}|${mId}`;
+					const $content = $(`#detail-content-${idx}`);
+					const row = this.currentFilteredResults[idx];
 
-							let hitlVal = null;
-							if (pId && mId && mapExact.has(keyExact)) {
-								hitlVal = mapExact.get(keyExact);
-							} else if (pId && mapPerson.has(pId)) {
-								hitlVal = mapPerson.get(pId);
-							} else if (mId && mapMention.has(mId)) {
-								hitlVal = mapMention.get(mId);
-							}
-
-							if (hitlVal && hitlVal !== '-') {
-								r.hitl_match = hitlVal;
-								count++;
-							}
-						}
-						return count;
+					// Select active row and update source context
+					$('#tableBody tr.row-clickable').removeClass('selected-row');
+					$row.addClass('selected-row');
+					if (row) {
+						this.updateExamineSourcesSection(row, idx);
 					}
 
-					// Load HITL CSV from file and update current verified census list
-					async loadHitlCsv(file) {
-						if (!file) return;
-						try {
-							const results = await new Promise((resolve, reject) => {
-								Papa.parse(file, {
-									header: true,
-									skipEmptyLines: true,
-									transformHeader: h => h.replace(/^\ufeff/, '').trim(),
-									complete: resolve,
-									error: reject
-								});
-							});
-
-							const rows = results.data || [];
-							const mapExact = new Map();
-							const mapPerson = new Map();
-							const mapMention = new Map();
-
-							for (const row of rows) {
-								const rawHitl = String(row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
-								if (!rawHitl || rawHitl === '-') continue;
-								const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
-									: (rawHitl === 'MAYBE' ? 'MAYBE'
-									: (rawHitl === 'UNMATCHED' || rawHitl === 'UN-MATCHED' ? 'UNMATCHED' : rawHitl));
-
-								const pId = String(row.person_id || row.verified_person_id || row.id || '').trim();
-								const mId = String(row.mention_id || row.census_mention_id || '').trim();
-
-								if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
-								if (pId) mapPerson.set(pId, validHitl);
-								if (mId) mapMention.set(mId, validHitl);
-							}
-
-							this.loadedHitlData = { mapExact, mapPerson, mapMention };
-
-							let updated = 0;
-							if (this.matchedResults && this.matchedResults.length > 0) {
-								updated = this.applyLoadedHitl(this.matchedResults) || 0;
-								if (this.sampledResults) this.applyLoadedHitl(this.sampledResults);
-								this.renderResultsTable();
-								alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} verified census records with HITL decisions.`);
-							} else {
-								alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run the matcher.`);
-							}
-						} catch (err) {
-							console.error('Error loading HITL CSV:', err);
-							alert(`Failed to load HITL CSV: ${err.message}`);
-						}
+					// Render breakdown details
+					if (row) {
+						$content.html(this.renderDetailDrawerHtml(row, idx));
 					}
 
-					initEventHandlers() {
-						$('#reviewModeBtn').on('click', (e) => {
-							this.isReviewMode = !this.isReviewMode;
-							$(e.currentTarget).toggleClass('active', this.isReviewMode);
-							$('#resultsTable').toggleClass('review-mode', this.isReviewMode);
-						});
-
-						$('#sampleCheckbox').on('change', (e) => {
-							this.isSampleMode = e.currentTarget.checked;
-							if (this.isSampleMode) {
-								if (!this.matchedResults || this.matchedResults.length === 0) {
-									alert('Please run the matcher first to generate results to sample.');
-									$(e.currentTarget).prop('checked', false);
-									this.isSampleMode = false;
-									return;
-								}
-								this.sampledResults = this.generateNeymanSample(500, 35);
-							} else {
-								this.sampledResults = null;
-							}
-							this.renderResultsTable();
-						});
-
-						$(document).on('change', '.hitl-select', (e) => {
-							const idx = $(e.currentTarget).data('index');
-							const newVal = e.currentTarget.value;
-							$(e.currentTarget).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
-							if (newVal !== '-') {
-								$(e.currentTarget).addClass(`val-${newVal}`);
-							}
-							if (this.currentFilteredResults && this.currentFilteredResults[idx]) {
-								this.currentFilteredResults[idx].hitl_match = newVal;
-							}
-						});
-
-						$(document).on('click', '.hitl-select', (e) => {
-							e.stopPropagation();
-						});
-
-						$('.filter-tab[data-filter]').on('click', (e) => {
-							$('.filter-tab[data-filter]').removeClass('active');
-							$(e.currentTarget).addClass('active');
-							this.currentFilter = $(e.currentTarget).data('filter');
-							this.renderResultsTable();
-						});
-
-						let filterDebounce = null;
-						$('#tableFilterInput').on('input', () => {
-							if (filterDebounce) clearTimeout(filterDebounce);
-							filterDebounce = setTimeout(() => {
-								this.renderResultsTable();
-							}, 120);
-						});
-
-						// Infinite / progressive scroll on table-wrapper
-						$('.table-wrapper').on('scroll', (e) => {
-							const el = e.currentTarget;
-							if (el.scrollHeight - el.scrollTop - el.clientHeight < 500) {
-								if (this.currentFilteredResults && this.renderedRowCount < this.currentFilteredResults.length) {
-									this.appendRowsBatch(200);
-								}
-							}
-						});
-
-						$(document).on('click', '.row-clickable', (e) => {
-							// Don't intercept if clicked directly on Why button or hitl select
-							if ($(e.target).closest('.why-pill-btn, .hitl-select').length > 0) return;
-
-							const idx = $(e.currentTarget).data('index');
-							$('#tableBody tr.row-clickable').removeClass('selected-row');
-							$(e.currentTarget).addClass('selected-row');
-
-							const row = this.currentFilteredResults[idx];
-							if (row) {
-								this.updateExamineSourcesSection(row, idx);
-							}
-						});
-
-						$(document).on('click', '.why-pill-btn', (e) => {
-							e.stopPropagation();
-							const idx = $(e.currentTarget).data('index');
-							const $row = $(`tr.row-clickable[data-index="${idx}"]`);
-							let $detail = $(`#detail-${idx}`);
-
-							if ($detail.length === 0) {
-								$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="12" style="padding: 6px 10px;" id="detail-content-${idx}"></td></tr>`);
-								$row.after($detail);
-							}
-
-							const $content = $(`#detail-content-${idx}`);
-							const row = this.currentFilteredResults[idx];
-
-							// Select active row and update source context
-							$('#tableBody tr.row-clickable').removeClass('selected-row');
-							$row.addClass('selected-row');
-							if (row) {
-								this.updateExamineSourcesSection(row, idx);
-							}
-
-							// Render breakdown details
-							if (row) {
-								$content.html(this.renderDetailDrawerHtml(row, idx));
-							}
-
-							const wasOpen = $detail.hasClass('open');
-							// Toggle open
-							if (wasOpen) {
-								$detail.removeClass('open').hide();
-								$(e.currentTarget).removeClass('active');
-							} else {
-								$detail.addClass('open').show();
-								$(e.currentTarget).addClass('active');
-							}
-						});
-
-						$('#runBtn').on('click', () => this.runMatcher());
-						$('#downloadBtn').on('click', () => this.exportToCsv());
-						$('#loadHitlBtn').on('click', () => $('#hitlFileInput').trigger('click'));
-						$('#hitlFileInput').on('change', (e) => {
-							if (e.target.files && e.target.files.length > 0) {
-								this.loadHitlCsv(e.target.files[0]);
-								e.target.value = '';
-							}
-						});
-
-						this.initResizableDivider();
+					const wasOpen = $detail.hasClass('open');
+					// Toggle open
+					if (wasOpen) {
+						$detail.removeClass('open').hide();
+						$(e.currentTarget).removeClass('active');
+					} else {
+						$detail.addClass('open').show();
+						$(e.currentTarget).addClass('active');
 					}
+				});
 
-					// Draggable and resizable division between Results table and Examine Sources
-					initResizableDivider() {
-						const divider = document.getElementById('dragDivider');
-						const bottomCard = document.getElementById('examineSourcesCard');
-						const topCard = document.querySelector('.table-container');
-						const container = document.querySelector('.container');
+				$('#yearSelect').on('change', () => this.runMatcher());
+				$('#runBtn').on('click', () => this.runMatcher());
+				$('#downloadBtn').on('click', () => this.exportToCsv());
+				$('#loadHitlBtn').on('click', () => $('#hitlFileInput').trigger('click'));
+				$('#hitlFileInput').on('change', (e) => {
+					if (e.target.files && e.target.files.length > 0) {
+						this.loadHitlCsv(e.target.files[0]);
+						e.target.value = '';
+					}
+				});
 
-						if (!divider || !bottomCard || !container) return;
+				this.initResizableDivider();
+			}
 
-						// Restore saved height preference from localStorage
-						const savedHeight = localStorage.getItem('c2c_examine_card_height');
-						if (savedHeight) {
-							const h = parseInt(savedHeight, 10);
-							if (!isNaN(h) && h >= 70 && h <= window.innerHeight - 200) {
-								bottomCard.style.height = `${h}px`;
-							}
-						}
+			// Draggable and resizable division between Results table and Examine Sources
+			initResizableDivider() {
+				const divider = document.getElementById('dragDivider');
+				const bottomCard = document.getElementById('examineSourcesCard');
+				const topCard = document.querySelector('.table-container');
+				const container = document.querySelector('.container');
 
-						let isDragging = false;
-						let startY = 0;
-						let startBottomHeight = 0;
+				if (!divider || !bottomCard || !container) return;
 
-						const onMouseDown = (e) => {
-							isDragging = true;
-							startY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-							startBottomHeight = bottomCard.getBoundingClientRect().height;
-
-							divider.classList.add('dragging');
-							document.body.classList.add('resizing-active');
-
-							document.addEventListener('mousemove', onMouseMove);
-							document.addEventListener('mouseup', onMouseUp);
-							document.addEventListener('touchmove', onTouchMove, { passive: false });
-							document.addEventListener('touchend', onTouchEnd);
-							if (e.preventDefault) e.preventDefault();
-						};
-
-						const onMouseMove = (e) => {
-							if (!isDragging) return;
-							const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-							const deltaY = clientY - startY;
-
-							const containerRect = container.getBoundingClientRect();
-							const minBottomHeight = 70;
-							const maxBottomHeight = Math.max(minBottomHeight, containerRect.height - 180);
-
-							let newBottomHeight = startBottomHeight - deltaY;
-							if (newBottomHeight < minBottomHeight) newBottomHeight = minBottomHeight;
-							if (newBottomHeight > maxBottomHeight) newBottomHeight = maxBottomHeight;
-
-							bottomCard.style.height = `${newBottomHeight}px`;
-							if (e.preventDefault) e.preventDefault();
-						};
-
-						const onTouchMove = (e) => {
-							if (!isDragging) return;
-							onMouseMove(e);
-						};
-
-						const onMouseUp = () => {
-							if (!isDragging) return;
-							isDragging = false;
-							divider.classList.remove('dragging');
-							document.body.classList.remove('resizing-active');
-
-							document.removeEventListener('mousemove', onMouseMove);
-							document.removeEventListener('mouseup', onMouseUp);
-							document.removeEventListener('touchmove', onTouchMove);
-							document.removeEventListener('touchend', onTouchEnd);
-
-							const finalH = Math.round(bottomCard.getBoundingClientRect().height);
-							localStorage.setItem('c2c_examine_card_height', finalH);
-						};
-
-						const onTouchEnd = () => {
-							onMouseUp();
-						};
-
-						divider.addEventListener('mousedown', onMouseDown);
-						divider.addEventListener('touchstart', onMouseDown, { passive: false });
-
-						// Double-click to cycle through default (280px), large (480px), and compact (110px) heights
-						divider.addEventListener('dblclick', () => {
-							const currentH = bottomCard.getBoundingClientRect().height;
-							let targetH = 280;
-							if (Math.abs(currentH - 280) < 30) {
-								targetH = 480;
-							} else if (currentH > 350) {
-								targetH = 110;
-							} else {
-								targetH = 280;
-							}
-							bottomCard.style.transition = 'height 0.2s ease';
-							bottomCard.style.height = `${targetH}px`;
-							localStorage.setItem('c2c_examine_card_height', targetH);
-							setTimeout(() => {
-								bottomCard.style.transition = '';
-							}, 220);
-						});
+				// Restore saved height preference from localStorage
+				const savedHeight = localStorage.getItem('c2c_examine_card_height');
+				if (savedHeight) {
+					const h = parseInt(savedHeight, 10);
+					if (!isNaN(h) && h >= 70 && h <= window.innerHeight - 200) {
+						bottomCard.style.height = `${h}px`;
 					}
 				}
 
-				// Initialize on page load
-				$(document).ready(() => {
-					window.censusMatcherApp = new CensusMatcherApp();
+				let isDragging = false;
+				let startY = 0;
+				let startBottomHeight = 0;
+
+				const onMouseDown = (e) => {
+					isDragging = true;
+					startY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+					startBottomHeight = bottomCard.getBoundingClientRect().height;
+
+					divider.classList.add('dragging');
+					document.body.classList.add('resizing-active');
+
+					document.addEventListener('mousemove', onMouseMove);
+					document.addEventListener('mouseup', onMouseUp);
+					document.addEventListener('touchmove', onTouchMove, { passive: false });
+					document.addEventListener('touchend', onTouchEnd);
+					if (e.preventDefault) e.preventDefault();
+				};
+
+				const onMouseMove = (e) => {
+					if (!isDragging) return;
+					const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+					const deltaY = clientY - startY;
+
+					const containerRect = container.getBoundingClientRect();
+					const minBottomHeight = 70;
+					const maxBottomHeight = Math.max(minBottomHeight, containerRect.height - 180);
+
+					let newBottomHeight = startBottomHeight - deltaY;
+					if (newBottomHeight < minBottomHeight) newBottomHeight = minBottomHeight;
+					if (newBottomHeight > maxBottomHeight) newBottomHeight = maxBottomHeight;
+
+					bottomCard.style.height = `${newBottomHeight}px`;
+					if (e.preventDefault) e.preventDefault();
+				};
+
+				const onTouchMove = (e) => {
+					if (!isDragging) return;
+					onMouseMove(e);
+				};
+
+				const onMouseUp = () => {
+					if (!isDragging) return;
+					isDragging = false;
+					divider.classList.remove('dragging');
+					document.body.classList.remove('resizing-active');
+
+					document.removeEventListener('mousemove', onMouseMove);
+					document.removeEventListener('mouseup', onMouseUp);
+					document.removeEventListener('touchmove', onTouchMove);
+					document.removeEventListener('touchend', onTouchEnd);
+
+					const finalH = Math.round(bottomCard.getBoundingClientRect().height);
+					localStorage.setItem('c2c_examine_card_height', finalH);
+				};
+
+				const onTouchEnd = () => {
+					onMouseUp();
+				};
+
+				divider.addEventListener('mousedown', onMouseDown);
+				divider.addEventListener('touchstart', onMouseDown, { passive: false });
+
+				// Double-click to cycle through default (280px), large (480px), and compact (110px) heights
+				divider.addEventListener('dblclick', () => {
+					const currentH = bottomCard.getBoundingClientRect().height;
+					let targetH = 280;
+					if (Math.abs(currentH - 280) < 30) {
+						targetH = 480;
+					} else if (currentH > 350) {
+						targetH = 110;
+					} else {
+						targetH = 280;
+					}
+					bottomCard.style.transition = 'height 0.2s ease';
+					bottomCard.style.height = `${targetH}px`;
+					localStorage.setItem('c2c_examine_card_height', targetH);
+					setTimeout(() => {
+						bottomCard.style.transition = '';
+					}, 220);
 				});
+			}
+		}
+
+		// Initialize on page load (do not auto-run matching)
+		$(document).ready(() => {
+			window.censusMatcherApp = new CensusMatcherApp();
+		});
 	</script>
 </body>
 

@@ -49,8 +49,19 @@ The people list contains a list of verified people from the census and contains 
 
 *Load lists*
 
-	The verified list is loaded from the file. For Augusta, that file is AUG-VP.csv. 
-	The census is loaded from mentions.csv, filtering for only rows with the source: and record year. (i.e. AUG-CN-1860).
+	- Data is loaded from mentions.csv.
+	- Add a pull down menu to select source, labeled "SOURCE":
+		- 1850
+		- 1860
+		- 1870
+		- 1880 
+	- Add a pull down menu to select census to match to, labeled "TARGET":
+		- 1860
+		- 1870
+		- 1880 
+		- 1900
+	- When clicking "Run Matcher", filter mentions.csv for the selected SOURCE record year (e.g. AUG-CN-1850) and match against the selected CENSUS record year (e.g. AUG-CN-1860).
+	- Don't start matching at startup, or when changing sources.
 
 *Find matches*
 
@@ -82,17 +93,13 @@ The people list contains a list of verified people from the census and contains 
 	Calculate the probability using nameProbability() in Match class for each matched pair. 
 	
 	Save the following columns from the census list  {
-		status
-		probability
-		score
-		full_name of census : full_name of verified
-		birth_year of census : birth_year of verified
-		gender of census : gender of verified
-		norm_race of census : norm_race of verified
-		mention_id	
-		person_id
-		why
+
+		Show only these fields and in this order {
+			reviewer_status	verity_status	probability	source_id	target_id	source_full_name	target_full_name	why	source_first_name	source_middle_name	source_last_name	source_birth_year	source_death_year	source_race	source_gender	source_occupation	source_legal_status	source_norm_first_name	source_head	source_household_id	source_family_id	source_birth_place	source_enumeration	source_district	target_first_name	target_middle_name	target_last_name	target_birth_year	target_death_year	target_race	target_gender	target_occupation	target_legal_status	target_head	target_household_id	target_family_id	target_birth_place	target_enumeration	target_district
 		}
+
+		Show which household members corroborated:
+			family: (i.e. Samuel Lightner-1817, Lucy-1823)
 
 	How to make the why field {
 		Break the score into its levers using matchNameDetail() {
@@ -107,19 +114,8 @@ The people list contains a list of verified people from the census and contains 
 		Show which household members corroborated:
 			family: (i.e. Samuel Lightner-1817, Lucy-1823)
 		
-		Show up to 3 runner-ups if a MAYBE {
-			mention_id: (i.e. AUG-CN-1860-1234)
-			nameScore: (i.e. 1.0)
-			birthScore: (i.e. .6)
-			familyScore: (i.e. .9)
-			rung: (i.e. EXACT_FIRST_SUR)
-			surnameKind: (i.e. EXACT_LASTNAME)
-			needsCorroboration: (i.e. TRUE)
-			runnerUpScore: (i.e. .58)
-			}
-	}
 
-	Save table to disc as “HITL1860“.csv” 
+	Save table to disc as “review.csv” 
 
 **Review view mode**
 
@@ -134,6 +130,3 @@ The people list contains a list of verified people from the census and contains 
 		3. Draw. Simple random sample within each bin, shuffle them together, and write two files: one with scores for you, and one without scores — just the two IDs and a blank label column — so the reviewer can't be anchored by what the model already thinks.
 
 		4. Estimate. Once labels come back (matched / unmatch / maybe), it estimates the true match rate in each bin from your ~40 reviews, scales it up by the bin's full population size, and — because the bin edges are the thresholds — every threshold's precision and recall falls out as a clean ratio of stratified totals. It adds bootstrap confidence intervals and a deterministic "ignorance band" from the unsure labels. The last cell is a smoke test with a fake reviewer.
-		
-
-
