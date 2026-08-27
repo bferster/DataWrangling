@@ -1917,6 +1917,34 @@
 			};
 		}
 
+		// Helper to extract 4-digit year from date or year field
+		function extractYear(val) {
+			if (val == null || val === '') return null;
+			if (typeof val === 'number' && !isNaN(val)) return val;
+			const s = String(val).trim();
+			const match = s.match(/\b(1[6789]\d\d|20\d\d)\b/);
+			if (match) return parseInt(match[1], 10);
+			const n = parseInt(s, 10);
+			return (!isNaN(n) && n > 1600 && n < 2100) ? n : null;
+		}
+
+		// Calculate age as: source year/date - birth_year (ignoring age column)
+		function calculateRecordAge(record, fallbackYear) {
+			if (!record || typeof record !== 'object') return '';
+			const recYear = extractYear(record.source_year)
+				|| extractYear(record.source)
+				|| extractYear(record.source_date)
+				|| extractYear(record.enumerator_date)
+				|| extractYear(record.year)
+				|| extractYear(fallbackYear);
+			const birthYear = extractYear(record.birth_year);
+			if (recYear != null && birthYear != null) {
+				const age = recYear - birthYear;
+				return age >= 0 ? age : '';
+			}
+			return '';
+		}
+
 		// Generic function to render all source fields (except original_data) in 48-row context window
 		function renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix) {
 			if (!items || items.length === 0) {
@@ -1950,20 +1978,8 @@
 					}
 				}
 
-				// Ensure age is populated if birth_year exists, or birth_year if age exists
-				if (merged.age === undefined || merged.age === null || merged.age === '') {
-					if (merged.birth_year != null && merged.birth_year !== '') {
-						const by = parseInt(merged.birth_year);
-						if (!isNaN(by)) {
-							merged.age = Math.max(0, currYear - by);
-						}
-					}
-				} else if (merged.birth_year === undefined || merged.birth_year === null || merged.birth_year === '') {
-					const ag = parseInt(merged.age);
-					if (!isNaN(ag)) {
-						merged.birth_year = currYear - ag;
-					}
-				}
+				// Calculate age by subtracting birth_date/birth_year from source date/year (ignore age column)
+				merged.age = calculateRecordAge(merged, currYear);
 
 				return merged;
 			});

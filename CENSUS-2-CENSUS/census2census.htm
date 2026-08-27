@@ -1299,8 +1299,36 @@
 				};
 			}
 
+			// Helper to extract 4-digit year from date or year field
+			extractYear(val) {
+				if (val == null || val === '') return null;
+				if (typeof val === 'number' && !isNaN(val)) return val;
+				const s = String(val).trim();
+				const match = s.match(/\b(1[6789]\d\d|20\d\d)\b/);
+				if (match) return parseInt(match[1], 10);
+				const n = parseInt(s, 10);
+				return (!isNaN(n) && n > 1600 && n < 2100) ? n : null;
+			}
+
+			// Calculate age as: source year/date - birth_year (ignoring age column)
+			calculateRecordAge(record, fallbackYear) {
+				if (!record || typeof record !== 'object') return '';
+				const recYear = this.extractYear(record.source_year)
+					|| this.extractYear(record.source)
+					|| this.extractYear(record.source_date)
+					|| this.extractYear(record.enumerator_date)
+					|| this.extractYear(record.year)
+					|| this.extractYear(fallbackYear);
+				const birthYear = this.extractYear(record.birth_year);
+				if (recYear != null && birthYear != null) {
+					const age = recYear - birthYear;
+					return age >= 0 ? age : '';
+				}
+				return '';
+			}
+
 			// Generic function to render all source fields in 48-row context window
-			renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix) {
+			renderSourceContextWindowHtml(items, matchFn, titlePrefix, paneId, emptyMsg, centerIdPrefix, recordYear) {
 				if (!items || items.length === 0) {
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No context rows available.'}</div></div>`;
 				}
@@ -1310,7 +1338,8 @@
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 				}
 
-				const currYear = parseInt($('#yearSelect').val()) || 1860;
+				const defaultYear = parseInt($('#censusYearSelect').val()) || 1860;
+				const currYear = recordYear || defaultYear;
 				// Unpack original_data and flatten fields for every row in window
 				const unpackedSlice = win.slice.map(r => {
 					if (!r || typeof r !== 'object') return {};
@@ -1332,20 +1361,8 @@
 						}
 					}
 
-					// Ensure age is populated if birth_year exists, or birth_year if age exists
-					if (merged.age === undefined || merged.age === null || merged.age === '') {
-						if (merged.birth_year != null && merged.birth_year !== '') {
-							const by = parseInt(merged.birth_year);
-							if (!isNaN(by)) {
-								merged.age = Math.max(0, currYear - by);
-							}
-						}
-					} else if (merged.birth_year === undefined || merged.birth_year === null || merged.birth_year === '') {
-						const ag = parseInt(merged.age);
-						if (!isNaN(ag)) {
-							merged.birth_year = currYear - ag;
-						}
-					}
+					// Calculate age by subtracting birth_date/birth_year from source date/year (ignore age column)
+					merged.age = this.calculateRecordAge(merged, currYear);
 
 					return merged;
 				});
@@ -1453,13 +1470,15 @@
 			// Render Top Div: Original lines from Source Census Table
 			renderVpContextWindowHtml(person, paneId) {
 				const targetId = person.mention_id || person.person_id;
+				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1850;
 				return this.renderSourceContextWindowHtml(
 					this.rawVpRows,
 					(p) => (p.mention_id && p.mention_id === targetId) || (p.person_id && p.person_id === targetId) || p === person,
 					'Source Census Table',
 					paneId,
 					'No Source Census context rows loaded.',
-					'vp-center'
+					'vp-center',
+					sourceYear
 				);
 			}
 
@@ -1487,6 +1506,7 @@
 
 				const targetMid = targetCand ? (targetCand.mention_id || '') : '';
 				const pLastName = (person && (person.last_name || person.full_name)) ? (person.last_name || person.full_name).trim().toUpperCase() : '';
+				const censusYear = parseInt($('#censusYearSelect').val()) || 1860;
 
 				return this.renderSourceContextWindowHtml(
 					this.rawCensusMentions,
@@ -1499,7 +1519,8 @@
 					`Target Census (CN) Population Table${subNote}`,
 					paneId,
 					'No Census context rows loaded.',
-					'cn-center'
+					'cn-center',
+					censusYear
 				);
 			}
 
@@ -2123,21 +2144,12 @@
 				const cand = row.bestCandidate || {};
 				const vp = row.person || {};
 
-				// Compute or retrieve age for source person and candidate using respective census years
+				// Compute age for source person and candidate: source date - birth_date (ignore age column)
 				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1850;
 				const censusYear = parseInt($('#censusYearSelect').val()) || 1860;
 
-				let vpAge = vp.age != null && vp.age !== '' ? vp.age : '';
-				if (vpAge === '' && vp.birth_year != null && vp.birth_year !== '') {
-					const by = parseInt(vp.birth_year);
-					if (!isNaN(by)) vpAge = Math.max(0, sourceYear - by);
-				}
-
-				let candAge = cand.age != null && cand.age !== '' ? cand.age : '';
-				if (candAge === '' && cand.birth_year != null && cand.birth_year !== '') {
-					const by = parseInt(cand.birth_year);
-					if (!isNaN(by)) candAge = Math.max(0, censusYear - by);
-				}
+				const vpAge = this.calculateRecordAge(vp, sourceYear);
+				const candAge = (cand && (cand.mention_id || cand.full_name || cand.birth_year || cand.birth_date)) ? this.calculateRecordAge(cand, censusYear) : '';
 
 				const nameDisplay = vp.full_name ? `${vp.full_name} : ${cand.full_name || '-'}` : `<span style="color: var(--text-muted);">${vp.full_name || '-'} : -</span>`;
 				const ageDisplay = `${vpAge !== '' ? vpAge : '-'} : ${candAge !== '' ? candAge : '-'}`;
