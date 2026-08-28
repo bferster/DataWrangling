@@ -1136,12 +1136,22 @@
 				this.matchedResults = [];
 				this.currentFilteredResults = [];
 				this.currentFilter = 'ALL';
-				this.isReviewMode = false;
-				this.isSampleMode = false;
+
+				const isTestMatch = new URLSearchParams(window.location.search).has('testmatch')
+					|| /[?&#]testmatch\b/i.test(window.location.href);
+
+				this.isReviewMode = isTestMatch;
+				this.isSampleMode = isTestMatch;
 				this.sampledResults = null;
 				this.loadedHitlData = null;
 				this.rawVpRows = [];
 				this.rawCensusMentions = [];
+
+				if (isTestMatch) {
+					$('#reviewModeBtn').addClass('active');
+					$('#resultsTable').addClass('review-mode');
+					$('#sampleCheckbox').prop('checked', true);
+				}
 
 				this.initEventHandlers();
 			}
@@ -1558,6 +1568,42 @@
 				return null;
 			}
 
+			// Ensure mentions.csv is loaded and unpacked
+			async ensureMentionsLoaded() {
+				if (this.allMentionsRows && this.allMentionsRows.length > 0) {
+					return this.allMentionsRows;
+				}
+				const mentionsFilenames = [
+					`../../COMMON/mentions.csv`,
+					`../COMMON/mentions.csv`,
+					`COMMON/mentions.csv`,
+					`mentions.csv`,
+					`../mentions.csv`
+				];
+				const mentionsRows = await this.loadCsv('mentionsFileInput', mentionsFilenames);
+				if (!mentionsRows || mentionsRows.length === 0) {
+					throw new Error('Could not load mentions.csv. Please ensure mentions.csv is in the COMMON folder.');
+				}
+				const unpackOriginalData = (rows) => {
+					if (!rows) return;
+					for (const r of rows) {
+						if (r.original_data && typeof r.original_data === 'string') {
+							try {
+								const orig = JSON.parse(r.original_data);
+								for (const [k, v] of Object.entries(orig)) {
+									if ((r[k] === undefined || r[k] === null || r[k] === '') && v !== undefined && v !== null && v !== '') {
+										r[k] = v;
+									}
+								}
+							} catch (e) { }
+						}
+					}
+				};
+				unpackOriginalData(mentionsRows);
+				this.allMentionsRows = mentionsRows;
+				return mentionsRows;
+			}
+
 			// Main Matching Runner
 			async runMatcher() {
 				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
@@ -1601,36 +1647,7 @@
 					$('#statusPanel').slideDown(150);
 					this.updateProgress(10, `Loading census mentions (mentions.csv)...`);
 
-					const mentionsFilenames = [
-						`../../COMMON/mentions.csv`,
-						`../COMMON/mentions.csv`,
-						`COMMON/mentions.csv`,
-						`mentions.csv`,
-						`../mentions.csv`
-					];
-
-					let mentionsRows = await this.loadCsv('mentionsFileInput', mentionsFilenames);
-					if (!mentionsRows || mentionsRows.length === 0) {
-						throw new Error('Could not load mentions.csv. Please ensure mentions.csv is in the COMMON folder.');
-					}
-
-					// Unpack original_data fields onto row objects if present
-					const unpackOriginalData = (rows) => {
-						if (!rows) return;
-						for (const r of rows) {
-							if (r.original_data && typeof r.original_data === 'string') {
-								try {
-									const orig = JSON.parse(r.original_data);
-									for (const [k, v] of Object.entries(orig)) {
-										if ((r[k] === undefined || r[k] === null || r[k] === '') && v !== undefined && v !== null && v !== '') {
-											r[k] = v;
-										}
-									}
-								} catch (e) { }
-							}
-						}
-					};
-					unpackOriginalData(mentionsRows);
+					let mentionsRows = await this.ensureMentionsLoaded();
 
 					// Source records for the selected source year (e.g. AUG-CN-1850)
 					const sourceRows = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === sourceSource);
@@ -2248,8 +2265,13 @@
 				const query = ($('#tableFilterInput').val() || '').toLowerCase().trim();
 				let filtered = this.matchedResults;
 
-				if (this.isSampleMode && this.sampledResults) {
-					filtered = this.sampledResults;
+				if (this.isSampleMode) {
+					if (!this.sampledResults && this.matchedResults && this.matchedResults.length > 0) {
+						this.sampledResults = this.generateNeymanSample(500, 35);
+					}
+					if (this.sampledResults) {
+						filtered = this.sampledResults;
+					}
 				}
 
 				if (this.currentFilter !== 'ALL') {
@@ -2402,6 +2424,9 @@
 			async loadHitlCsv(file) {
 				if (!file) return;
 				try {
+					const isTestMatch = new URLSearchParams(window.location.search).has('testmatch')
+						|| /[?&#]testmatch\b/i.test(window.location.href);
+
 					const results = await new Promise((resolve, reject) => {
 						Papa.parse(file, {
 							header: true,
@@ -2413,6 +2438,212 @@
 					});
 
 					const rows = results.data || [];
+
+					if (isTestMatch) {
+						// -------------------------------------------------------------
+						// TESTMATCH MODE:
+						// Load only: source_id, target_id, reviewer_status, verity_status
+						// Rerun matching on these rows, populating all regular fields.
+						// -------------------------------------------------------------
+						$('#statusPanel').slideDown(150);
+						this.updateProgress(15, `TestMatch: Loading mentions and running match on ${rows.length} rows...`);
+
+						const mentionsRows = await this.ensureMentionsLoaded();
+						const mentionsById = new Map();
+						const households = new Map();
+
+						for (const m of mentionsRows) {
+							const mid = this.normStr(m.mention_id);
+							const pid = this.normStr(m.person_id);
+							if (mid) mentionsById.set(mid, m);
+							if (pid && !mentionsById.has(pid)) mentionsById.set(pid, m);
+
+							const hh = this.normStr(m.household_id);
+							if (hh) {
+								if (!households.has(hh)) households.set(hh, []);
+								households.get(hh).push(m);
+							}
+						}
+
+						const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
+						const sourceYear = $('#sourceYearSelect').val() || '1850';
+						const censusYear = $('#censusYearSelect').val() || '1860';
+						const yrNum = parseInt(censusYear, 10);
+						const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
+						const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
+						const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
+						const promoteFloor = Math.max(floor, ceiling - 0.25);
+						const SECOND_MAX = 0.50;
+
+						const sourceSource = `${county}-CN-${sourceYear}`;
+						const targetSource = `${county}-CN-${censusYear}`;
+						const sourceRows = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === sourceSource);
+						for (const r of sourceRows) {
+							r.person_id = r.person_id || r.mention_id;
+							r.source_id = r.person_id || r.mention_id;
+						}
+						const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
+						this.rawVpRows = sourceRows;
+						this.rawCensusMentions = censusMentions;
+
+						const matcher = new Match();
+						if (typeof matcher.usePool === 'function') matcher.usePool(mentionsRows);
+
+						const BETA = 0.6;
+						const BIRTH_PROFILES = {
+							CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
+							SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
+						};
+						const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
+
+						const classify = (best, second) => {
+							if (best >= ceiling) return 'MATCH';
+							if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
+							if (best >= floor) return 'MAYBE';
+							return 'UN-MATCHED';
+						};
+
+						const recomputedResults = [];
+
+						for (let i = 0; i < rows.length; i++) {
+							const row = rows[i];
+							// Read only the requested 4 fields from CSV
+							const sourceId = this.normStr(row.source_id || row.source_mention_id || '');
+							const targetId = this.normStr(row.target_id || row.census_id || row.mention_id || '');
+							const reviewerStatus = String(row.reviewer_status || row.hitl_match || '').trim();
+							const verityStatus = String(row.verity_status || row.status || '').trim();
+
+							const person = mentionsById.get(sourceId) || {
+								person_id: sourceId, mention_id: sourceId,
+								full_name: '', first_name: '', last_name: '', birth_year: '', gender: '', race: ''
+							};
+
+							const cand = targetId ? mentionsById.get(targetId) : null;
+
+							const rawHitl = reviewerStatus.toUpperCase();
+							const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
+								: (rawHitl === 'MAYBE' ? 'MAYBE'
+									: (rawHitl === 'UN-MATCHED' || rawHitl === 'UNMATCHED' ? 'UN-MATCHED' : (reviewerStatus || '-')));
+
+							if (!cand) {
+								recomputedResults.push({
+									person: person,
+									status: verityStatus || 'UN-MATCHED',
+									probability: 0,
+									score: 0,
+									bestCandidate: null,
+									hitl_match: validHitl,
+									why: {
+										name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+										needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
+										note: 'No target candidate found'
+									},
+									allCandidates: [],
+									formattedWhy: {
+										levers: {
+											name: 0, birth: 0, family: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+											needsCorroboration: false, birthGap: '', familyCount: 0, householdH: 0, margin: '', secondBest: ''
+										},
+										familyCorroborated: '',
+										runnerUps: [],
+										reconciledNote: 'No target candidate'
+									}
+								});
+								continue;
+							}
+
+							const pHh = this.normStr(person.household_id);
+							const personKin = (pHh && households.has(pHh))
+								? households.get(pHh).filter(p => p !== person)
+								: [];
+
+							const cHh = this.normStr(cand.household_id);
+							const candHousehold = (cHh && households.has(cHh))
+								? households.get(cHh).filter(m => m !== cand)
+								: [];
+
+							const matchRes = matcher.MatchPerson(person, cand, {
+								censusYear: yrNum,
+								personKin: personKin,
+								candidateHousehold: candHousehold,
+								weights: LEVER_WEIGHTS,
+								birthProfiles: BIRTH_PROFILES,
+								householdBoost: BETA
+							});
+
+							let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
+							if (candProb == null && typeof matcher.nameProbability === 'function') {
+								candProb = matcher.nameProbability(matchRes.score);
+							}
+							if (candProb == null) {
+								candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
+							}
+
+							const score = Number(matchRes.score.toFixed(4));
+							const status = matchRes.tier === 'KNOCKOUT' ? 'UN-MATCHED' : (verityStatus || classify(score, 0));
+							const why = Object.assign({}, matchRes.why, {
+								margin: '',
+								secondBest: ''
+							});
+
+							const formattedWhy = {
+								levers: {
+									name: why.name != null ? why.name : 0,
+									birth: why.birth != null ? why.birth : 0,
+									family: why.family != null ? why.family : 0,
+									rung: why.rung || 'NONE',
+									surnameKind: why.surnameKind || 'NONE',
+									needsCorroboration: !!why.needsCorroboration,
+									birthGap: why.birthGap != null ? why.birthGap : '',
+									familyCount: why.familyCount != null ? why.familyCount : 0,
+									householdH: why.householdH != null ? why.householdH : 0,
+									margin: '',
+									secondBest: ''
+								},
+								familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
+									? why.familyMatches.join(', ')
+									: '',
+								runnerUps: [],
+								reconciledNote: why.reconciledNote || ''
+							};
+
+							recomputedResults.push({
+								person: person,
+								status: status,
+								probability: candProb,
+								score: score,
+								bestCandidate: cand,
+								hitl_match: validHitl,
+								why: why,
+								allCandidates: [{ candidate: cand, score: score, probability: candProb, tier: matchRes.tier, why: why }],
+								formattedWhy: formattedWhy
+							});
+						}
+
+						this.matchedResults = recomputedResults;
+						this.sampledResults = null;
+						this.isSampleMode = false;
+						$('#sampleCheckbox').prop('checked', false);
+
+						// Update KPI stats
+						const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
+						const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
+						const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
+
+						$('#statMatches').text(matchCount.toLocaleString());
+						$('#statMatchPct').text(`${((matchCount / (recomputedResults.length || 1)) * 100).toFixed(1)}% of test list`);
+						$('#statMaybes').text(maybeCount.toLocaleString());
+						$('#statUnmatched').text(unmatchedCount.toLocaleString());
+						$('#downloadBtn').prop('disabled', false);
+						$('#resultCountBadge').text(`${recomputedResults.length.toLocaleString()} Rows (TestMatch)`);
+
+						this.updateProgress(100, `TestMatch complete: Re-matched ${recomputedResults.length.toLocaleString()} rows from ${file.name}.`);
+						this.renderResultsTable();
+						alert(`TestMatch: Loaded and re-matched ${recomputedResults.length.toLocaleString()} rows from ${file.name}.`);
+						return;
+					}
+
+					// Standard HITL Loading mode (when testmatch is not active)
 					const mapExact = new Map();
 					const mapPerson = new Map();
 					const mapMention = new Map();
@@ -2459,13 +2690,9 @@
 				$('#sampleCheckbox').on('change', (e) => {
 					this.isSampleMode = e.currentTarget.checked;
 					if (this.isSampleMode) {
-						if (!this.matchedResults || this.matchedResults.length === 0) {
-							alert('Please run the matcher first to generate results to sample.');
-							$(e.currentTarget).prop('checked', false);
-							this.isSampleMode = false;
-							return;
+						if (this.matchedResults && this.matchedResults.length > 0) {
+							this.sampledResults = this.generateNeymanSample(500, 35);
 						}
-						this.sampledResults = this.generateNeymanSample(500, 35);
 					} else {
 						this.sampledResults = null;
 					}
