@@ -10,8 +10,9 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-	<!-- Shared Match Engine -->
-	<script src="../COMMON/match.js"></script>
+	<!-- Shared Match Engine (falls back to the hosted copy for standalone preview) -->
+	<script src="../COMMON/match.js"
+		onerror="document.write('<scr'+'ipt src=&quot;https://stagetools.com/verite/COMMON/match.js&quot;><\/scr'+'ipt>')"></script>
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -909,9 +910,9 @@
 					<div class="form-group">
 						<label for="sourceYearSelect">SOURCE</label>
 						<select id="sourceYearSelect" class="form-control">
-							<option value="1850" selected>1850</option>
+							<option value="1850">1850</option>
 							<option value="1860">1860</option>
-							<option value="1870">1870</option>
+							<option value="1870" selected>1870</option>
 							<option value="1880">1880</option>
 							<option value="1900">1900</option>
 						</select>
@@ -920,9 +921,9 @@
 					<div class="form-group">
 						<label for="censusYearSelect">TARGET</label>
 						<select id="censusYearSelect" class="form-control">
-							<option value="1860" selected>1860</option>
+							<option value="1860">1860</option>
 							<option value="1870">1870</option>
-							<option value="1880">1880</option>
+							<option value="1880" selected>1880</option>
 							<option value="1900">1900</option>
 						</select>
 					</div>
@@ -944,7 +945,14 @@
 					</div>
 
 					<div class="form-group"
-						style="display: flex; flex-direction: row; gap: 6px; grid-column: 1 / -1; margin-top: 6px;">
+						style="display: flex; flex-direction: row; gap: 6px; grid-column: 1 / -1; margin-top: 6px; align-items: center;">
+						<label
+							title="Multi-pass cascade: strict anchors -> household bridges -> surname-change retrieval -> residual sweep. Unchecked = single pass."
+							style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none; white-space: nowrap; padding-right: 4px;">
+							<input type="checkbox" id="multiPassCheckbox"
+								style="cursor: pointer; accent-color: var(--accent-primary);">
+							<span>MultiPass</span>
+						</label>
 						<button id="runBtn" class="btn btn-primary" style="flex: 1;">
 							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 								<path
@@ -992,13 +1000,13 @@
 					<div class="stat-card" style="--stat-accent: #3b82f6;">
 						<div class="stat-title">Source Pool</div>
 						<div class="stat-value" id="statVerified">0</div>
-						<div class="stat-sub" id="statTargetSource">Target: AUG-VP</div>
+						<div class="stat-sub" id="statTargetSource">Source: AUG-CN-1870</div>
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #8b5cf6;">
 						<div class="stat-title">Target Pool</div>
 						<div class="stat-value" id="statCensusPool">0</div>
-						<div class="stat-sub" id="statCensusTarget">Source: AUG-CN-1860</div>
+						<div class="stat-sub" id="statCensusTarget">Target: AUG-CN-1880</div>
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #10b981;">
@@ -1179,6 +1187,39 @@
 				return [Math.min(...y), Math.max(...y)];
 			}
 
+			// Household grouping key. 1850/1860 populate household_id; 1870/1880
+			// populate ONLY family_id -- without this fallback Lever C silently
+			// scores zero for every later-census pass.
+			hhKey(rec) {
+				if (!rec) return '';
+				const isPlaceholder = (v) => {
+					if (!v) return true;
+					const s = String(v).trim().toUpperCase();
+					return s === '' || s === '0' || s === '-1' || s === '-' || s === 'NULL' || s === 'NONE' || s === 'N/A' || s === 'UNKNOWN';
+				};
+				const h = this.normStr(rec.household_id);
+				if (!isPlaceholder(h)) return h;
+				const f = this.normStr(rec.family_id);
+				if (!isPlaceholder(f)) return f;
+				return '';
+			}
+
+			// Non-surname blocking key: first name + 5-year birth bucket. This is the
+			// only retrieval path that survives a surname change (married women),
+			// who are otherwise never even scored by the surname/phonetic index.
+			fbKey(firstName, bucket) {
+				const fn = this.normUpper(firstName);
+				return fn ? (fn + 'B' + bucket) : '';
+			}
+
+			birthBuckets(rec) {
+				const r = this.parseRange(rec.birth_year);
+				if (!r) return [];
+				const out = [];
+				for (let b = Math.floor(r[0] / 5); b <= Math.floor(r[1] / 5); b++) out.push(b);
+				return out;
+			}
+
 			getProb(row) {
 				if (row.probability != null && !isNaN(row.probability)) return Number(row.probability);
 				if (row.score != null && !isNaN(row.score)) return Math.min(1.0, Math.max(0.0, Number(row.score)));
@@ -1348,7 +1389,7 @@
 					return `<div class="context-box"><div class="context-box-header"><span>${titlePrefix}</span></div><div style="padding: 12px; color: var(--text-muted); font-size: 12px;">${emptyMsg || 'No matching row found.'}</div></div>`;
 				}
 
-				const defaultYear = parseInt($('#censusYearSelect').val()) || 1860;
+				const defaultYear = parseInt($('#censusYearSelect').val()) || 1880;
 				const currYear = recordYear || defaultYear;
 				// Unpack original_data and flatten fields for every row in window
 				const unpackedSlice = win.slice.map(r => {
@@ -1480,7 +1521,7 @@
 			// Render Top Div: Original lines from Source Census Table
 			renderVpContextWindowHtml(person, paneId) {
 				const targetId = person.mention_id || person.person_id;
-				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1850;
+				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1870;
 				return this.renderSourceContextWindowHtml(
 					this.rawVpRows,
 					(p) => (p.mention_id && p.mention_id === targetId) || (p.person_id && p.person_id === targetId) || p === person,
@@ -1516,7 +1557,7 @@
 
 				const targetMid = targetCand ? (targetCand.mention_id || '') : '';
 				const pLastName = (person && (person.last_name || person.full_name)) ? (person.last_name || person.full_name).trim().toUpperCase() : '';
-				const censusYear = parseInt($('#censusYearSelect').val()) || 1860;
+				const censusYear = parseInt($('#censusYearSelect').val()) || 1880;
 
 				return this.renderSourceContextWindowHtml(
 					this.rawCensusMentions,
@@ -1574,8 +1615,8 @@
 					return this.allMentionsRows;
 				}
 				const mentionsFilenames = [
-					`../../COMMON/mentions.csv`,
 					`../COMMON/mentions.csv`,
+					`../../COMMON/mentions.csv`,
 					`COMMON/mentions.csv`,
 					`mentions.csv`,
 					`../mentions.csv`
@@ -1607,8 +1648,8 @@
 			// Main Matching Runner
 			async runMatcher() {
 				const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
-				const sourceYear = $('#sourceYearSelect').val() || '1850';
-				const censusYear = $('#censusYearSelect').val() || '1860';
+				const sourceYear = $('#sourceYearSelect').val() || '1870';
+				const censusYear = $('#censusYearSelect').val() || '1880';
 				const yrNum = parseInt(censusYear, 10);
 				const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
 				const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
@@ -1687,7 +1728,7 @@
 					// 1. Group census records by household
 					const censusHouseholds = new Map();
 					for (const m of censusMentions) {
-						const hh = this.normStr(m.household_id);
+						const hh = this.hhKey(m);
 						if (hh) {
 							if (!censusHouseholds.has(hh)) censusHouseholds.set(hh, []);
 							censusHouseholds.get(hh).push(m);
@@ -1697,12 +1738,34 @@
 					// 2. Build source household groups (if household_id or co-mentions present)
 					const vpHouseholds = new Map();
 					for (const vp of vpRows) {
-						const hh = this.normStr(vp.household_id);
+						const hh = this.hhKey(vp);
 						if (hh) {
 							if (!vpHouseholds.has(hh)) vpHouseholds.set(hh, []);
 							vpHouseholds.get(hh).push(vp);
 						}
 					}
+
+					// Guard against a bad/placeholder family_id (esp. 1870/1880, which
+					// have no household_id and fall back to family_id -- see hhKey) that
+					// collapses thousands of unrelated records into one pseudo-household.
+					// Such a group is not real household data, and if left in it turns
+					// every candidate score in that bucket into an O(household size)
+					// scoreHousehold() nested loop (match.js) -- multiplied across up to
+					// MAX_CANDIDATES candidates per person, that's what hangs the round.
+					const MAX_HOUSEHOLD_SIZE = 40;
+					const dropOversizedHouseholds = (map, label) => {
+						let dropped = 0, droppedRecords = 0;
+						for (const [key, list] of map) {
+							if (list.length > MAX_HOUSEHOLD_SIZE) {
+								droppedRecords += list.length;
+								map.delete(key);
+								dropped++;
+							}
+						}
+						if (dropped) console.warn(`${label}: ignored ${dropped} oversized household key(s) (${droppedRecords.toLocaleString()} records, likely a placeholder/blank family_id)`);
+					};
+					dropOversizedHouseholds(censusHouseholds, 'censusHouseholds');
+					dropOversizedHouseholds(vpHouseholds, 'vpHouseholds');
 
 					// 3. Phonetic indexing for candidate retrieval
 					const phoneticIndex = new Map();
@@ -1727,6 +1790,9 @@
 							if (parts[0]) addToIndex('M', parts[0], m);
 							if (parts[1]) addToIndex('M', parts[1], m);
 						}
+						// surname-independent key (see fbKey) for the surname-change round
+						const fnm = m.norm_first_name || m.first_name;
+						if (fnm) for (const b of this.birthBuckets(m)) addToIndex('FB', this.fbKey(fnm, b), m);
 					}
 
 					// Instantiate + configure the shared Match engine for this pass
@@ -1747,7 +1813,11 @@
 					// Optional resolved-label CSV -> REAL probability calibration.
 					// Columns: person_id, mention_id, label (1=same person, 0=not).
 					const labelRows = await this.loadCsv('labelsFileInput', [
-						`${county}-LABELS.csv`, `../COMMON/${county}-LABELS.csv`, `labels.csv`
+						`../COMMON/${county}-LABELS.csv`,
+						`${county}-LABELS.csv`,
+						`COMMON/${county}-LABELS.csv`,
+						`labels.csv`,
+						`../COMMON/labels.csv`
 					]);
 					const labelKey = (pid, mid) => `${this.normStr(pid)}|${this.normStr(mid)}`;
 					const labelMap = new Map();
@@ -1764,99 +1834,278 @@
 					const totalVp = vpRows.length;
 					const chunkSize = 150;
 
-					// ---- PASS 1: score every surviving (person, candidate) edge ----
+					// ---- MULTI-PASS ROUND CASCADE ----
+					// Checked   -> 4 rounds: strict anchors, household bridges,
+					//              surname-change retrieval, residual sweep.
+					// Unchecked -> one round, original single-pass behavior.
+					const multiPass = $('#multiPassCheckbox').is(':checked');
+
+					const ROUNDS = multiPass ? [
+						{ id: 1, label: 'Anchors', ceil: Math.max(ceiling, 0.90), minLevers: 3, margin: 0.05, bridges: false, firstName: false },
+						{ id: 2, label: 'Bridges', ceil: ceiling, minLevers: 2, margin: 0.05, bridges: true, firstName: false },
+						{ id: 3, label: 'Surname change', ceil: ceiling, minLevers: 1, margin: 0.05, bridges: true, firstName: true },
+						{ id: 4, label: 'Residual', ceil: promoteFloor, minLevers: 1, margin: 0.10, bridges: true, firstName: true }
+					] : [
+						{ id: 1, label: 'Single pass', ceil: ceiling, minLevers: 0, margin: 0.05, bridges: false, firstName: false }
+					];
+
+					const roundLabelById = new Map(ROUNDS.map(r => [r.id, r.label]));
+					roundLabelById.set(0, 'HITL confirmed');
+
+					const MAX_CANDIDATES = 800;   // hard cap on retrieval per person per round
+
 					const perPerson = new Array(totalVp).fill(null).map(() => []);
+					const seenPair = new Array(totalVp).fill(null).map(() => new Set());
 					const edges = [];
 					const calibRows = [];
+					const usedMention = new Set();          // claim-once ledger
+					const assigned = new Array(totalVp).fill(null);
+					const assignedRound = new Array(totalVp).fill(-1);
+					const roundStats = [];
+					let bridges = new Map();                // source household -> target household
 
-					for (let idx = 0; idx < totalVp; idx += chunkSize) {
-						const endIdx = Math.min(idx + chunkSize, totalVp);
-						for (let i = idx; i < endIdx; i++) {
-							const person = vpRows[i];
-
-							const pGender = matcher._gender(person);
-							const pRaceCls = matcher._raceClass(person);
-							const pBirthRange = this.parseRange(person.birth_year);
-							const pDeathRange = this.parseRange(person.death_year);
-
-							// died before this census -> cannot be present (leave empty -> UN-MATCHED)
-							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
-
-							// candidate retrieval via phonetic/surname block
-							const candidateSet = new Set();
-							const addKeys = (prefix, val) => {
-								const k = makeIndexKey(prefix, val);
-								if (!k) return;
-								const list = phoneticIndex.get(k);
-								if (list) for (let c = 0; c < list.length; c++) candidateSet.add(list[c]);
-							};
-							if (person.last_name) addKeys('L', person.last_name);
-							if (person.nysiis_last_name) addKeys('N', person.nysiis_last_name);
-							if (person.full_name) addKeys('F', person.full_name);
-							if (person.metaphone_last_name) {
-								const parts = String(person.metaphone_last_name).split(':');
-								if (parts[0]) addKeys('M', parts[0]);
-								if (parts[1]) addKeys('M', parts[1]);
+					// Cross-run persistence from a loaded HITL CSV:
+					//   MATCHED    -> pre-locked before round 1, never re-litigated
+					//   UN-MATCHED -> never-match; that pair is excluded from every round
+					const neverMatch = new Set();
+					const preClaimed = new Map();
+					if (this.loadedHitlData && this.loadedHitlData.mapExact) {
+						for (const [k, v] of this.loadedHitlData.mapExact) {
+							if (v === 'UN-MATCHED') neverMatch.add(k);
+							else if (v === 'MATCHED') {
+								const parts = k.split('|');
+								if (parts[0] && parts[1]) preClaimed.set(parts[0], parts[1]);
 							}
-
-							const personKin = (person.household_id && vpHouseholds.get(person.household_id))
-								? vpHouseholds.get(person.household_id).filter(p => p !== person)
-								: [];
-
-							for (const cand of candidateSet) {
-								// blocking knockouts (race collapses B<->M via _raceClass)
-								const cGender = matcher._gender(cand);
-								if (pGender && cGender && pGender !== cGender) continue;
-								const cRaceCls = matcher._raceClass(cand);
-								if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
-								const cBirthRange = this.parseRange(cand.birth_year);
-								if (pBirthRange && cBirthRange) {
-									const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
-										: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
-									if (gap > 12) continue;   // aligned with MatchPerson knockout
-								}
-
-								const candHh = this.normStr(cand.household_id);
-								const candHousehold = (candHh && censusHouseholds.has(candHh))
-									? censusHouseholds.get(candHh).filter(m => m !== cand)
-									: [];
-
-								const matchRes = matcher.MatchPerson(person, cand, {
-									censusYear: yrNum,
-									personKin: personKin,
-									candidateHousehold: candHousehold,
-									weights: LEVER_WEIGHTS,
-									birthProfiles: BIRTH_PROFILES,
-									householdBoost: BETA
-								});
-								if (matchRes.tier === 'KNOCKOUT') continue;
-
-								let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
-								if (candProb == null && typeof matcher.nameProbability === 'function') {
-									candProb = matcher.nameProbability(matchRes.score);
-								}
-								if (candProb == null) {
-									candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
-								}
-
-								const entry = {
-									candidate: cand,
-									score: Number(matchRes.score.toFixed(4)),
-									probability: candProb,
-									tier: matchRes.tier,
-									why: matchRes.why
-								};
-								perPerson[i].push(entry);
-								edges.push({ pi: i, mid: this.normStr(cand.mention_id), entry: entry });
-
-								const lab = labelMap.get(labelKey(person.person_id || person.mention_id, cand.mention_id));
-								if (lab === 0 || lab === 1)
-									calibRows.push({ features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family], label: lab });
-							}
-							perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
 						}
-						this.updateProgress(55 + (endIdx / totalVp) * 25, `Scoring: ${endIdx} of ${totalVp}...`);
-						await new Promise(r => setTimeout(r, 0));
+					}
+
+					const pKeyOf = (p) => this.normStr(p.person_id || p.mention_id);
+					const mentionById = new Map();
+					for (const m of censusMentions) mentionById.set(this.normStr(m.mention_id), m);
+
+					const kinOf = (person) => {
+						const h = this.hhKey(person);
+						return (h && vpHouseholds.has(h)) ? vpHouseholds.get(h).filter(p => p !== person) : [];
+					};
+					const householdOf = (cand) => {
+						const h = this.hhKey(cand);
+						return (h && censusHouseholds.has(h)) ? censusHouseholds.get(h).filter(m => m !== cand) : [];
+					};
+					const scorePair = (person, cand) => matcher.MatchPerson(person, cand, {
+						censusYear: yrNum,
+						personKin: kinOf(person),
+						candidateHousehold: householdOf(cand),
+						weights: LEVER_WEIGHTS,
+						birthProfiles: BIRTH_PROFILES,
+						householdBoost: BETA
+					});
+
+					// Majority-vote map of where each source household landed, rebuilt
+					// after every round so later rounds can seed from confirmed families.
+					const rebuildBridges = () => {
+						const votes = new Map();
+						for (let i = 0; i < totalVp; i++) {
+							const a = assigned[i];
+							if (!a) continue;
+							const sh = this.hhKey(vpRows[i]);
+							const th = this.hhKey(a.candidate);
+							if (!sh || !th) continue;
+							if (!votes.has(sh)) votes.set(sh, new Map());
+							const c = votes.get(sh);
+							c.set(th, (c.get(th) || 0) + 1);
+						}
+						const best = new Map();
+						for (const [sh, c] of votes) {
+							let bt = null, bn = 0;
+							for (const [th, n] of c) if (n > bn) { bn = n; bt = th; }
+							if (bt) best.set(sh, bt);
+						}
+						return best;
+					};
+
+					// Candidate retrieval under one round's rules.
+					const retrieve = (person, round, hasPlausible) => {
+						const set = new Set();
+						const addKeys = (prefix, val) => {
+							if (set.size >= MAX_CANDIDATES) return;
+							const k = makeIndexKey(prefix, val);
+							if (!k) return;
+							const list = phoneticIndex.get(k);
+							if (list) for (let c = 0; c < list.length && set.size < MAX_CANDIDATES; c++) set.add(list[c]);
+						};
+						if (person.last_name) addKeys('L', person.last_name);
+						if (person.nysiis_last_name) addKeys('N', person.nysiis_last_name);
+						if (person.full_name) addKeys('F', person.full_name);
+						if (person.metaphone_last_name) {
+							const parts = String(person.metaphone_last_name).split(':');
+							if (parts[0]) addKeys('M', parts[0]);
+							if (parts[1]) addKeys('M', parts[1]);
+						}
+						// bridge: pull the whole target household this family landed in,
+						// regardless of surname (recovers bad surname transcriptions and
+						// disambiguates common names against a known family)
+						if (round.bridges) {
+							const sh = this.hhKey(person);
+							const th = sh ? bridges.get(sh) : null;
+							if (th && censusHouseholds.has(th)) {
+								for (const m of censusHouseholds.get(th)) { if (set.size < MAX_CANDIDATES) set.add(m); }
+							}
+						}
+						// surname-independent retrieval (married women). Gated to later
+						// rounds because the unassigned pool is much smaller by then, and
+						// skipped for anyone who already has a plausible candidate -- this
+						// net is the dominant cost of the cascade.
+						if (round.firstName && !(hasPlausible)) {
+							const r = this.parseRange(person.birth_year);
+							const fn = person.norm_first_name || person.first_name;
+							if (r && fn) {
+								const b0 = Math.floor(r[0] / 5) - 3, b1 = Math.floor(r[1] / 5) + 3;
+								for (let b = b0; b <= b1 && set.size < MAX_CANDIDATES; b++) addKeys('FB', this.fbKey(fn, b));
+							}
+						}
+						return set;
+					};
+
+					// ---- ROUND 0: re-apply confirmed HITL claims ----
+					let preLocked = 0;
+					if (preClaimed.size) {
+						for (let i = 0; i < totalVp; i++) {
+							const mid = preClaimed.get(pKeyOf(vpRows[i]));
+							if (!mid || usedMention.has(mid)) continue;
+							const cand = mentionById.get(mid);
+							if (!cand) continue;
+							const mr = scorePair(vpRows[i], cand);
+							const entry = {
+								candidate: cand, score: Number((mr.score || 0).toFixed(4)),
+								probability: mr.probability != null ? Number(mr.probability.toFixed(3)) : null,
+								tier: mr.tier, levers: (mr.firedLevers || []).length,
+								round: 0, roundLabel: 'HITL confirmed',
+								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded HITL CSV' })
+							};
+							perPerson[i].push(entry);
+							seenPair[i].add(mid);
+							assigned[i] = entry;
+							assignedRound[i] = 0;
+							usedMention.add(mid);
+							preLocked++;
+						}
+						if (preLocked) { bridges = rebuildBridges(); roundStats.push(`R0 HITL: +${preLocked}`); }
+					}
+
+					// ---- ROUND CASCADE ----
+					for (let ri = 0; ri < ROUNDS.length; ri++) {
+						const round = ROUNDS[ri];
+						const pending = [];
+						for (let i = 0; i < totalVp; i++) if (!assigned[i]) pending.push(i);
+						if (!pending.length) { roundStats.push(`R${round.id} ${round.label}: +0`); continue; }
+
+						const base = 55 + (ri / ROUNDS.length) * 25;
+						const span = 25 / ROUNDS.length;
+
+						for (let c = 0; c < pending.length; c += chunkSize) {
+							const endC = Math.min(c + chunkSize, pending.length);
+							for (let q = c; q < endC; q++) {
+								const i = pending[q];
+								const person = vpRows[i];
+								const pKey = pKeyOf(person);
+
+								const pGender = matcher._gender(person);
+								const pRaceCls = matcher._raceClass(person);
+								const pBirthRange = this.parseRange(person.birth_year);
+								const pDeathRange = this.parseRange(person.death_year);
+
+								// died before this census -> cannot be present
+								if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
+
+								const personKin = kinOf(person);
+
+								const hasPlausible = perPerson[i].length > 0 && perPerson[i][0].score >= floor;
+								for (const cand of retrieve(person, round, hasPlausible)) {
+									const mid = this.normStr(cand.mention_id);
+									if (usedMention.has(mid)) continue;              // claimed in an earlier round
+									if (seenPair[i].has(mid)) continue;              // already scored this pair
+									if (neverMatch.has(`${pKey}|${mid}`)) continue;  // human rejected it
+									seenPair[i].add(mid);
+
+									const cGender = matcher._gender(cand);
+									if (pGender && cGender && pGender !== cGender) continue;
+									const cRaceCls = matcher._raceClass(cand);
+									if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
+									const cBirthRange = this.parseRange(cand.birth_year);
+									if (pBirthRange && cBirthRange) {
+										const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
+											: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
+										if (gap > 12) continue;   // aligned with MatchPerson knockout
+									}
+
+									const candHousehold = householdOf(cand);
+									const matchRes = matcher.MatchPerson(person, cand, {
+										censusYear: yrNum,
+										personKin: personKin,
+										candidateHousehold: candHousehold,
+										weights: LEVER_WEIGHTS,
+										birthProfiles: BIRTH_PROFILES,
+										householdBoost: BETA
+									});
+									if (matchRes.tier === 'KNOCKOUT') continue;
+
+									let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
+									if (candProb == null && typeof matcher.nameProbability === 'function') {
+										candProb = matcher.nameProbability(matchRes.score);
+									}
+									if (candProb == null) {
+										candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
+									}
+
+									const entry = {
+										candidate: cand,
+										score: Number(matchRes.score.toFixed(4)),
+										probability: candProb,
+										tier: matchRes.tier,
+										levers: (matchRes.firedLevers || []).length,
+										round: round.id,
+										roundLabel: round.label,
+										why: matchRes.why
+									};
+									perPerson[i].push(entry);
+									edges.push({ pi: i, mid: mid, entry: entry });
+
+									const lab = labelMap.get(labelKey(pKey, cand.mention_id));
+									if (lab === 0 || lab === 1)
+										calibRows.push({
+											// MUST match match.js _calibFeatures order/length:
+											// [name, birth, H(family), surnameReliability]
+											features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family,
+											matchRes.why.surnameReliability != null ? matchRes.why.surnameReliability : 0.5],
+											label: lab
+										});
+								}
+								perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
+							}
+							this.updateProgress(base + (endC / pending.length) * span,
+								`Round ${round.id} (${round.label}): scored ${endC.toLocaleString()} of ${pending.length.toLocaleString()} unassigned...`);
+							await new Promise(r => setTimeout(r, 0));
+						}
+
+						// lock this round's confident, clear, uncontested winners
+						const order = pending.filter(i => !assigned[i] && perPerson[i].length);
+						order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
+						let lockedCount = 0;
+						for (const i of order) {
+							if (assigned[i]) continue;
+							const avail = perPerson[i].filter(e => !usedMention.has(this.normStr(e.candidate.mention_id)));
+							if (!avail.length) continue;
+							const best = avail[0];
+							const second = avail[1] ? avail[1].score : 0;
+							if (best.score >= round.ceil && (best.score - second) >= round.margin && best.levers >= round.minLevers) {
+								assigned[i] = best;
+								assignedRound[i] = round.id;
+								usedMention.add(this.normStr(best.candidate.mention_id));
+								lockedCount++;
+							}
+						}
+						roundStats.push(`R${round.id} ${round.label}: +${lockedCount}`);
+						if (multiPass) bridges = rebuildBridges();
 					}
 
 					// ---- optional REAL calibration on resolved labels ----
@@ -1867,50 +2116,33 @@
 							calibrated = true;
 							for (const e of edges) {
 								try {
-									e.entry.probability = Number(matcher.probability(
-										[e.entry.why.name, e.entry.why.birth, e.entry.why.family]).toFixed(3));
+									e.entry.probability = Number(matcher.probability([
+										e.entry.why.name, e.entry.why.birth, e.entry.why.family,
+										e.entry.why.surnameReliability != null ? e.entry.why.surnameReliability : 0.5
+									]).toFixed(3));
 								} catch (_) { }
 							}
 						} catch (err) { console.warn('fitCalibration skipped:', err.message); }
 					}
 
-					// ---- PASS 2: global one-to-one assignment (confident-first + slack) ----
+					// ---- final slack assignment (never forces a sub-floor claim) ----
 					this.updateProgress(82, 'Assigning: deconflicting contested census mentions...');
 					await new Promise(r => setTimeout(r, 0));
 
-					const usedMention = new Set();
-					const assigned = new Array(totalVp).fill(null);
-					const locked = new Set();
-
-					// order persons by best score so the strongest confident claim wins a mention
-					const order = [];
-					for (let i = 0; i < totalVp; i++) if (perPerson[i].length) order.push(i);
-					order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
-
-					// 1) lock confident, clear winners
-					for (const i of order) {
-						const cands = perPerson[i];
-						const best = cands[0];
-						const second = cands[1] ? cands[1].score : 0;
-						const bmid = this.normStr(best.candidate.mention_id);
-						if (best.score >= ceiling && (best.score - second) >= 0.05 && !usedMention.has(bmid)) {
-							assigned[i] = best;
-							usedMention.add(bmid);
-							locked.add(i);
-						}
-					}
-
-					// 2) deconflict the rest greedily by score, WITH SLACK (never force sub-floor)
 					const rem = edges
-						.filter(e => !locked.has(e.pi) && !usedMention.has(e.mid) && e.entry.score >= floor)
+						.filter(e => !assigned[e.pi] && !usedMention.has(e.mid) && e.entry.score >= floor)
 						.sort((a, b) => b.entry.score - a.entry.score);
+					let slackCount = 0;
 					for (const e of rem) {
 						if (assigned[e.pi] || usedMention.has(e.mid)) continue;
 						assigned[e.pi] = e.entry;
+						if (assignedRound[e.pi] < 0) assignedRound[e.pi] = 99;
 						usedMention.add(e.mid);
+						slackCount++;
 					}
+					if (slackCount) roundStats.push(`Slack: +${slackCount}`);
 
-					// ---- PASS 3: classify MATCH / MAYBE / NEW by margin over assigned edge ----
+					// ---- classify MATCH / MAYBE / UN-MATCHED by margin over assigned edge ----
 					this.updateProgress(90, 'Classifying by margin (best vs runner-up)...');
 					await new Promise(r => setTimeout(r, 0));
 
@@ -1933,6 +2165,7 @@
 								why: {
 									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
 									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
+									round: '',
 									note: cands.length ? 'Lost assignment to a better-fitting person' : 'No candidate cleared blocking'
 								},
 								allCandidates: cands
@@ -1943,11 +2176,13 @@
 						const best = a.score;
 						const secondEntry = cands.find(c => this.normStr(c.candidate.mention_id) !== this.normStr(a.candidate.mention_id));
 						const second = secondEntry ? secondEntry.score : 0;
-						const status = classify(best, second);
+						const status = (a.round === 0) ? 'MATCH' : classify(best, second);
 
 						const why = Object.assign({}, a.why, {
 							margin: Number((best - second).toFixed(3)),
-							secondBest: Number(second.toFixed(3))
+							secondBest: Number(second.toFixed(3)),
+							round: (assignedRound[i] === 99) ? 'Slack'
+								: `R${assignedRound[i]} ${roundLabelById.get(assignedRound[i]) || ''}`.trim()
 						});
 
 						rawResults.push({
@@ -1956,6 +2191,8 @@
 							bestCandidate: a.candidate, why: why, allCandidates: cands
 						});
 					}
+
+					this.roundStats = roundStats;
 
 					this.updateProgress(95, 'Formatting explanation levers and top candidate runner-ups...');
 					await new Promise(r => setTimeout(r, 0));
@@ -1990,7 +2227,8 @@
 								familyCount: why.familyCount != null ? why.familyCount : 0,
 								householdH: why.householdH != null ? why.householdH : 0,
 								margin: why.margin != null ? why.margin : '',
-								secondBest: why.secondBest != null ? why.secondBest : ''
+								secondBest: why.secondBest != null ? why.secondBest : '',
+								round: why.round || ''
 							},
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
 								? why.familyMatches.join(', ')
@@ -2022,7 +2260,8 @@
 					await this.renderResultsTable(this.matchedResults);
 					$('#downloadBtn').prop('disabled', false);
 
-					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.`);
+					const roundNote = (this.roundStats && this.roundStats.length) ? `  |  ${this.roundStats.join('  ')}` : '';
+					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.${roundNote}`);
 
 				} catch (err) {
 					console.error(err);
@@ -2116,6 +2355,10 @@
                 <div class="breakdown-label">Kin Matched (H)</div>
                 <div class="breakdown-value">${levers.familyCount != null ? levers.familyCount : 0} (H ${levers.householdH != null ? levers.householdH : 0})</div>
               </div>
+              <div class="breakdown-item" style="border-left: 3px solid #7c3aed;">
+                <div class="breakdown-label">Matched In Round</div>
+                <div class="breakdown-value">${levers.round || '-'}</div>
+              </div>
               <div class="breakdown-item" style="border-left: 3px solid #ec4899;">
                 <div class="breakdown-label">Margin vs #2</div>
                 <div class="breakdown-value">${levers.margin != null && levers.margin !== '' ? levers.margin : '-'} (2nd ${levers.secondBest != null && levers.secondBest !== '' ? levers.secondBest : '-'})</div>
@@ -2162,8 +2405,8 @@
 				const vp = row.person || {};
 
 				// Compute age for source person and candidate: source date - birth_date (ignore age column)
-				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1850;
-				const censusYear = parseInt($('#censusYearSelect').val()) || 1860;
+				const sourceYear = parseInt($('#sourceYearSelect').val()) || 1870;
+				const censusYear = parseInt($('#censusYearSelect').val()) || 1880;
 
 				const vpAge = this.calculateRecordAge(vp, sourceYear);
 				const candAge = (cand && (cand.mention_id || cand.full_name || cand.birth_year || cand.birth_date)) ? this.calculateRecordAge(cand, censusYear) : '';
@@ -2340,6 +2583,7 @@
 					return {
 						reviewer_status: reviewerStatus,
 						verity_status: r.status || '',
+						matched_in_round: (r.why && r.why.round) ? r.why.round : '',
 						probability: prob,
 						source_id: vp.person_id || vp.mention_id || '',
 						target_id: cand.mention_id || '',
@@ -2458,7 +2702,7 @@
 							if (mid) mentionsById.set(mid, m);
 							if (pid && !mentionsById.has(pid)) mentionsById.set(pid, m);
 
-							const hh = this.normStr(m.household_id);
+							const hh = this.hhKey(m);
 							if (hh) {
 								if (!households.has(hh)) households.set(hh, []);
 								households.get(hh).push(m);
@@ -2552,12 +2796,12 @@
 								continue;
 							}
 
-							const pHh = this.normStr(person.household_id);
+							const pHh = this.hhKey(person);
 							const personKin = (pHh && households.has(pHh))
 								? households.get(pHh).filter(p => p !== person)
 								: [];
 
-							const cHh = this.normStr(cand.household_id);
+							const cHh = this.hhKey(cand);
 							const candHousehold = (cHh && households.has(cHh))
 								? households.get(cHh).filter(m => m !== cand)
 								: [];
