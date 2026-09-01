@@ -1,4 +1,4 @@
-**LINK PEOPLE LIST TO 1860 CENSUS**
+**LINK CENSUS TO CENSUS**
 
 	I want to create a list of matched people between a verified persons list and a census for the current county and record_year. 
 

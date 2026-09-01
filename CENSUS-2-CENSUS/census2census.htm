@@ -342,6 +342,7 @@
 			transition: all 0.15s ease;
 		}
 
+		.hitl-select.val-MATCH,
 		.hitl-select.val-MATCHED {
 			background-color: #dcfce7;
 			color: #15803d;
@@ -354,6 +355,7 @@
 			border-color: #fcd34d;
 		}
 
+		.hitl-select.val-UN-MATCHED,
 		.hitl-select.val-UNMATCHED {
 			background-color: #f1f5f9;
 			color: #64748b;
@@ -403,7 +405,7 @@
 
 		.stats-grid-right {
 			display: grid;
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(6, 1fr);
 			gap: 6px;
 			height: 100%;
 		}
@@ -890,7 +892,7 @@
 			<div class="header-title">
 				<h1>
 					Census to Census Matcher
-					<span class="badge badge-primary">HITL Linkage</span>
+					<span class="badge badge-primary">REVIEWER Linkage</span>
 				</h1>
 				<p>Match source person list against target Census mentions with multi-lever scoring and calibrated
 					probabilities.</p>
@@ -967,7 +969,7 @@
 								<path
 									d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
 							</svg>
-							Save HITL CSV
+							Save Reviewer CSV
 						</button>
 						<button id="loadHitlBtn" class="btn btn-secondary" style="flex: 1;">
 							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -976,7 +978,7 @@
 								<path
 									d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
 							</svg>
-							Load HITL CSV
+							Load Reviewer CSV
 						</button>
 						<input type="file" id="hitlFileInput" accept=".csv" style="display: none;">
 					</div>
@@ -997,25 +999,25 @@
 			<!-- Right Side: Stats Panel -->
 			<div class="stats-panel-right">
 				<div class="stats-grid-right">
-					<div class="stat-card" style="--stat-accent: #3b82f6;">
+					<div class="stat-card" style="--stat-accent: #3b82f6; grid-column: span 3;">
 						<div class="stat-title">Source Pool</div>
 						<div class="stat-value" id="statVerified">0</div>
 						<div class="stat-sub" id="statTargetSource">Source: AUG-CN-1870</div>
 					</div>
 
-					<div class="stat-card" style="--stat-accent: #8b5cf6;">
+					<div class="stat-card" style="--stat-accent: #8b5cf6; grid-column: span 3;">
 						<div class="stat-title">Target Pool</div>
 						<div class="stat-value" id="statCensusPool">0</div>
 						<div class="stat-sub" id="statCensusTarget">Target: AUG-CN-1880</div>
 					</div>
 
-					<div class="stat-card" style="--stat-accent: #10b981;">
+					<div class="stat-card" style="--stat-accent: #10b981; grid-column: span 2;">
 						<div class="stat-title">MATCH Status</div>
 						<div class="stat-value" id="statMatches">0</div>
 						<div class="stat-sub" id="statMatchPct">Score ≥ Ceiling</div>
 					</div>
 
-					<div class="stat-card" style="--stat-accent: #f59e0b;">
+					<div class="stat-card" style="--stat-accent: #f59e0b; grid-column: span 2;">
 						<div class="stat-title">MAYBE Status</div>
 						<div class="stat-value" id="statMaybes">0</div>
 						<div class="stat-sub">Review Required</div>
@@ -1046,7 +1048,7 @@
 						<span
 							style="width: 1px; height: 16px; background: #cbd5e1; margin: 0 3px; align-self: center;"></span>
 						<button id="reviewModeBtn" class="filter-tab review-tab-btn"
-							title="Toggle HITL Review Mode (hide status/score, show review dropdowns)">Review</button>
+							title="Toggle REVIEWER Review Mode (hide status/score, show review dropdowns)">Review</button>
 					</div>
 					<label class="sample-checkbox-label"
 						title="Show 500 sampled rows using Neyman Stratified Allocation across 8 probability bins"
@@ -1068,7 +1070,7 @@
 							<th class="col-status">Status</th>
 							<th class="col-why">Why</th>
 							<th class="col-prob">Probability</th>
-							<th class="col-hitl">HITL Match</th>
+							<th class="col-hitl">Reviewer Match</th>
 							<th>Name (Source : Target)</th>
 							<th>Age (S : T)</th>
 							<th>Birth Year (S : T)</th>
@@ -1850,7 +1852,7 @@
 					];
 
 					const roundLabelById = new Map(ROUNDS.map(r => [r.id, r.label]));
-					roundLabelById.set(0, 'HITL confirmed');
+					roundLabelById.set(0, 'Reviewer confirmed');
 
 					const MAX_CANDIDATES = 800;   // hard cap on retrieval per person per round
 
@@ -1864,15 +1866,15 @@
 					const roundStats = [];
 					let bridges = new Map();                // source household -> target household
 
-					// Cross-run persistence from a loaded HITL CSV:
+					// Cross-run persistence from a loaded REVIEWER CSV:
 					//   MATCHED    -> pre-locked before round 1, never re-litigated
 					//   UN-MATCHED -> never-match; that pair is excluded from every round
 					const neverMatch = new Set();
 					const preClaimed = new Map();
 					if (this.loadedHitlData && this.loadedHitlData.mapExact) {
 						for (const [k, v] of this.loadedHitlData.mapExact) {
-							if (v === 'UN-MATCHED') neverMatch.add(k);
-							else if (v === 'MATCHED') {
+							if (v === 'UN-MATCHED' || v === 'UNMATCHED') neverMatch.add(k);
+							else if (v === 'MATCH' || v === 'MATCHED') {
 								const parts = k.split('|');
 								if (parts[0] && parts[1]) preClaimed.set(parts[0], parts[1]);
 							}
@@ -1966,7 +1968,7 @@
 						return set;
 					};
 
-					// ---- ROUND 0: re-apply confirmed HITL claims ----
+					// ---- ROUND 0: re-apply confirmed REVIEWERclaims ----
 					let preLocked = 0;
 					if (preClaimed.size) {
 						for (let i = 0; i < totalVp; i++) {
@@ -1979,8 +1981,8 @@
 								candidate: cand, score: Number((mr.score || 0).toFixed(4)),
 								probability: mr.probability != null ? Number(mr.probability.toFixed(3)) : null,
 								tier: mr.tier, levers: (mr.firedLevers || []).length,
-								round: 0, roundLabel: 'HITL confirmed',
-								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded HITL CSV' })
+								round: 0, roundLabel: 'REVIEWER confirmed',
+								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded REVIEWER CSV' })
 							};
 							perPerson[i].push(entry);
 							seenPair[i].add(mid);
@@ -1989,7 +1991,7 @@
 							usedMention.add(mid);
 							preLocked++;
 						}
-						if (preLocked) { bridges = rebuildBridges(); roundStats.push(`R0 HITL: +${preLocked}`); }
+						if (preLocked) { bridges = rebuildBridges(); roundStats.push(`R0 REVIEWER: +${preLocked}`); }
 					}
 
 					// ---- ROUND CASCADE ----
@@ -2419,14 +2421,17 @@
 				const sourceIdDisplay = `<span class="mono" style="color: #7c3aed; font-weight: 700;">${vp.person_id || vp.mention_id || '-'}</span>`;
 				const censusIdDisplay = cand.mention_id ? `<span class="mono" style="color: #60a5fa;">${cand.mention_id}</span>` : '<span style="color: var(--text-muted);">-</span>';
 
-				const hitlVal = row.hitl_match || '-';
+				const rawHitlVal = String(row.hitl_match || row.reviewer_status || '-').trim();
+				const hitlVal = (rawHitlVal === 'MATCH' || rawHitlVal === 'MATCHED') ? 'MATCH'
+					: (rawHitlVal === 'MAYBE' ? 'MAYBE'
+						: (rawHitlVal === 'UN-MATCHED' || rawHitlVal === 'UNMATCHED' || rawHitlVal === 'UNMATCH' ? 'UN-MATCHED' : (rawHitlVal || '-')));
 				row.hitl_match = hitlVal;
 
 				const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
 				const hitlSelectHtml = `
-					<select class="hitl-select ${valClass}" data-index="${i}" title="Select HITL review decision">
+					<select class="hitl-select ${valClass}" data-index="${i}" title="Select REVIEWER review decision">
 						<option value="-" ${hitlVal === '-' ? 'selected' : ''}>-</option>
-						<option value="MATCHED" ${hitlVal === 'MATCHED' ? 'selected' : ''}>MATCHED</option>
+						<option value="MATCH" ${hitlVal === 'MATCH' ? 'selected' : ''}>MATCH</option>
 						<option value="MAYBE" ${hitlVal === 'MAYBE' ? 'selected' : ''}>MAYBE</option>
 						<option value="UN-MATCHED" ${hitlVal === 'UN-MATCHED' ? 'selected' : ''}>UN-MATCHED</option>
 					</select>
@@ -2561,7 +2566,7 @@
 				}
 			}
 
-			// Export to CSV for HITL Verification
+			// Export to CSV for REVIEWER Verification
 			exportToCsv() {
 				const dataset = (this.isSampleMode && this.sampledResults) ? this.sampledResults : this.matchedResults;
 				if (!dataset || dataset.length === 0) {
@@ -2635,7 +2640,7 @@
 				document.body.removeChild(link);
 			}
 
-			// Apply loaded HITL decisions to dataset
+			// Apply loaded REVIEWER decisions to dataset
 			applyLoadedHitl(dataset) {
 				if (!dataset || !this.loadedHitlData) return 0;
 				const { mapExact, mapPerson, mapMention } = this.loadedHitlData;
@@ -2657,20 +2662,19 @@
 					}
 
 					if (hitlVal && hitlVal !== '-') {
-						r.hitl_match = hitlVal;
+						const normHitl = (hitlVal === 'MATCH' || hitlVal === 'MATCHED') ? 'MATCH'
+							: (hitlVal === 'UN-MATCHED' || hitlVal === 'UNMATCHED' || hitlVal === 'UNMATCH' ? 'UN-MATCHED' : hitlVal);
+						r.hitl_match = normHitl;
 						count++;
 					}
 				}
 				return count;
 			}
 
-			// Load HITL CSV from file and update current source census list
+			// Load REVIEWER CSV from file and rematch only the rows loaded
 			async loadHitlCsv(file) {
 				if (!file) return;
 				try {
-					const isTestMatch = new URLSearchParams(window.location.search).has('testmatch')
-						|| /[?&#]testmatch\b/i.test(window.location.href);
-
 					const results = await new Promise((resolve, reject) => {
 						Papa.parse(file, {
 							header: true,
@@ -2682,245 +2686,268 @@
 					});
 
 					const rows = results.data || [];
-
-					if (isTestMatch) {
-						// -------------------------------------------------------------
-						// TESTMATCH MODE:
-						// Load only: source_id, target_id, reviewer_status, verity_status
-						// Rerun matching on these rows, populating all regular fields.
-						// -------------------------------------------------------------
-						$('#statusPanel').slideDown(150);
-						this.updateProgress(15, `TestMatch: Loading mentions and running match on ${rows.length} rows...`);
-
-						const mentionsRows = await this.ensureMentionsLoaded();
-						const mentionsById = new Map();
-						const households = new Map();
-
-						for (const m of mentionsRows) {
-							const mid = this.normStr(m.mention_id);
-							const pid = this.normStr(m.person_id);
-							if (mid) mentionsById.set(mid, m);
-							if (pid && !mentionsById.has(pid)) mentionsById.set(pid, m);
-
-							const hh = this.hhKey(m);
-							if (hh) {
-								if (!households.has(hh)) households.set(hh, []);
-								households.get(hh).push(m);
-							}
-						}
-
-						const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
-						const sourceYear = $('#sourceYearSelect').val() || '1850';
-						const censusYear = $('#censusYearSelect').val() || '1860';
-						const yrNum = parseInt(censusYear, 10);
-						const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
-						const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
-						const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
-						const promoteFloor = Math.max(floor, ceiling - 0.25);
-						const SECOND_MAX = 0.50;
-
-						const sourceSource = `${county}-CN-${sourceYear}`;
-						const targetSource = `${county}-CN-${censusYear}`;
-						const sourceRows = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === sourceSource);
-						for (const r of sourceRows) {
-							r.person_id = r.person_id || r.mention_id;
-							r.source_id = r.person_id || r.mention_id;
-						}
-						const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
-						this.rawVpRows = sourceRows;
-						this.rawCensusMentions = censusMentions;
-
-						const matcher = new Match();
-						if (typeof matcher.usePool === 'function') matcher.usePool(mentionsRows);
-
-						const BETA = 0.6;
-						const BIRTH_PROFILES = {
-							CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
-							SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
-						};
-						const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
-
-						const classify = (best, second) => {
-							if (best >= ceiling) return 'MATCH';
-							if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
-							if (best >= floor) return 'MAYBE';
-							return 'UN-MATCHED';
-						};
-
-						const recomputedResults = [];
-
-						for (let i = 0; i < rows.length; i++) {
-							const row = rows[i];
-							// Read only the requested 4 fields from CSV
-							const sourceId = this.normStr(row.source_id || row.source_mention_id || '');
-							const targetId = this.normStr(row.target_id || row.census_id || row.mention_id || '');
-							const reviewerStatus = String(row.reviewer_status || row.hitl_match || '').trim();
-							const verityStatus = String(row.verity_status || row.status || '').trim();
-
-							const person = mentionsById.get(sourceId) || {
-								person_id: sourceId, mention_id: sourceId,
-								full_name: '', first_name: '', last_name: '', birth_year: '', gender: '', race: ''
-							};
-
-							const cand = targetId ? mentionsById.get(targetId) : null;
-
-							const rawHitl = reviewerStatus.toUpperCase();
-							const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
-								: (rawHitl === 'MAYBE' ? 'MAYBE'
-									: (rawHitl === 'UN-MATCHED' || rawHitl === 'UNMATCHED' ? 'UN-MATCHED' : (reviewerStatus || '-')));
-
-							if (!cand) {
-								recomputedResults.push({
-									person: person,
-									status: verityStatus || 'UN-MATCHED',
-									probability: 0,
-									score: 0,
-									bestCandidate: null,
-									hitl_match: validHitl,
-									why: {
-										name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
-										needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
-										note: 'No target candidate found'
-									},
-									allCandidates: [],
-									formattedWhy: {
-										levers: {
-											name: 0, birth: 0, family: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
-											needsCorroboration: false, birthGap: '', familyCount: 0, householdH: 0, margin: '', secondBest: ''
-										},
-										familyCorroborated: '',
-										runnerUps: [],
-										reconciledNote: 'No target candidate'
-									}
-								});
-								continue;
-							}
-
-							const pHh = this.hhKey(person);
-							const personKin = (pHh && households.has(pHh))
-								? households.get(pHh).filter(p => p !== person)
-								: [];
-
-							const cHh = this.hhKey(cand);
-							const candHousehold = (cHh && households.has(cHh))
-								? households.get(cHh).filter(m => m !== cand)
-								: [];
-
-							const matchRes = matcher.MatchPerson(person, cand, {
-								censusYear: yrNum,
-								personKin: personKin,
-								candidateHousehold: candHousehold,
-								weights: LEVER_WEIGHTS,
-								birthProfiles: BIRTH_PROFILES,
-								householdBoost: BETA
-							});
-
-							let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
-							if (candProb == null && typeof matcher.nameProbability === 'function') {
-								candProb = matcher.nameProbability(matchRes.score);
-							}
-							if (candProb == null) {
-								candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
-							}
-
-							const score = Number(matchRes.score.toFixed(4));
-							const status = matchRes.tier === 'KNOCKOUT' ? 'UN-MATCHED' : (verityStatus || classify(score, 0));
-							const why = Object.assign({}, matchRes.why, {
-								margin: '',
-								secondBest: ''
-							});
-
-							const formattedWhy = {
-								levers: {
-									name: why.name != null ? why.name : 0,
-									birth: why.birth != null ? why.birth : 0,
-									family: why.family != null ? why.family : 0,
-									rung: why.rung || 'NONE',
-									surnameKind: why.surnameKind || 'NONE',
-									needsCorroboration: !!why.needsCorroboration,
-									birthGap: why.birthGap != null ? why.birthGap : '',
-									familyCount: why.familyCount != null ? why.familyCount : 0,
-									householdH: why.householdH != null ? why.householdH : 0,
-									margin: '',
-									secondBest: ''
-								},
-								familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
-									? why.familyMatches.join(', ')
-									: '',
-								runnerUps: [],
-								reconciledNote: why.reconciledNote || ''
-							};
-
-							recomputedResults.push({
-								person: person,
-								status: status,
-								probability: candProb,
-								score: score,
-								bestCandidate: cand,
-								hitl_match: validHitl,
-								why: why,
-								allCandidates: [{ candidate: cand, score: score, probability: candProb, tier: matchRes.tier, why: why }],
-								formattedWhy: formattedWhy
-							});
-						}
-
-						this.matchedResults = recomputedResults;
-						this.sampledResults = null;
-						this.isSampleMode = false;
-						$('#sampleCheckbox').prop('checked', false);
-
-						// Update KPI stats
-						const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
-						const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
-						const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
-
-						$('#statMatches').text(matchCount.toLocaleString());
-						$('#statMatchPct').text(`${((matchCount / (recomputedResults.length || 1)) * 100).toFixed(1)}% of test list`);
-						$('#statMaybes').text(maybeCount.toLocaleString());
-						$('#statUnmatched').text(unmatchedCount.toLocaleString());
-						$('#downloadBtn').prop('disabled', false);
-						$('#resultCountBadge').text(`${recomputedResults.length.toLocaleString()} Rows (TestMatch)`);
-
-						this.updateProgress(100, `TestMatch complete: Re-matched ${recomputedResults.length.toLocaleString()} rows from ${file.name}.`);
-						this.renderResultsTable();
-						alert(`TestMatch: Loaded and re-matched ${recomputedResults.length.toLocaleString()} rows from ${file.name}.`);
+					if (rows.length === 0) {
+						alert(`No data rows found in ${file.name}.`);
 						return;
 					}
 
-					// Standard HITL Loading mode (when testmatch is not active)
+					$('#statusPanel').slideDown(150);
+					this.updateProgress(15, `Loading mentions and rematching ${rows.length.toLocaleString()} rows from ${file.name}...`);
+
+					const mentionsRows = await this.ensureMentionsLoaded();
+					const mentionsById = new Map();
+					const households = new Map();
+
+					for (const m of mentionsRows) {
+						const mid = this.normStr(m.mention_id);
+						const pid = this.normStr(m.person_id);
+						if (mid) mentionsById.set(mid, m);
+						if (pid && !mentionsById.has(pid)) mentionsById.set(pid, m);
+
+						const hh = this.hhKey(m);
+						if (hh) {
+							if (!households.has(hh)) households.set(hh, []);
+							households.get(hh).push(m);
+						}
+					}
+
+					const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
+					const sourceYear = $('#sourceYearSelect').val() || '1850';
+					const censusYear = $('#censusYearSelect').val() || '1860';
+					const yrNum = parseInt(censusYear, 10);
+					const ceiling = (parseFloat($('#ceilingInput').val()) || 80) / 100;
+					const floor = (parseFloat($('#floorInput').val()) || 40) / 100;
+					const margin = (parseFloat($('#marginInput').val()) || 15) / 100;
+					const promoteFloor = Math.max(floor, ceiling - 0.25);
+					const SECOND_MAX = 0.50;
+
+					const sourceSource = `${county}-CN-${sourceYear}`;
+					const targetSource = `${county}-CN-${censusYear}`;
+					const sourceRows = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === sourceSource);
+					for (const r of sourceRows) {
+						r.person_id = r.person_id || r.mention_id;
+						r.source_id = r.person_id || r.mention_id;
+					}
+					const censusMentions = mentionsRows.filter(r => this.normStr(r.source).toUpperCase() === targetSource);
+					this.rawVpRows = sourceRows;
+					this.rawCensusMentions = censusMentions;
+
+					const matcher = new Match();
+					if (typeof matcher.usePool === 'function') matcher.usePool(mentionsRows);
+
+					const BETA = 0.6;
+					const BIRTH_PROFILES = {
+						CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
+						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
+					};
+					const LEVER_WEIGHTS = { name: 0.40, birth: 0.30 };
+
+					const classify = (best, second) => {
+						if (best >= ceiling) return 'MATCH';
+						if (best >= promoteFloor && (best - second) >= margin && second < SECOND_MAX) return 'MATCH';
+						if (best >= floor) return 'MAYBE';
+						return 'UN-MATCHED';
+					};
+
+					// Build lookup maps for cross-run persistence
 					const mapExact = new Map();
 					const mapPerson = new Map();
 					const mapMention = new Map();
 
 					for (const row of rows) {
-						const rawHitl = String(row.reviewer_status || row.hitl_match || '').trim().toUpperCase();
+						const rawHitl = String(row.reviewer_status || row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
 						if (!rawHitl || rawHitl === '-') continue;
-						const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
+						const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCH'
 							: (rawHitl === 'MAYBE' ? 'MAYBE'
-								: (rawHitl === 'UN-MATCHED' ? 'UN-MATCHED' : rawHitl));
+								: (rawHitl === 'UN-MATCHED' || rawHitl === 'UNMATCHED' || rawHitl === 'UNMATCH' ? 'UN-MATCHED' : rawHitl));
 
-						const pId = String(row.source_id || row.source_mention_id || '').trim();
-						const mId = String(row.target_id || row.census_id || row.mention_id || '').trim();
+						const pId = String(row.source_id || row.source_mention_id || row.person_id || row.candidate_id || row.id || '').trim();
+						const mId = String(row.target_id || row.census_id || row.census_mention_id || row.mention_id || row.target_mention_id || '').trim();
 
 						if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
 						if (pId) mapPerson.set(pId, validHitl);
 						if (mId) mapMention.set(mId, validHitl);
 					}
-
 					this.loadedHitlData = { mapExact, mapPerson, mapMention };
 
-					let updated = 0;
-					if (this.matchedResults && this.matchedResults.length > 0) {
-						updated = this.applyLoadedHitl(this.matchedResults) || 0;
-						if (this.sampledResults) this.applyLoadedHitl(this.sampledResults);
-						this.renderResultsTable();
-						alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} source census records with HITL decisions.`);
-					} else {
-						alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run the matcher.`);
+					const recomputedResults = [];
+
+					for (let i = 0; i < rows.length; i++) {
+						const row = rows[i];
+						const sourceId = this.normStr(row.source_id || row.source_mention_id || row.person_id || row.candidate_id || row.id || '');
+						const targetId = this.normStr(row.target_id || row.census_id || row.census_mention_id || row.mention_id || row.target_mention_id || '');
+						const reviewerStatus = String(row.reviewer_status || row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim();
+						const verityStatus = String(row.verity_status || row.status || row.match_status || '').trim();
+
+						const person = mentionsById.get(sourceId) || {
+							person_id: sourceId,
+							mention_id: sourceId,
+							full_name: row.source_full_name || `${row.source_first_name || ''} ${row.source_last_name || ''}`.trim(),
+							first_name: row.source_first_name || '',
+							middle_name: row.source_middle_name || '',
+							last_name: row.source_last_name || '',
+							birth_year: row.source_birth_year || '',
+							death_year: row.source_death_year || '',
+							gender: row.source_gender || '',
+							race: row.source_race || '',
+							occupation: row.source_occupation || '',
+							legal_status: row.source_legal_status || '',
+							norm_first_name: row.source_norm_first_name || '',
+							head: row.source_head || '',
+							household_id: row.source_household_id || '',
+							family_id: row.source_family_id || '',
+							birth_place: row.source_birth_place || '',
+							enumeration: row.source_enumeration || '',
+							district: row.source_district || ''
+						};
+
+						let cand = targetId ? mentionsById.get(targetId) : null;
+						if (!cand && targetId) {
+							cand = {
+								mention_id: targetId,
+								full_name: row.target_full_name || `${row.target_first_name || ''} ${row.target_last_name || ''}`.trim(),
+								first_name: row.target_first_name || '',
+								middle_name: row.target_middle_name || '',
+								last_name: row.target_last_name || '',
+								birth_year: row.target_birth_year || '',
+								death_year: row.target_death_year || '',
+								gender: row.target_gender || '',
+								race: row.target_race || '',
+								occupation: row.target_occupation || '',
+								legal_status: row.target_legal_status || '',
+								head: row.target_head || '',
+								household_id: row.target_household_id || '',
+								family_id: row.target_family_id || '',
+								birth_place: row.target_birth_place || '',
+								enumeration: row.target_enumeration || '',
+								district: row.target_district || ''
+							};
+						}
+
+						const rawHitl = reviewerStatus.toUpperCase();
+						const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCH'
+							: (rawHitl === 'MAYBE' ? 'MAYBE'
+								: (rawHitl === 'UN-MATCHED' || rawHitl === 'UNMATCHED' || rawHitl === 'UNMATCH' ? 'UN-MATCHED' : (reviewerStatus || '-')));
+
+						if (!cand) {
+							recomputedResults.push({
+								person: person,
+								status: verityStatus || 'UN-MATCHED',
+								probability: 0,
+								score: 0,
+								bestCandidate: null,
+								hitl_match: validHitl,
+								why: {
+									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
+									note: 'No target candidate found'
+								},
+								allCandidates: [],
+								formattedWhy: {
+									levers: {
+										name: 0, birth: 0, family: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
+										needsCorroboration: false, birthGap: '', familyCount: 0, householdH: 0, margin: '', secondBest: ''
+									},
+									familyCorroborated: '',
+									runnerUps: [],
+									reconciledNote: 'No target candidate'
+								}
+							});
+							continue;
+						}
+
+						const pHh = this.hhKey(person);
+						const personKin = (pHh && households.has(pHh))
+							? households.get(pHh).filter(p => p !== person)
+							: [];
+
+						const cHh = this.hhKey(cand);
+						const candHousehold = (cHh && households.has(cHh))
+							? households.get(cHh).filter(m => m !== cand)
+							: [];
+
+						const matchRes = matcher.MatchPerson(person, cand, {
+							censusYear: yrNum,
+							personKin: personKin,
+							candidateHousehold: candHousehold,
+							weights: LEVER_WEIGHTS,
+							birthProfiles: BIRTH_PROFILES,
+							householdBoost: BETA
+						});
+
+						let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
+						if (candProb == null && typeof matcher.nameProbability === 'function') {
+							candProb = matcher.nameProbability(matchRes.score);
+						}
+						if (candProb == null) {
+							candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
+						}
+
+						const score = Number(matchRes.score.toFixed(4));
+						const status = matchRes.tier === 'KNOCKOUT' ? 'UN-MATCHED' : (verityStatus || classify(score, 0));
+						const why = Object.assign({}, matchRes.why, {
+							margin: '',
+							secondBest: ''
+						});
+
+						const formattedWhy = {
+							levers: {
+								name: why.name != null ? why.name : 0,
+								birth: why.birth != null ? why.birth : 0,
+								family: why.family != null ? why.family : 0,
+								rung: why.rung || 'NONE',
+								surnameKind: why.surnameKind || 'NONE',
+								needsCorroboration: !!why.needsCorroboration,
+								birthGap: why.birthGap != null ? why.birthGap : '',
+								familyCount: why.familyCount != null ? why.familyCount : 0,
+								householdH: why.householdH != null ? why.householdH : 0,
+								margin: '',
+								secondBest: ''
+							},
+							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
+								? why.familyMatches.join(', ')
+								: '',
+							runnerUps: [],
+							reconciledNote: why.reconciledNote || ''
+						};
+
+						recomputedResults.push({
+							person: person,
+							status: status,
+							probability: candProb,
+							score: score,
+							bestCandidate: cand,
+							hitl_match: validHitl,
+							why: why,
+							allCandidates: [{ candidate: cand, score: score, probability: candProb, tier: matchRes.tier, why: why }],
+							formattedWhy: formattedWhy
+						});
 					}
+
+					this.matchedResults = recomputedResults;
+					this.sampledResults = null;
+					this.isSampleMode = false;
+					$('#sampleCheckbox').prop('checked', false);
+
+					// Update KPI stats
+					const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
+					const maybeCount = this.matchedResults.filter(r => r.status === 'MAYBE').length;
+					const unmatchedCount = this.matchedResults.filter(r => r.status === 'UN-MATCHED').length;
+
+					$('#statMatches').text(matchCount.toLocaleString());
+					$('#statMatchPct').text(`${((matchCount / (recomputedResults.length || 1)) * 100).toFixed(1)}% of loaded list`);
+					$('#statMaybes').text(maybeCount.toLocaleString());
+					$('#statUnmatched').text(unmatchedCount.toLocaleString());
+					$('#statVerified').text(recomputedResults.length.toLocaleString());
+					$('#downloadBtn').prop('disabled', false);
+					$('#resultCountBadge').text(`${recomputedResults.length.toLocaleString()} Rows (HITL)`);
+
+					this.updateProgress(100, `Loaded and rematched ${recomputedResults.length.toLocaleString()} rows from ${file.name}.`);
+					this.renderResultsTable();
+					alert(`Loaded Reviewer file: ${file.name}\nRematched ${recomputedResults.length.toLocaleString()} rows.`);
 				} catch (err) {
-					console.error('Error loading HITL CSV:', err);
-					alert(`Failed to load HITL CSV: ${err.message}`);
+					console.error('Error loading REVIEWER CSV:', err);
+					alert(`Failed to load Reviewer CSV: ${err.message}`);
 				}
 			}
 
@@ -2946,7 +2973,7 @@
 				$(document).on('change', '.hitl-select', (e) => {
 					const idx = $(e.currentTarget).data('index');
 					const newVal = e.currentTarget.value;
-					$(e.currentTarget).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
+					$(e.currentTarget).removeClass('val-MATCH val-MATCHED val-MAYBE val-UN-MATCHED val-UNMATCHED');
 					if (newVal !== '-') {
 						$(e.currentTarget).addClass(`val-${newVal}`);
 					}
