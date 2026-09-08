@@ -10,9 +10,11 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-	<!-- Shared Match Engine (falls back to the hosted copy for standalone preview) -->
-	<script src="../COMMON/match.js"
-		onerror="document.write('<scr'+'ipt src=&quot;https://stagetools.com/verite/COMMON/match.js&quot;><\/scr'+'ipt>')"></script>
+	<!-- Fellegi-Sunter & Shared Match Engine -->
+	<script src="COMMON/fellegi.js"
+		onerror="this.onerror=null;document.write('<scr'+'ipt src=&quot;../COMMON/fellegi.js&quot; onerror=&quot;document.write(\'<scr\'+'ipt src=\\\'https://stagetools.com/verite/COMMON/fellegi.js\\\'><\\\/scr\'+'ipt>\')&quot;><\/scr'+'ipt>')"></script>
+	<script src="COMMON/match.js"
+		onerror="this.onerror=null;document.write('<scr'+'ipt src=&quot;../COMMON/match.js&quot; onerror=&quot;document.write(\'<scr\'+'ipt src=\\\'https://stagetools.com/verite/COMMON/match.js\\\'><\\\/scr\'+'ipt>\')&quot;><\/scr'+'ipt>')"></script>
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -892,10 +894,9 @@
 			<div class="header-title">
 				<h1>
 					Census to Census Matcher
-					<span class="badge badge-primary">REVIEWER Linkage</span>
+					<span class="badge badge-primary">Fellegi-Sunter Linkage</span>
 				</h1>
-				<p>Match source person list against target Census mentions with multi-lever scoring and calibrated
-					probabilities.</p>
+				<p>Match source person list against target Census mentions with Fellegi-Sunter probabilistic record linkage and default search method.</p>
 			</div>
 		</header>
 
@@ -1797,9 +1798,17 @@
 						if (fnm) for (const b of this.birthBuckets(m)) addToIndex('FB', this.fbKey(fnm, b), m);
 					}
 
-					// Instantiate + configure the shared Match engine for this pass
-					const matcher = new Match();
-					if (typeof matcher.usePool === 'function') matcher.usePool(censusMentions);
+					// Instantiate + configure Fellegi-Sunter & Match engine for this pass
+					const matcher = new Match({ candidatePrior: 0.002 });
+					const fellegi = (typeof Fellegi !== 'undefined')
+						? new Fellegi({ match: matcher, prior: 0.002 })
+						: matcher._getFellegi();
+					if (fellegi && censusMentions && censusMentions.length) {
+						fellegi.usePool(censusMentions);
+					}
+					if (matcher && fellegi) {
+						matcher._fellegi = fellegi;
+					}
 
 					// Tunables (see design notes): birth sigma loosened for age-report
 					// noise; household applied as a noisy-OR BOOST (beta) not a lever.
@@ -1899,7 +1908,8 @@
 						candidateHousehold: householdOf(cand),
 						weights: LEVER_WEIGHTS,
 						birthProfiles: BIRTH_PROFILES,
-						householdBoost: BETA
+						householdBoost: BETA,
+						prior: 0.002
 					});
 
 					// Majority-vote map of where each source household landed, rebuilt
@@ -1982,7 +1992,11 @@
 								probability: mr.probability != null ? Number(mr.probability.toFixed(3)) : null,
 								tier: mr.tier, levers: (mr.firedLevers || []).length,
 								round: 0, roundLabel: 'REVIEWER confirmed',
-								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded REVIEWER CSV' })
+								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded REVIEWER CSV' }),
+								bits: mr.bits != null ? mr.bits : null,
+								rankKey: mr.rankKey != null ? mr.rankKey : null,
+								fields: mr.fields || null,
+								decision: mr.decision || 'MATCH'
 							};
 							perPerson[i].push(entry);
 							seenPair[i].add(mid);
@@ -2047,9 +2061,21 @@
 										candidateHousehold: candHousehold,
 										weights: LEVER_WEIGHTS,
 										birthProfiles: BIRTH_PROFILES,
-										householdBoost: BETA
+										householdBoost: BETA,
+										prior: 0.002
 									});
-									if (matchRes.tier === 'KNOCKOUT') continue;
+									if (matchRes.tier === 'KNOCKOUT' || matchRes.score <= 0) continue;
+
+									// Name disagreement guard (from default search method):
+									// If both sides have names, drop pairs where neither surname, given name, rung, nor family continuity agreed.
+									const hasSurnameMatch = matchRes.why && matchRes.why.surname && matchRes.why.surname !== 'DISAGREE' && matchRes.why.surname !== 'NONE';
+									const hasGivenMatch = matchRes.why && matchRes.why.given && matchRes.why.given !== 'CONFLICT' && matchRes.why.given !== 'DISAGREE';
+									const hasRungMatch = matchRes.why && matchRes.why.rung && matchRes.why.rung !== 'NONE';
+									const hasFamilyMatch = matchRes.why && ((typeof matchRes.why.family === 'number' && matchRes.why.family > 0) || (matchRes.why.family && matchRes.why.family !== 'NONE') || (matchRes.why.familyMatches && matchRes.why.familyMatches.length > 0));
+
+									const isTargetNamed = Boolean(person.first_name || person.last_name || person.full_name);
+									const isCandNamed = Boolean(cand.first_name || cand.last_name || cand.full_name);
+									if (isTargetNamed && isCandNamed && !hasSurnameMatch && !hasGivenMatch && !hasRungMatch && !hasFamilyMatch) continue;
 
 									let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
 									if (candProb == null && typeof matcher.nameProbability === 'function') {
@@ -2067,7 +2093,11 @@
 										levers: (matchRes.firedLevers || []).length,
 										round: round.id,
 										roundLabel: round.label,
-										why: matchRes.why
+										why: matchRes.why,
+										bits: matchRes.bits != null ? matchRes.bits : null,
+										rankKey: matchRes.rankKey != null ? matchRes.rankKey : null,
+										fields: matchRes.fields || null,
+										decision: matchRes.decision || null
 									};
 									perPerson[i].push(entry);
 									edges.push({ pi: i, mid: mid, entry: entry });
@@ -2082,7 +2112,13 @@
 											label: lab
 										});
 								}
-								perPerson[i].sort((a, b) => (b.score - a.score) || ((b.probability || 0) - (a.probability || 0)));
+								// Sort candidates by rankKey (Fellegi bits + tiebreaker + household support), falling back to score
+								perPerson[i].sort((a, b) => {
+									const rkA = a.rankKey != null ? a.rankKey : a.bits;
+									const rkB = b.rankKey != null ? b.rankKey : b.bits;
+									if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
+									return (b.score - a.score) || ((b.probability || 0) - (a.probability || 0));
+								});
 							}
 							this.updateProgress(base + (endC / pending.length) * span,
 								`Round ${round.id} (${round.label}): scored ${endC.toLocaleString()} of ${pending.length.toLocaleString()} unassigned...`);
@@ -2091,7 +2127,14 @@
 
 						// lock this round's confident, clear, uncontested winners
 						const order = pending.filter(i => !assigned[i] && perPerson[i].length);
-						order.sort((a, b) => perPerson[b][0].score - perPerson[a][0].score);
+						order.sort((a, b) => {
+							const bestA = perPerson[a][0];
+							const bestB = perPerson[b][0];
+							const rkA = bestA.rankKey != null ? bestA.rankKey : bestA.bits;
+							const rkB = bestB.rankKey != null ? bestB.rankKey : bestB.bits;
+							if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
+							return bestB.score - bestA.score;
+						});
 						let lockedCount = 0;
 						for (const i of order) {
 							if (assigned[i]) continue;
@@ -2133,7 +2176,12 @@
 
 					const rem = edges
 						.filter(e => !assigned[e.pi] && !usedMention.has(e.mid) && e.entry.score >= floor)
-						.sort((a, b) => b.entry.score - a.entry.score);
+						.sort((a, b) => {
+							const rkA = a.entry.rankKey != null ? a.entry.rankKey : a.entry.bits;
+							const rkB = b.entry.rankKey != null ? b.entry.rankKey : b.entry.bits;
+							if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
+							return b.entry.score - a.entry.score;
+						});
 					let slackCount = 0;
 					for (const e of rem) {
 						if (assigned[e.pi] || usedMention.has(e.mid)) continue;
@@ -2213,6 +2261,10 @@
 							familyScore: (c.why && c.why.family) || 0,
 							rung: (c.why && c.why.rung) || 'NONE',
 							surnameKind: (c.why && c.why.surnameKind) || 'NONE',
+							fellegiGiven: (c.why && c.why.given) || '',
+							fellegiSurname: (c.why && c.why.surname) || '',
+							bits: (c.bits != null) ? c.bits : (c.why && c.why.bits),
+							decision: c.decision || (c.why && c.why.decision) || '',
 							probability: (c.probability != null && !isNaN(c.probability)) ? Number(c.probability).toFixed(3) : ((c.score != null && !isNaN(c.score)) ? Number(c.score).toFixed(3) : '0.000'),
 							runnerUpScore: c.score != null ? c.score.toFixed(3) : '0.000'
 						}));
@@ -2224,6 +2276,11 @@
 								family: why.family != null ? why.family : 0,
 								rung: why.rung || 'NONE',
 								surnameKind: why.surnameKind || 'NONE',
+								fellegiGiven: why.given || '',
+								fellegiSurname: why.surname || '',
+								bits: why.bits != null ? why.bits : (r.bits != null ? r.bits : null),
+								decision: why.decision || r.decision || '',
+								rankKey: why.rankKey != null ? why.rankKey : (r.rankKey != null ? r.rankKey : null),
 								needsCorroboration: !!why.needsCorroboration,
 								birthGap: why.birthGap != null ? why.birthGap : '',
 								familyCount: why.familyCount != null ? why.familyCount : 0,
@@ -2233,7 +2290,7 @@
 								round: why.round || ''
 							},
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
-								? why.familyMatches.join(', ')
+								? why.familyMatches.map(m => typeof m === 'object' ? `${m.name}${m.birth_year ? '-' + m.birth_year : ''}` : String(m)).join(', ')
 								: '',
 							runnerUps: runnerUps,
 							reconciledNote: why.reconciledNote || ''
@@ -2341,6 +2398,14 @@
 								<div class="breakdown-label">Surname Kind</div>
 								<div class="breakdown-value">${levers.surnameKind || 'NONE'}</div>
 							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #6366f1;">
+								<div class="breakdown-label">Fellegi Agreement</div>
+								<div class="breakdown-value" style="font-size: 11px;">${(levers.fellegiGiven || levers.fellegiSurname) ? `${levers.fellegiGiven || '-'} / ${levers.fellegiSurname || '-'}` : '-'}</div>
+							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #0284c7;">
+								<div class="breakdown-label">Fellegi Bits (Log LR)</div>
+								<div class="breakdown-value">${levers.bits != null ? `${levers.bits} bits` : '-'}</div>
+							</div>
 							<div class="breakdown-item" style="border-left: 3px solid #10b981;">
 								<div class="breakdown-label">Needs Corroboration</div>
 								<div class="breakdown-value">${levers.needsCorroboration ? 'TRUE' : 'FALSE'}</div>
@@ -2348,23 +2413,23 @@
 							<div class="breakdown-item" style="border-left: 3px solid #06b6d4;">
 								<div class="breakdown-label">Corroborated Kin</div>
 								<div class="breakdown-value" style="font-size: 10px; font-weight: 600;">${famCorr}</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #f59e0b;">
-                <div class="breakdown-label">Birth Gap (yrs)</div>
-                <div class="breakdown-value">${levers.birthGap != null && levers.birthGap !== '' ? levers.birthGap : '-'}</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #22c55e;">
-                <div class="breakdown-label">Kin Matched (H)</div>
-                <div class="breakdown-value">${levers.familyCount != null ? levers.familyCount : 0} (H ${levers.householdH != null ? levers.householdH : 0})</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #7c3aed;">
-                <div class="breakdown-label">Matched In Round</div>
-                <div class="breakdown-value">${levers.round || '-'}</div>
-              </div>
-              <div class="breakdown-item" style="border-left: 3px solid #ec4899;">
-                <div class="breakdown-label">Margin vs #2</div>
-                <div class="breakdown-value">${levers.margin != null && levers.margin !== '' ? levers.margin : '-'} (2nd ${levers.secondBest != null && levers.secondBest !== '' ? levers.secondBest : '-'})</div>
-              </div>
+							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #f59e0b;">
+								<div class="breakdown-label">Birth Gap (yrs)</div>
+								<div class="breakdown-value">${levers.birthGap != null && levers.birthGap !== '' ? levers.birthGap : '-'}</div>
+							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #22c55e;">
+								<div class="breakdown-label">Kin Matched (H)</div>
+								<div class="breakdown-value">${levers.familyCount != null ? levers.familyCount : 0} (H ${levers.householdH != null ? levers.householdH : 0})</div>
+							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #7c3aed;">
+								<div class="breakdown-label">Matched In Round</div>
+								<div class="breakdown-value">${levers.round || '-'}</div>
+							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #ec4899;">
+								<div class="breakdown-label">Margin vs #2</div>
+								<div class="breakdown-value">${levers.margin != null && levers.margin !== '' ? levers.margin : '-'} (2nd ${levers.secondBest != null && levers.secondBest !== '' ? levers.secondBest : '-'})</div>
+							</div>
 						</div>
 
 						${runnerUpsHtml}
@@ -2732,8 +2797,17 @@
 					this.rawVpRows = sourceRows;
 					this.rawCensusMentions = censusMentions;
 
-					const matcher = new Match();
-					if (typeof matcher.usePool === 'function') matcher.usePool(mentionsRows);
+					// Configure Match & Fellegi-Sunter with pool for rematching
+					const matcher = new Match({ candidatePrior: 0.002 });
+					const fellegi = (typeof Fellegi !== 'undefined')
+						? new Fellegi({ match: matcher, prior: 0.002 })
+						: matcher._getFellegi();
+					if (fellegi && mentionsRows && mentionsRows.length) {
+						fellegi.usePool(mentionsRows);
+					}
+					if (matcher && fellegi) {
+						matcher._fellegi = fellegi;
+					}
 
 					const BETA = 0.6;
 					const BIRTH_PROFILES = {
@@ -2872,7 +2946,8 @@
 							candidateHousehold: candHousehold,
 							weights: LEVER_WEIGHTS,
 							birthProfiles: BIRTH_PROFILES,
-							householdBoost: BETA
+							householdBoost: BETA,
+							prior: 0.002
 						});
 
 						let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
@@ -2897,6 +2972,11 @@
 								family: why.family != null ? why.family : 0,
 								rung: why.rung || 'NONE',
 								surnameKind: why.surnameKind || 'NONE',
+								fellegiGiven: why.given || '',
+								fellegiSurname: why.surname || '',
+								bits: why.bits != null ? why.bits : (matchRes.bits != null ? matchRes.bits : null),
+								decision: why.decision || matchRes.decision || '',
+								rankKey: why.rankKey != null ? why.rankKey : (matchRes.rankKey != null ? matchRes.rankKey : null),
 								needsCorroboration: !!why.needsCorroboration,
 								birthGap: why.birthGap != null ? why.birthGap : '',
 								familyCount: why.familyCount != null ? why.familyCount : 0,
@@ -2905,7 +2985,7 @@
 								secondBest: ''
 							},
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
-								? why.familyMatches.join(', ')
+								? why.familyMatches.map(m => typeof m === 'object' ? `${m.name}${m.birth_year ? '-' + m.birth_year : ''}` : String(m)).join(', ')
 								: '',
 							runnerUps: [],
 							reconciledNote: why.reconciledNote || ''
