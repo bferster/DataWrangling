@@ -217,7 +217,7 @@
 
 		.controls-grid {
 			display: grid;
-			grid-template-columns: repeat(6, 1fr);
+			grid-template-columns: repeat(7, 1fr);
 			gap: 6px 8px;
 			align-items: flex-end;
 		}
@@ -879,6 +879,10 @@
 				grid-template-columns: 1fr;
 			}
 
+			.controls-grid {
+				grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+			}
+
 			.stats-grid-right {
 				grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 			}
@@ -948,14 +952,18 @@
 					</div>
 
 					<div class="form-group"
-						style="display: flex; flex-direction: row; gap: 6px; grid-column: 1 / -1; margin-top: 6px; align-items: center;">
-						<label
-							title="Multi-pass cascade: strict anchors -> household bridges -> surname-change retrieval -> residual sweep. Unchecked = single pass."
-							style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none; white-space: nowrap; padding-right: 4px;">
-							<input type="checkbox" id="multiPassCheckbox"
-								style="cursor: pointer; accent-color: var(--accent-primary);">
-							<span>MultiPass</span>
+						style="display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding-bottom: 5px;">
+						<label for="familyBoostCheckbox"
+							title="Include family member boosting (BETA 0.6) in scoring and probability"
+							style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none; white-space: nowrap;">
+							<input type="checkbox" id="familyBoostCheckbox" checked
+								style="cursor: pointer; accent-color: var(--accent-primary); width: 14px; height: 14px;">
+							<span>Family Boost</span>
 						</label>
+					</div>
+
+					<div class="form-group"
+						style="display: flex; flex-direction: row; gap: 6px; grid-column: 1 / -1; margin-top: 6px; align-items: center;">
 						<button id="runBtn" class="btn btn-primary" style="flex: 1;">
 							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 								<path
@@ -1754,7 +1762,7 @@
 					// Such a group is not real household data, and if left in it turns
 					// every candidate score in that bucket into an O(household size)
 					// scoreHousehold() nested loop (match.js) -- multiplied across up to
-					// MAX_CANDIDATES candidates per person, that's what hangs the round.
+					// MAX_CANDIDATES candidates per person, that's what hangs the matcher.
 					const MAX_HOUSEHOLD_SIZE = 40;
 					const dropOversizedHouseholds = (map, label) => {
 						let dropped = 0, droppedRecords = 0;
@@ -1793,12 +1801,12 @@
 							if (parts[0]) addToIndex('M', parts[0], m);
 							if (parts[1]) addToIndex('M', parts[1], m);
 						}
-						// surname-independent key (see fbKey) for the surname-change round
+						// surname-independent key (see fbKey)
 						const fnm = m.norm_first_name || m.first_name;
 						if (fnm) for (const b of this.birthBuckets(m)) addToIndex('FB', this.fbKey(fnm, b), m);
 					}
 
-					// Instantiate + configure Fellegi-Sunter & Match engine for this pass
+					// Instantiate + configure Fellegi-Sunter & Match engine for this matching pass
 					const matcher = new Match({ candidatePrior: 0.002 });
 					const fellegi = (typeof Fellegi !== 'undefined')
 						? new Fellegi({ match: matcher, prior: 0.002 })
@@ -1812,7 +1820,8 @@
 
 					// Tunables (see design notes): birth sigma loosened for age-report
 					// noise; household applied as a noisy-OR BOOST (beta) not a lever.
-					const BETA = 0.6;
+					const familyBoostEnabled = $('#familyBoostCheckbox').is(':checked');
+					const BETA = familyBoostEnabled ? 0.6 : 0.0;
 					const BIRTH_PROFILES = {
 						CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
 						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
@@ -1845,25 +1854,7 @@
 					const totalVp = vpRows.length;
 					const chunkSize = 150;
 
-					// ---- MULTI-PASS ROUND CASCADE ----
-					// Checked   -> 4 rounds: strict anchors, household bridges,
-					//              surname-change retrieval, residual sweep.
-					// Unchecked -> one round, original single-pass behavior.
-					const multiPass = $('#multiPassCheckbox').is(':checked');
-
-					const ROUNDS = multiPass ? [
-						{ id: 1, label: 'Anchors', ceil: Math.max(ceiling, 0.90), minLevers: 3, margin: 0.05, bridges: false, firstName: false },
-						{ id: 2, label: 'Bridges', ceil: ceiling, minLevers: 2, margin: 0.05, bridges: true, firstName: false },
-						{ id: 3, label: 'Surname change', ceil: ceiling, minLevers: 1, margin: 0.05, bridges: true, firstName: true },
-						{ id: 4, label: 'Residual', ceil: promoteFloor, minLevers: 1, margin: 0.10, bridges: true, firstName: true }
-					] : [
-						{ id: 1, label: 'Single pass', ceil: ceiling, minLevers: 0, margin: 0.05, bridges: false, firstName: false }
-					];
-
-					const roundLabelById = new Map(ROUNDS.map(r => [r.id, r.label]));
-					roundLabelById.set(0, 'Reviewer confirmed');
-
-					const MAX_CANDIDATES = 800;   // hard cap on retrieval per person per round
+					const MAX_CANDIDATES = 800;   // hard cap on retrieval per person
 
 					const perPerson = new Array(totalVp).fill(null).map(() => []);
 					const seenPair = new Array(totalVp).fill(null).map(() => new Set());
@@ -1871,13 +1862,10 @@
 					const calibRows = [];
 					const usedMention = new Set();          // claim-once ledger
 					const assigned = new Array(totalVp).fill(null);
-					const assignedRound = new Array(totalVp).fill(-1);
-					const roundStats = [];
-					let bridges = new Map();                // source household -> target household
 
 					// Cross-run persistence from a loaded REVIEWER CSV:
-					//   MATCHED    -> pre-locked before round 1, never re-litigated
-					//   UN-MATCHED -> never-match; that pair is excluded from every round
+					//   MATCHED    -> pre-locked, never re-litigated
+					//   UN-MATCHED -> never-match; that pair is excluded
 					const neverMatch = new Set();
 					const preClaimed = new Map();
 					if (this.loadedHitlData && this.loadedHitlData.mapExact) {
@@ -1904,39 +1892,16 @@
 					};
 					const scorePair = (person, cand) => matcher.MatchPerson(person, cand, {
 						censusYear: yrNum,
-						personKin: kinOf(person),
-						candidateHousehold: householdOf(cand),
+						personKin: familyBoostEnabled ? kinOf(person) : null,
+						candidateHousehold: familyBoostEnabled ? householdOf(cand) : null,
 						weights: LEVER_WEIGHTS,
 						birthProfiles: BIRTH_PROFILES,
 						householdBoost: BETA,
 						prior: 0.002
 					});
 
-					// Majority-vote map of where each source household landed, rebuilt
-					// after every round so later rounds can seed from confirmed families.
-					const rebuildBridges = () => {
-						const votes = new Map();
-						for (let i = 0; i < totalVp; i++) {
-							const a = assigned[i];
-							if (!a) continue;
-							const sh = this.hhKey(vpRows[i]);
-							const th = this.hhKey(a.candidate);
-							if (!sh || !th) continue;
-							if (!votes.has(sh)) votes.set(sh, new Map());
-							const c = votes.get(sh);
-							c.set(th, (c.get(th) || 0) + 1);
-						}
-						const best = new Map();
-						for (const [sh, c] of votes) {
-							let bt = null, bn = 0;
-							for (const [th, n] of c) if (n > bn) { bn = n; bt = th; }
-							if (bt) best.set(sh, bt);
-						}
-						return best;
-					};
-
-					// Candidate retrieval under one round's rules.
-					const retrieve = (person, round, hasPlausible) => {
+					// Candidate retrieval: surname & phonetic blocking keys
+					const retrieveSurname = (person) => {
 						const set = new Set();
 						const addKeys = (prefix, val) => {
 							if (set.size >= MAX_CANDIDATES) return;
@@ -1953,33 +1918,27 @@
 							if (parts[0]) addKeys('M', parts[0]);
 							if (parts[1]) addKeys('M', parts[1]);
 						}
-						// bridge: pull the whole target household this family landed in,
-						// regardless of surname (recovers bad surname transcriptions and
-						// disambiguates common names against a known family)
-						if (round.bridges) {
-							const sh = this.hhKey(person);
-							const th = sh ? bridges.get(sh) : null;
-							if (th && censusHouseholds.has(th)) {
-								for (const m of censusHouseholds.get(th)) { if (set.size < MAX_CANDIDATES) set.add(m); }
-							}
-						}
-						// surname-independent retrieval (married women). Gated to later
-						// rounds because the unassigned pool is much smaller by then, and
-						// skipped for anyone who already has a plausible candidate -- this
-						// net is the dominant cost of the cascade.
-						if (round.firstName && !(hasPlausible)) {
-							const r = this.parseRange(person.birth_year);
-							const fn = person.norm_first_name || person.first_name;
-							if (r && fn) {
-								const b0 = Math.floor(r[0] / 5) - 3, b1 = Math.floor(r[1] / 5) + 3;
-								for (let b = b0; b <= b1 && set.size < MAX_CANDIDATES; b++) addKeys('FB', this.fbKey(fn, b));
+						return set;
+					};
+
+					// Fallback candidate retrieval: first name + birth year bucket (e.g. married women)
+					const retrieveFirstName = (person) => {
+						const set = new Set();
+						const r = this.parseRange(person.birth_year);
+						const fn = person.norm_first_name || person.first_name;
+						if (r && fn) {
+							const b0 = Math.floor(r[0] / 5) - 2, b1 = Math.floor(r[1] / 5) + 2;
+							for (let b = b0; b <= b1 && set.size < 120; b++) {
+								const k = makeIndexKey('FB', this.fbKey(fn, b));
+								if (!k) continue;
+								const list = phoneticIndex.get(k);
+								if (list) for (let c = 0; c < list.length && set.size < 120; c++) set.add(list[c]);
 							}
 						}
 						return set;
 					};
 
-					// ---- ROUND 0: re-apply confirmed REVIEWERclaims ----
-					let preLocked = 0;
+					// ---- Re-apply confirmed REVIEWER claims ----
 					if (preClaimed.size) {
 						for (let i = 0; i < totalVp; i++) {
 							const mid = preClaimed.get(pKeyOf(vpRows[i]));
@@ -1987,12 +1946,15 @@
 							const cand = mentionById.get(mid);
 							if (!cand) continue;
 							const mr = scorePair(vpRows[i], cand);
+							const finalVal = mr.score != null ? Number(mr.score.toFixed(3)) : (mr.probability != null ? Number(mr.probability.toFixed(3)) : null);
+							const rawFellegi = (mr.baseScore != null) ? Number(mr.baseScore.toFixed(4))
+								: ((mr.why && mr.why.base != null) ? Number(mr.why.base) : 0);
 							const entry = {
 								candidate: cand, score: Number((mr.score || 0).toFixed(4)),
-								probability: mr.probability != null ? Number(mr.probability.toFixed(3)) : null,
+								probability: finalVal,
+								rawFellegiScore: rawFellegi,
 								tier: mr.tier, levers: (mr.firedLevers || []).length,
-								round: 0, roundLabel: 'REVIEWER confirmed',
-								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded REVIEWER CSV' }),
+								why: Object.assign({}, mr.why || {}, { note: 'Locked from loaded REVIEWER CSV', raw_fellegi_score: rawFellegi }),
 								bits: mr.bits != null ? mr.bits : null,
 								rankKey: mr.rankKey != null ? mr.rankKey : null,
 								fields: mr.fields || null,
@@ -2001,156 +1963,132 @@
 							perPerson[i].push(entry);
 							seenPair[i].add(mid);
 							assigned[i] = entry;
-							assignedRound[i] = 0;
 							usedMention.add(mid);
-							preLocked++;
 						}
-						if (preLocked) { bridges = rebuildBridges(); roundStats.push(`R0 REVIEWER: +${preLocked}`); }
 					}
 
-					// ---- ROUND CASCADE ----
-					for (let ri = 0; ri < ROUNDS.length; ri++) {
-						const round = ROUNDS[ri];
-						const pending = [];
-						for (let i = 0; i < totalVp; i++) if (!assigned[i]) pending.push(i);
-						if (!pending.length) { roundStats.push(`R${round.id} ${round.label}: +0`); continue; }
+					// ---- Single-pass candidate scoring ----
+					const pending = [];
+					for (let i = 0; i < totalVp; i++) if (!assigned[i]) pending.push(i);
 
-						const base = 55 + (ri / ROUNDS.length) * 25;
-						const span = 25 / ROUNDS.length;
+					for (let c = 0; c < pending.length; c += chunkSize) {
+						const endC = Math.min(c + chunkSize, pending.length);
+						for (let q = c; q < endC; q++) {
+							const i = pending[q];
+							const person = vpRows[i];
+							const pKey = pKeyOf(person);
 
-						for (let c = 0; c < pending.length; c += chunkSize) {
-							const endC = Math.min(c + chunkSize, pending.length);
-							for (let q = c; q < endC; q++) {
-								const i = pending[q];
-								const person = vpRows[i];
-								const pKey = pKeyOf(person);
+							const pGender = matcher._gender(person);
+							const pRaceCls = matcher._raceClass(person);
+							const pBirthRange = this.parseRange(person.birth_year);
+							const pDeathRange = this.parseRange(person.death_year);
 
-								const pGender = matcher._gender(person);
-								const pRaceCls = matcher._raceClass(person);
-								const pBirthRange = this.parseRange(person.birth_year);
-								const pDeathRange = this.parseRange(person.death_year);
+							// died before this census -> cannot be present
+							if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
 
-								// died before this census -> cannot be present
-								if (pDeathRange && pDeathRange[1] < (yrNum - 1)) continue;
+							const personKin = kinOf(person);
+							let hasPlausible = false;
 
-								const personKin = kinOf(person);
+							const evaluateCandidate = (cand) => {
+								const mid = this.normStr(cand.mention_id);
+								if (usedMention.has(mid)) return;
+								if (seenPair[i].has(mid)) return;
+								if (neverMatch.has(`${pKey}|${mid}`)) return;
+								seenPair[i].add(mid);
 
-								const hasPlausible = perPerson[i].length > 0 && perPerson[i][0].score >= floor;
-								for (const cand of retrieve(person, round, hasPlausible)) {
-									const mid = this.normStr(cand.mention_id);
-									if (usedMention.has(mid)) continue;              // claimed in an earlier round
-									if (seenPair[i].has(mid)) continue;              // already scored this pair
-									if (neverMatch.has(`${pKey}|${mid}`)) continue;  // human rejected it
-									seenPair[i].add(mid);
-
-									const cGender = matcher._gender(cand);
-									if (pGender && cGender && pGender !== cGender) continue;
-									const cRaceCls = matcher._raceClass(cand);
-									if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) continue;
-									const cBirthRange = this.parseRange(cand.birth_year);
-									if (pBirthRange && cBirthRange) {
-										const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
-											: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
-										if (gap > 12) continue;   // aligned with MatchPerson knockout
-									}
-
-									const candHousehold = householdOf(cand);
-									const matchRes = matcher.MatchPerson(person, cand, {
-										censusYear: yrNum,
-										personKin: personKin,
-										candidateHousehold: candHousehold,
-										weights: LEVER_WEIGHTS,
-										birthProfiles: BIRTH_PROFILES,
-										householdBoost: BETA,
-										prior: 0.002
-									});
-									if (matchRes.tier === 'KNOCKOUT' || matchRes.score <= 0) continue;
-
-									// Name disagreement guard (from default search method):
-									// If both sides have names, drop pairs where neither surname, given name, rung, nor family continuity agreed.
-									const hasSurnameMatch = matchRes.why && matchRes.why.surname && matchRes.why.surname !== 'DISAGREE' && matchRes.why.surname !== 'NONE';
-									const hasGivenMatch = matchRes.why && matchRes.why.given && matchRes.why.given !== 'CONFLICT' && matchRes.why.given !== 'DISAGREE';
-									const hasRungMatch = matchRes.why && matchRes.why.rung && matchRes.why.rung !== 'NONE';
-									const hasFamilyMatch = matchRes.why && ((typeof matchRes.why.family === 'number' && matchRes.why.family > 0) || (matchRes.why.family && matchRes.why.family !== 'NONE') || (matchRes.why.familyMatches && matchRes.why.familyMatches.length > 0));
-
-									const isTargetNamed = Boolean(person.first_name || person.last_name || person.full_name);
-									const isCandNamed = Boolean(cand.first_name || cand.last_name || cand.full_name);
-									if (isTargetNamed && isCandNamed && !hasSurnameMatch && !hasGivenMatch && !hasRungMatch && !hasFamilyMatch) continue;
-
-									let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
-									if (candProb == null && typeof matcher.nameProbability === 'function') {
-										candProb = matcher.nameProbability(matchRes.score);
-									}
-									if (candProb == null) {
-										candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
-									}
-
-									const entry = {
-										candidate: cand,
-										score: Number(matchRes.score.toFixed(4)),
-										probability: candProb,
-										tier: matchRes.tier,
-										levers: (matchRes.firedLevers || []).length,
-										round: round.id,
-										roundLabel: round.label,
-										why: matchRes.why,
-										bits: matchRes.bits != null ? matchRes.bits : null,
-										rankKey: matchRes.rankKey != null ? matchRes.rankKey : null,
-										fields: matchRes.fields || null,
-										decision: matchRes.decision || null
-									};
-									perPerson[i].push(entry);
-									edges.push({ pi: i, mid: mid, entry: entry });
-
-									const lab = labelMap.get(labelKey(pKey, cand.mention_id));
-									if (lab === 0 || lab === 1)
-										calibRows.push({
-											// MUST match match.js _calibFeatures order/length:
-											// [name, birth, H(family), surnameReliability]
-											features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family,
-											matchRes.why.surnameReliability != null ? matchRes.why.surnameReliability : 0.5],
-											label: lab
-										});
+								const cGender = matcher._gender(cand);
+								if (pGender && cGender && pGender !== cGender) return;
+								const cRaceCls = matcher._raceClass(cand);
+								if (pRaceCls && cRaceCls && pRaceCls !== cRaceCls) return;
+								const cBirthRange = this.parseRange(cand.birth_year);
+								if (pBirthRange && cBirthRange) {
+									const gap = (cBirthRange[0] > pBirthRange[1]) ? cBirthRange[0] - pBirthRange[1]
+										: (pBirthRange[0] > cBirthRange[1]) ? pBirthRange[0] - cBirthRange[1] : 0;
+									if (gap > 12) return;
 								}
-								// Sort candidates by rankKey (Fellegi bits + tiebreaker + household support), falling back to score
-								perPerson[i].sort((a, b) => {
-									const rkA = a.rankKey != null ? a.rankKey : a.bits;
-									const rkB = b.rankKey != null ? b.rankKey : b.bits;
-									if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
-									return (b.score - a.score) || ((b.probability || 0) - (a.probability || 0));
-								});
-							}
-							this.updateProgress(base + (endC / pending.length) * span,
-								`Round ${round.id} (${round.label}): scored ${endC.toLocaleString()} of ${pending.length.toLocaleString()} unassigned...`);
-							await new Promise(r => setTimeout(r, 0));
-						}
 
-						// lock this round's confident, clear, uncontested winners
-						const order = pending.filter(i => !assigned[i] && perPerson[i].length);
-						order.sort((a, b) => {
-							const bestA = perPerson[a][0];
-							const bestB = perPerson[b][0];
-							const rkA = bestA.rankKey != null ? bestA.rankKey : bestA.bits;
-							const rkB = bestB.rankKey != null ? bestB.rankKey : bestB.bits;
-							if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
-							return bestB.score - bestA.score;
-						});
-						let lockedCount = 0;
-						for (const i of order) {
-							if (assigned[i]) continue;
-							const avail = perPerson[i].filter(e => !usedMention.has(this.normStr(e.candidate.mention_id)));
-							if (!avail.length) continue;
-							const best = avail[0];
-							const second = avail[1] ? avail[1].score : 0;
-							if (best.score >= round.ceil && (best.score - second) >= round.margin && best.levers >= round.minLevers) {
-								assigned[i] = best;
-								assignedRound[i] = round.id;
-								usedMention.add(this.normStr(best.candidate.mention_id));
-								lockedCount++;
+								const candHousehold = (familyBoostEnabled && personKin.length > 0) ? householdOf(cand) : null;
+								const matchRes = matcher.MatchPerson(person, cand, {
+									censusYear: yrNum,
+									personKin: familyBoostEnabled ? personKin : null,
+									candidateHousehold: candHousehold,
+									weights: LEVER_WEIGHTS,
+									birthProfiles: BIRTH_PROFILES,
+									householdBoost: BETA,
+									prior: 0.002
+								});
+								if (matchRes.tier === 'KNOCKOUT' || matchRes.score <= 0) return;
+
+								// Name disagreement guard:
+								const hasSurnameMatch = matchRes.why && matchRes.why.surname && matchRes.why.surname !== 'DISAGREE' && matchRes.why.surname !== 'NONE';
+								const hasGivenMatch = matchRes.why && matchRes.why.given && matchRes.why.given !== 'CONFLICT' && matchRes.why.given !== 'DISAGREE';
+								const hasRungMatch = matchRes.why && matchRes.why.rung && matchRes.why.rung !== 'NONE';
+								const hasFamilyMatch = familyBoostEnabled && matchRes.why && ((typeof matchRes.why.family === 'number' && matchRes.why.family > 0) || (matchRes.why.family && matchRes.why.family !== 'NONE') || (matchRes.why.familyMatches && matchRes.why.familyMatches.length > 0));
+
+								const isTargetNamed = Boolean(person.first_name || person.last_name || person.full_name);
+								const isCandNamed = Boolean(cand.first_name || cand.last_name || cand.full_name);
+								if (isTargetNamed && isCandNamed && !hasSurnameMatch && !hasGivenMatch && !hasRungMatch && !hasFamilyMatch) return;
+
+								let candProb = Number(Math.max(0, Math.min(1, matchRes.score != null ? matchRes.score : (matchRes.probability || 0))).toFixed(3));
+								const rawFellegi = (matchRes.baseScore != null) ? Number(matchRes.baseScore.toFixed(4))
+									: ((matchRes.why && matchRes.why.base != null) ? Number(matchRes.why.base) : 0);
+
+								const candWhy = Object.assign({}, matchRes.why, { raw_fellegi_score: rawFellegi });
+
+								const entry = {
+									candidate: cand,
+									score: Number(matchRes.score.toFixed(4)),
+									probability: candProb,
+									rawFellegiScore: rawFellegi,
+									tier: matchRes.tier,
+									levers: (matchRes.firedLevers || []).length,
+									why: candWhy,
+									bits: matchRes.bits != null ? matchRes.bits : null,
+									rankKey: matchRes.rankKey != null ? matchRes.rankKey : null,
+									fields: matchRes.fields || null,
+									decision: matchRes.decision || null
+								};
+								perPerson[i].push(entry);
+								if (entry.score >= floor) {
+									edges.push({ pi: i, mid: mid, entry: entry });
+									hasPlausible = true;
+								}
+
+								const lab = labelMap.get(labelKey(pKey, cand.mention_id));
+								if (lab === 0 || lab === 1) {
+									calibRows.push({
+										features: [matchRes.why.name, matchRes.why.birth, matchRes.why.family,
+										matchRes.why.surnameReliability != null ? matchRes.why.surnameReliability : 0.5],
+										label: lab
+									});
+								}
+							};
+
+							// Step 1: Score surname & phonetic candidates
+							for (const cand of retrieveSurname(person)) {
+								evaluateCandidate(cand);
+							}
+
+							// Step 2: If no candidate scored at or above floor, fall back to first-name (FB) retrieval (e.g. married women)
+							if (!hasPlausible) {
+								for (const cand of retrieveFirstName(person)) {
+									evaluateCandidate(cand);
+								}
+							}
+
+							perPerson[i].sort((a, b) => {
+								const rkA = a.rankKey != null ? a.rankKey : a.bits;
+								const rkB = b.rankKey != null ? b.rankKey : b.bits;
+								if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
+								return (b.score - a.score) || ((b.probability || 0) - (a.probability || 0));
+							});
+							if (perPerson[i].length > 8) {
+								perPerson[i].length = 8;
 							}
 						}
-						roundStats.push(`R${round.id} ${round.label}: +${lockedCount}`);
-						if (multiPass) bridges = rebuildBridges();
+						this.updateProgress(55 + (endC / (pending.length || 1)) * 25,
+							`Scored ${endC.toLocaleString()} of ${pending.length.toLocaleString()} source persons...`);
+						await new Promise(r => setTimeout(r, 0));
 					}
 
 					// ---- optional REAL calibration on resolved labels ----
@@ -2159,21 +2097,46 @@
 						try {
 							matcher.fitCalibration(calibRows);
 							calibrated = true;
-							for (const e of edges) {
-								try {
-									e.entry.probability = Number(matcher.probability([
-										e.entry.why.name, e.entry.why.birth, e.entry.why.family,
-										e.entry.why.surnameReliability != null ? e.entry.why.surnameReliability : 0.5
-									]).toFixed(3));
-								} catch (_) { }
+							for (let pIdx = 0; pIdx < totalVp; pIdx++) {
+								for (const entry of perPerson[pIdx]) {
+									try {
+										entry.probability = Number(matcher.probability([
+											entry.why.name, entry.why.birth, entry.why.family,
+											entry.why.surnameReliability != null ? entry.why.surnameReliability : 0.5
+										]).toFixed(3));
+									} catch (_) { }
+								}
 							}
 						} catch (err) { console.warn('fitCalibration skipped:', err.message); }
 					}
 
-					// ---- final slack assignment (never forces a sub-floor claim) ----
+					// ---- 1-to-1 assignment: deconflicting contested census mentions ----
 					this.updateProgress(82, 'Assigning: deconflicting contested census mentions...');
 					await new Promise(r => setTimeout(r, 0));
 
+					// Lock confident, uncontested winners
+					const order = pending.filter(i => !assigned[i] && perPerson[i].length);
+					order.sort((a, b) => {
+						const bestA = perPerson[a][0];
+						const bestB = perPerson[b][0];
+						const rkA = bestA.rankKey != null ? bestA.rankKey : bestA.bits;
+						const rkB = bestB.rankKey != null ? bestB.rankKey : bestB.bits;
+						if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
+						return bestB.score - bestA.score;
+					});
+					for (const i of order) {
+						if (assigned[i]) continue;
+						const avail = perPerson[i].filter(e => !usedMention.has(this.normStr(e.candidate.mention_id)));
+						if (!avail.length) continue;
+						const best = avail[0];
+						const second = avail[1] ? avail[1].score : 0;
+						if (best.score >= ceiling && (best.score - second) >= margin) {
+							assigned[i] = best;
+							usedMention.add(this.normStr(best.candidate.mention_id));
+						}
+					}
+
+					// Assign remaining contested/unassigned candidates above floor
 					const rem = edges
 						.filter(e => !assigned[e.pi] && !usedMention.has(e.mid) && e.entry.score >= floor)
 						.sort((a, b) => {
@@ -2182,15 +2145,11 @@
 							if (rkB != null && rkA != null && rkB !== rkA) return rkB - rkA;
 							return b.entry.score - a.entry.score;
 						});
-					let slackCount = 0;
 					for (const e of rem) {
 						if (assigned[e.pi] || usedMention.has(e.mid)) continue;
 						assigned[e.pi] = e.entry;
-						if (assignedRound[e.pi] < 0) assignedRound[e.pi] = 99;
 						usedMention.add(e.mid);
-						slackCount++;
 					}
-					if (slackCount) roundStats.push(`Slack: +${slackCount}`);
 
 					// ---- classify MATCH / MAYBE / UN-MATCHED by margin over assigned edge ----
 					this.updateProgress(90, 'Classifying by margin (best vs runner-up)...');
@@ -2211,11 +2170,11 @@
 
 						if (!a) {
 							rawResults.push({
-								person: person, status: 'UN-MATCHED', probability: 0, score: 0, bestCandidate: null,
+								person: person, status: 'UN-MATCHED', probability: 0, rawFellegiScore: 0, score: 0, bestCandidate: null,
 								why: {
+									raw_fellegi_score: 0,
 									name: 0, birth: 0, family: 0, householdH: 0, rung: 'NONE', surnameKind: 'NO_MATCH',
 									needsCorroboration: false, birthGap: '', familyCount: 0, margin: '', secondBest: '',
-									round: '',
 									note: cands.length ? 'Lost assignment to a better-fitting person' : 'No candidate cleared blocking'
 								},
 								allCandidates: cands
@@ -2226,23 +2185,24 @@
 						const best = a.score;
 						const secondEntry = cands.find(c => this.normStr(c.candidate.mention_id) !== this.normStr(a.candidate.mention_id));
 						const second = secondEntry ? secondEntry.score : 0;
-						const status = (a.round === 0) ? 'MATCH' : classify(best, second);
+						const status = (a.why && a.why.note === 'Locked from loaded REVIEWER CSV') ? 'MATCH' : classify(best, second);
+
+						const rawFellegi = (a.rawFellegiScore != null) ? a.rawFellegiScore : ((a.why && a.why.raw_fellegi_score != null) ? a.why.raw_fellegi_score : ((a.why && a.why.base != null) ? a.why.base : 0));
 
 						const why = Object.assign({}, a.why, {
+							raw_fellegi_score: rawFellegi,
 							margin: Number((best - second).toFixed(3)),
-							secondBest: Number(second.toFixed(3)),
-							round: (assignedRound[i] === 99) ? 'Slack'
-								: `R${assignedRound[i]} ${roundLabelById.get(assignedRound[i]) || ''}`.trim()
+							secondBest: Number(second.toFixed(3))
 						});
 
 						rawResults.push({
 							person: person, status: status,
-							probability: a.probability != null ? a.probability : Number(Math.max(0, Math.min(1, best)).toFixed(3)), score: best,
+							probability: a.probability != null ? a.probability : Number(Math.max(0, Math.min(1, best)).toFixed(3)),
+							rawFellegiScore: rawFellegi,
+							score: best,
 							bestCandidate: a.candidate, why: why, allCandidates: cands
 						});
 					}
-
-					this.roundStats = roundStats;
 
 					this.updateProgress(95, 'Formatting explanation levers and top candidate runner-ups...');
 					await new Promise(r => setTimeout(r, 0));
@@ -2263,6 +2223,7 @@
 							surnameKind: (c.why && c.why.surnameKind) || 'NONE',
 							fellegiGiven: (c.why && c.why.given) || '',
 							fellegiSurname: (c.why && c.why.surname) || '',
+							rawFellegiScore: (c.rawFellegiScore != null) ? c.rawFellegiScore : ((c.why && c.why.raw_fellegi_score != null) ? c.why.raw_fellegi_score : (c.why && c.why.base)),
 							bits: (c.bits != null) ? c.bits : (c.why && c.why.bits),
 							decision: c.decision || (c.why && c.why.decision) || '',
 							probability: (c.probability != null && !isNaN(c.probability)) ? Number(c.probability).toFixed(3) : ((c.score != null && !isNaN(c.score)) ? Number(c.score).toFixed(3) : '0.000'),
@@ -2278,6 +2239,7 @@
 								surnameKind: why.surnameKind || 'NONE',
 								fellegiGiven: why.given || '',
 								fellegiSurname: why.surname || '',
+								rawFellegiScore: (why.raw_fellegi_score != null) ? why.raw_fellegi_score : (why.base != null ? why.base : null),
 								bits: why.bits != null ? why.bits : (r.bits != null ? r.bits : null),
 								decision: why.decision || r.decision || '',
 								rankKey: why.rankKey != null ? why.rankKey : (r.rankKey != null ? r.rankKey : null),
@@ -2286,8 +2248,7 @@
 								familyCount: why.familyCount != null ? why.familyCount : 0,
 								householdH: why.householdH != null ? why.householdH : 0,
 								margin: why.margin != null ? why.margin : '',
-								secondBest: why.secondBest != null ? why.secondBest : '',
-								round: why.round || ''
+								secondBest: why.secondBest != null ? why.secondBest : ''
 							},
 							familyCorroborated: (why.familyMatches && why.familyMatches.length > 0)
 								? why.familyMatches.map(m => typeof m === 'object' ? `${m.name}${m.birth_year ? '-' + m.birth_year : ''}` : String(m)).join(', ')
@@ -2300,6 +2261,41 @@
 					this.matchedResults = rawResults;
 					if (this.loadedHitlData) {
 						this.applyLoadedHitl(this.matchedResults);
+					}
+
+					// Log Fellegi-Sunter match probabilities to console
+					const qualifiedMatches = this.matchedResults.filter(r => r.bestCandidate && (r.status === 'MATCH' || r.status === 'MAYBE'));
+					console.log(`%c[Fellegi-Sunter Match Probabilities] ${qualifiedMatches.length} candidate(s) scored as MATCH or MAYBE for ${sourceSource} ➔ ${targetSource}:`, 'font-weight:bold; color:#0066cc;');
+					if (qualifiedMatches.length > 0) {
+						console.table(qualifiedMatches.slice(0, 50).map((r, i) => {
+							const cand = r.bestCandidate || {};
+							const vp = r.person || {};
+							const why = r.why || {};
+							const levers = (r.formattedWhy && r.formattedWhy.levers) || {};
+							return {
+								'#': i + 1,
+								'Status': r.status,
+								'Source Person': `${vp.person_id || vp.mention_id || ''} (${vp.full_name || ''})`,
+								'Target Candidate': `${cand.mention_id || ''} (${cand.full_name || ''})`,
+								'FS Prob': r.probability != null ? +Number(r.probability).toFixed(4) : '-',
+								'FS Raw Score': (r.rawFellegiScore != null) ? r.rawFellegiScore : ((why.raw_fellegi_score != null) ? why.raw_fellegi_score : (why.base != null ? why.base : '-')),
+								'FS Bits': levers.bits != null ? levers.bits : (why.bits != null ? why.bits : '-'),
+								'Score': r.score != null ? +Number(r.score).toFixed(4) : 0,
+								'Decision': levers.decision || why.decision || r.status,
+								'Rung': levers.rung || why.rung || '-',
+								'Agreement': (levers.fellegiGiven || levers.fellegiSurname) ? `${levers.fellegiGiven || ''} / ${levers.fellegiSurname || ''}` : '-'
+							};
+						}));
+						if (qualifiedMatches[0]) {
+							console.log('[Top Candidate FS Breakdown]', {
+								source_id: (qualifiedMatches[0].person && (qualifiedMatches[0].person.person_id || qualifiedMatches[0].person.mention_id)) || null,
+								target_id: (qualifiedMatches[0].bestCandidate && qualifiedMatches[0].bestCandidate.mention_id) || null,
+								probability: qualifiedMatches[0].probability,
+								bits: (qualifiedMatches[0].why && qualifiedMatches[0].why.bits != null) ? qualifiedMatches[0].why.bits : qualifiedMatches[0].bits,
+								fields: (qualifiedMatches[0].why && qualifiedMatches[0].why.fields) || null,
+								why: qualifiedMatches[0].why
+							});
+						}
 					}
 
 					this.updateProgress(97, 'Aggregating match statistics and KPIs...');
@@ -2319,8 +2315,7 @@
 					await this.renderResultsTable(this.matchedResults);
 					$('#downloadBtn').prop('disabled', false);
 
-					const roundNote = (this.roundStats && this.roundStats.length) ? `  |  ${this.roundStats.join('  ')}` : '';
-					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.${roundNote}`);
+					this.updateProgress(100, `Completed! ${matchCount.toLocaleString()} matches, ${maybeCount.toLocaleString()} maybes, ${unmatchedCount.toLocaleString()} un-matched persons.`);
 
 				} catch (err) {
 					console.error(err);
@@ -2334,6 +2329,35 @@
 						Run Matcher
 					`);
 				}
+			}
+
+			// Helper: log Fellegi-Sunter candidate details to console
+			logCandidateFellegiDetails(row) {
+				if (!row) return;
+				const cand = row.bestCandidate;
+				const vp = row.person || {};
+				const why = row.why || {};
+				const levers = (row.formattedWhy && row.formattedWhy.levers) || {};
+				const prob = row.probability != null ? row.probability : 'N/A';
+				const bits = levers.bits != null ? levers.bits : (why.bits != null ? why.bits : 'N/A');
+				const decision = levers.decision || why.decision || (row.status || 'N/A');
+
+				console.log(`%c[Match Value (Probability): ${prob}] ${vp.person_id || vp.mention_id || ''} (${vp.full_name || ''}) ➔ ${cand ? cand.mention_id : 'NO_CANDIDATE'} (${cand ? cand.full_name : '-'})`, 'font-weight:bold; color:#0284c7;', {
+					'Status': row.status,
+					'Final Match Value (Prob)': prob,
+					'Raw Fellegi Score': row.rawFellegiScore != null ? row.rawFellegiScore : ((why.raw_fellegi_score != null) ? why.raw_fellegi_score : why.base),
+					'Match Score': row.score,
+					'FS Base Demographic Prob': why.base != null ? why.base : 'N/A',
+					'FS Bits (Log LR)': bits != null ? `${bits} bits` : 'N/A',
+					'Rank Key': levers.rankKey != null ? levers.rankKey : why.rankKey,
+					'Household Boost (H)': levers.householdH != null ? levers.householdH : why.family,
+					'Decision': decision,
+					'Given Level': levers.fellegiGiven || why.given || '-',
+					'Surname Level': levers.fellegiSurname || why.surname || '-',
+					'Name Rung': levers.rung || why.rung || '-',
+					'Fields': why.fields || null,
+					'Why': why
+				});
 			}
 
 			// Render Details Accordion Content on demand
@@ -2359,7 +2383,7 @@
 											<span class="mono" style="color: #1d4ed8; font-weight: 700;">
 												#${ruIdx + 1} ${ru.mention_id} &mdash; ${ru.full_name}
 											</span>
-											<span class="badge badge-warning">Prob: ${ru.probability}</span>
+											<span class="badge badge-warning">Prob: ${ru.probability} | Raw FS: ${ru.rawFellegiScore != null ? ru.rawFellegiScore : '-'}</span>
 										</div>
 										<div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
 											<span class="score-chip chip-name">Name: ${ru.nameScore}</span>
@@ -2406,6 +2430,10 @@
 								<div class="breakdown-label">Fellegi Bits (Log LR)</div>
 								<div class="breakdown-value">${levers.bits != null ? `${levers.bits} bits` : '-'}</div>
 							</div>
+							<div class="breakdown-item" style="border-left: 3px solid #6366f1;">
+								<div class="breakdown-label">Raw Fellegi Score</div>
+								<div class="breakdown-value" style="font-weight: 700; color: #4338ca;">${levers.rawFellegiScore != null ? levers.rawFellegiScore : '-'}</div>
+							</div>
 							<div class="breakdown-item" style="border-left: 3px solid #10b981;">
 								<div class="breakdown-label">Needs Corroboration</div>
 								<div class="breakdown-value">${levers.needsCorroboration ? 'TRUE' : 'FALSE'}</div>
@@ -2421,10 +2449,6 @@
 							<div class="breakdown-item" style="border-left: 3px solid #22c55e;">
 								<div class="breakdown-label">Kin Matched (H)</div>
 								<div class="breakdown-value">${levers.familyCount != null ? levers.familyCount : 0} (H ${levers.householdH != null ? levers.householdH : 0})</div>
-							</div>
-							<div class="breakdown-item" style="border-left: 3px solid #7c3aed;">
-								<div class="breakdown-label">Matched In Round</div>
-								<div class="breakdown-value">${levers.round || '-'}</div>
 							</div>
 							<div class="breakdown-item" style="border-left: 3px solid #ec4899;">
 								<div class="breakdown-label">Margin vs #2</div>
@@ -2653,8 +2677,11 @@
 					return {
 						reviewer_status: reviewerStatus,
 						verity_status: r.status || '',
-						matched_in_round: (r.why && r.why.round) ? r.why.round : '',
+						matched_in_round: '',
 						probability: prob,
+						raw_fellegi_score: (r.rawFellegiScore != null && !isNaN(r.rawFellegiScore)) ? Number(r.rawFellegiScore)
+							: ((r.why && r.why.raw_fellegi_score != null) ? Number(r.why.raw_fellegi_score)
+							: ((r.why && r.why.base != null) ? Number(r.why.base) : '')),
 						source_id: vp.person_id || vp.mention_id || '',
 						target_id: cand.mention_id || '',
 						source_full_name: vp.full_name || '',
@@ -2809,7 +2836,8 @@
 						matcher._fellegi = fellegi;
 					}
 
-					const BETA = 0.6;
+					const familyBoostEnabled = $('#familyBoostCheckbox').is(':checked');
+					const BETA = familyBoostEnabled ? 0.6 : 0.0;
 					const BIRTH_PROFILES = {
 						CENSUS_CENSUS: { sigma: 3.0, knockout: 12 },
 						SCHEDULE_INVOLVED: { sigma: 3.5, knockout: 12 }
@@ -2936,13 +2964,13 @@
 							: [];
 
 						const cHh = this.hhKey(cand);
-						const candHousehold = (cHh && households.has(cHh))
+						const candHousehold = (familyBoostEnabled && cHh && households.has(cHh))
 							? households.get(cHh).filter(m => m !== cand)
-							: [];
+							: null;
 
 						const matchRes = matcher.MatchPerson(person, cand, {
 							censusYear: yrNum,
-							personKin: personKin,
+							personKin: familyBoostEnabled ? personKin : null,
 							candidateHousehold: candHousehold,
 							weights: LEVER_WEIGHTS,
 							birthProfiles: BIRTH_PROFILES,
@@ -2950,17 +2978,15 @@
 							prior: 0.002
 						});
 
-						let candProb = (matchRes.probability != null) ? Number(matchRes.probability.toFixed(3)) : null;
-						if (candProb == null && typeof matcher.nameProbability === 'function') {
-							candProb = matcher.nameProbability(matchRes.score);
-						}
-						if (candProb == null) {
-							candProb = Number(Math.max(0, Math.min(1, matchRes.score)).toFixed(3));
-						}
+						// Probability shows the final match value (incorporating demographic + household evidence)
+						let candProb = Number(Math.max(0, Math.min(1, matchRes.score != null ? matchRes.score : (matchRes.probability || 0))).toFixed(3));
+						const rawFellegi = (matchRes.baseScore != null) ? Number(matchRes.baseScore.toFixed(4))
+							: ((matchRes.why && matchRes.why.base != null) ? Number(matchRes.why.base) : 0);
 
 						const score = Number(matchRes.score.toFixed(4));
 						const status = matchRes.tier === 'KNOCKOUT' ? 'UN-MATCHED' : (verityStatus || classify(score, 0));
 						const why = Object.assign({}, matchRes.why, {
+							raw_fellegi_score: rawFellegi,
 							margin: '',
 							secondBest: ''
 						});
@@ -2974,6 +3000,7 @@
 								surnameKind: why.surnameKind || 'NONE',
 								fellegiGiven: why.given || '',
 								fellegiSurname: why.surname || '',
+								rawFellegiScore: rawFellegi,
 								bits: why.bits != null ? why.bits : (matchRes.bits != null ? matchRes.bits : null),
 								decision: why.decision || matchRes.decision || '',
 								rankKey: why.rankKey != null ? why.rankKey : (matchRes.rankKey != null ? matchRes.rankKey : null),
@@ -2995,11 +3022,12 @@
 							person: person,
 							status: status,
 							probability: candProb,
+							rawFellegiScore: rawFellegi,
 							score: score,
 							bestCandidate: cand,
 							hitl_match: validHitl,
 							why: why,
-							allCandidates: [{ candidate: cand, score: score, probability: candProb, tier: matchRes.tier, why: why }],
+							allCandidates: [{ candidate: cand, score: score, probability: candProb, rawFellegiScore: rawFellegi, tier: matchRes.tier, why: why }],
 							formattedWhy: formattedWhy
 						});
 					}
@@ -3008,6 +3036,29 @@
 					this.sampledResults = null;
 					this.isSampleMode = false;
 					$('#sampleCheckbox').prop('checked', false);
+
+					// Log Fellegi-Sunter match probabilities to console
+					const hitlQualified = this.matchedResults.filter(r => r.bestCandidate && (r.status === 'MATCH' || r.status === 'MAYBE'));
+					console.log(`%c[Fellegi-Sunter Match Probabilities (HITL Recomputed)] ${hitlQualified.length} candidate(s) scored as MATCH or MAYBE:`, 'font-weight:bold; color:#0066cc;');
+					if (hitlQualified.length > 0) {
+						console.table(hitlQualified.slice(0, 50).map((r, i) => {
+							const cand = r.bestCandidate || {};
+							const vp = r.person || {};
+							const why = r.why || {};
+							const levers = (r.formattedWhy && r.formattedWhy.levers) || {};
+							return {
+								'#': i + 1,
+								'Status': r.status,
+								'Source Person': `${vp.person_id || vp.mention_id || ''} (${vp.full_name || ''})`,
+								'Target Candidate': `${cand.mention_id || ''} (${cand.full_name || ''})`,
+								'FS Prob': r.probability != null ? +Number(r.probability).toFixed(4) : '-',
+								'FS Bits': levers.bits != null ? levers.bits : (why.bits != null ? why.bits : '-'),
+								'Score': r.score != null ? +Number(r.score).toFixed(4) : 0,
+								'Decision': levers.decision || why.decision || r.status,
+								'Rung': levers.rung || why.rung || '-'
+							};
+						}));
+					}
 
 					// Update KPI stats
 					const matchCount = this.matchedResults.filter(r => r.status === 'MATCH').length;
@@ -3102,6 +3153,7 @@
 					const row = this.currentFilteredResults[idx];
 					if (row) {
 						this.updateExamineSourcesSection(row, idx);
+						this.logCandidateFellegiDetails(row);
 					}
 				});
 
@@ -3124,6 +3176,7 @@
 					$row.addClass('selected-row');
 					if (row) {
 						this.updateExamineSourcesSection(row, idx);
+						this.logCandidateFellegiDetails(row);
 					}
 
 					// Render breakdown details
