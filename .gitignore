@@ -1,7 +1,6 @@
 # Ignore COMMON data folder
 COMMON/
-**/COMMON/
-
+scratch/
 # SQL files and large dumps
 *.sql
 
