@@ -105,20 +105,42 @@ def load_census_transcript(year: str, county: str = 'AUG', cache_dir: str = 'cac
     return histid_to_mention
 
 
-def run_crosswalk(crosswalk_path: str = 'crosswalk.csv',
-                  who: str = 'cnt',
-                  county: str = 'AUG',
-                  output_path: Optional[str] = None,
-                  cache_dir: str = 'cache',
-                  refresh: bool = False) -> Dict[str, int]:
+def ensure_output_ready(output_path: str) -> bool:
     """
-    Run crosswalk processing between census years.
+    Ensure output file exists and has a trailing newline before appending.
+    If the file does not exist or is empty, creates it and writes ASSERTION_SCHEMA.
+    Returns True if file existed, False if created fresh.
+    """
+    output_exists = os.path.exists(output_path) and os.path.getsize(output_path) > 0
+    if not output_exists:
+        with open(output_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(ASSERTION_SCHEMA)
+        return False
+
+    with open(output_path, 'rb+') as f:
+        f.seek(-1, os.SEEK_END)
+        last_char = f.read(1)
+        if last_char not in (b'\n', b'\r'):
+            f.write(b'\n')
+    return True
+
+
+def run_multilink_crosswalk(crosswalk_path: str,
+                            who: str = 'MLP',
+                            county: str = 'AUG',
+                            output_path: Optional[str] = None,
+                            cache_dir: str = 'cache',
+                            refresh: bool = False) -> Dict[str, int]:
+    """
+    Run multi-link crosswalk processing where records are linked by an individual key (e.g. HIK).
+    Links adjacent census years (1850->1860, 1860->1870, 1870->1880).
     """
     if output_path is None:
         output_path = f"{county}-Crosswalk.csv"
 
     print("==================================================")
-    print("CROSSWALK INGESTION")
+    print("MULTI-LINK CROSSWALK INGESTION")
     print(f"  Crosswalk file: {crosswalk_path}")
     print(f"  County code:    {county}")
     print(f"  Source/Method:  {who}")
@@ -129,11 +151,124 @@ def run_crosswalk(crosswalk_path: str = 'crosswalk.csv',
     if not os.path.exists(crosswalk_path):
         raise FileNotFoundError(f"Crosswalk file not found: {crosswalk_path}")
 
-    # 1. Identify source and target years from crosswalk header
+    # 1. Load census transcripts for known years
+    years = ['1850', '1860', '1870', '1880']
+    histid_to_year_mention: Dict[str, Tuple[str, str]] = {}
+    for yr in years:
+        transcript_map = load_census_transcript(yr, county=county, cache_dir=cache_dir, refresh=refresh)
+        for h, mention in transcript_map.items():
+            histid_to_year_mention[h] = (yr, mention)
+
+    # 2. Group records by HIK
+    from collections import defaultdict
+    hik_records = defaultdict(dict)
+    rows_read = 0
+    rows_matched_transcript = 0
+
+    print(f"Reading multi-link data from {crosswalk_path}...")
+    with open(crosswalk_path, 'r', encoding='utf-8-sig', errors='ignore') as in_f:
+        reader = csv.DictReader(in_f)
+        for row in reader:
+            rows_read += 1
+            h = str(row.get('HISTID', '')).strip().upper()
+            hik = str(row.get('HIK', '')).strip()
+            if not h or not hik:
+                continue
+
+            if h in histid_to_year_mention:
+                yr, mention = histid_to_year_mention[h]
+                hik_records[hik][yr] = mention
+                rows_matched_transcript += 1
+
+    print(f"Read {rows_read:,} rows; matched {rows_matched_transcript:,} records across {len(hik_records):,} unique individuals (HIKs).")
+
+    # 3. Generate adjacent pairwise assertions
+    pairs = [('1850', '1860'), ('1860', '1870'), ('1870', '1880')]
+    pair_counts = {p: 0 for p in pairs}
+    assertions = []
+
+    for hik, yr_dict in hik_records.items():
+        for y1, y2 in pairs:
+            if y1 in yr_dict and y2 in yr_dict:
+                pair_counts[(y1, y2)] += 1
+                assertions.append([
+                    str(uuid.uuid4()),
+                    yr_dict[y1],
+                    'isSameAs',
+                    yr_dict[y2],
+                    y1,
+                    y2,
+                    who,
+                    ''
+                ])
+
+    # 4. Append to output file safely
+    ensure_output_ready(output_path)
+    with open(output_path, 'a', encoding='utf-8', newline='') as out_f:
+        writer = csv.writer(out_f)
+        writer.writerows(assertions)
+
+    # 5. Report counts
+    print("\n---------------- Run Results ----------------")
+    print(f"  Rows read:                                {rows_read:,}")
+    print(f"  Rows matched to Augusta transcripts:      {rows_matched_transcript:,}")
+    print(f"  Unique individuals (HIKs) tracked:        {len(hik_records):,}")
+    for p in pairs:
+        print(f"  Assertions written ({p[0]} -> {p[1]}):       {pair_counts[p]:,}")
+    print(f"  Total assertions written:                 {len(assertions):,}")
+    print(f"  Output file:                              {output_path}")
+    print("---------------------------------------------")
+
+    return {
+        'rows_read': rows_read,
+        'assertions_written': len(assertions),
+        **{f"{p[0]}_{p[1]}": pair_counts[p] for p in pairs}
+    }
+
+
+def run_crosswalk(crosswalk_path: str = 'crosswalk.csv',
+                  who: str = 'cnt',
+                  county: str = 'AUG',
+                  output_path: Optional[str] = None,
+                  cache_dir: str = 'cache',
+                  refresh: bool = False) -> Dict[str, int]:
+    """
+    Run crosswalk processing between census years.
+    Automatically detects pairwise crosswalks (e.g. histid_1850, histid_1860)
+    or multi-link longitudinal datasets (HIK, HISTID).
+    """
+    if output_path is None:
+        output_path = f"{county}-Crosswalk.csv"
+
+    if not os.path.exists(crosswalk_path):
+        raise FileNotFoundError(f"Crosswalk file not found: {crosswalk_path}")
+
+    # Check header to dispatch between pairwise and multi-link
     with open(crosswalk_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
         reader = csv.reader(f)
         header = next(reader)
 
+    header_upper = [col.strip().upper() for col in header]
+    if 'HIK' in header_upper and 'HISTID' in header_upper:
+        return run_multilink_crosswalk(
+            crosswalk_path=crosswalk_path,
+            who=who,
+            county=county,
+            output_path=output_path,
+            cache_dir=cache_dir,
+            refresh=refresh
+        )
+
+    print("==================================================")
+    print("CROSSWALK INGESTION (PAIRWISE)")
+    print(f"  Crosswalk file: {crosswalk_path}")
+    print(f"  County code:    {county}")
+    print(f"  Source/Method:  {who}")
+    print(f"  Output file:    {output_path}")
+    print(f"  Refresh cache:  {refresh}")
+    print("==================================================")
+
+    # 1. Identify source and target years from crosswalk header
     source_year, target_year, source_idx, target_idx = detect_years(header)
     print(f"Detected years from header: {source_year} (col {source_idx}) and {target_year} (col {target_idx})")
 
@@ -146,14 +281,10 @@ def run_crosswalk(crosswalk_path: str = 'crosswalk.csv',
     start_year = source_year if source_is_earlier else target_year
     end_year = target_year if source_is_earlier else source_year
 
-    # 4. Open output file for appending (create with header if does not exist or empty)
-    output_exists = os.path.exists(output_path) and os.path.getsize(output_path) > 0
-
+    # 4. Open output file for appending safely
+    ensure_output_ready(output_path)
     out_f = open(output_path, 'a', encoding='utf-8', newline='')
     writer = csv.writer(out_f)
-    if not output_exists:
-        writer.writerow(ASSERTION_SCHEMA)
-        out_f.flush()
 
     # 5. Process crosswalk rows
     rows_read = 0
