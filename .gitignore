@@ -4,6 +4,7 @@ scratch/
 cache/
 # SQL files and large dumps
 *.sql
+crosswalk.csv
 
 # Node modules
 node_modules/
