@@ -1,6 +1,7 @@
 # Ignore COMMON data folder
 COMMON/
 scratch/
+cache/
 # SQL files and large dumps
 *.sql
 
