@@ -9,7 +9,12 @@
 	<!-- External Libraries -->
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-	<script src="../COMMON/match.js"></script>
+
+	<!-- Fellegi-Sunter & Shared Match Engine -->
+	<script src="../COMMON/fellegi.js"
+		onerror="this.onerror=null;document.write('<scr'+'ipt src=&quot;../COMMON/fellegi.js&quot; onerror=&quot;document.write(\'<scr\'+'ipt src=\'../../COMMON/fellegi.js\'><\/scr\'+'ipt>\')&quot;><\/scr'+'ipt>')"></script>
+	<script src="../COMMON/match.js"
+		onerror="this.onerror=null;document.write('<scr'+'ipt src=&quot;../COMMON/match.js&quot; onerror=&quot;document.write(\'<scr\'+'ipt src=\'../../COMMON/match.js\'><\/scr\'+'ipt>\')&quot;><\/scr'+'ipt>')"></script>
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -312,23 +317,21 @@
 			box-shadow: 0 1px 4px rgba(124, 58, 237, 0.35);
 		}
 
-		.col-hitl {
-			display: none;
-		}
-
-		.review-mode .col-status,
-		.review-mode .col-why,
-		.review-mode .col-prob,
-		.review-mode .scores-raw-array,
-		.review-mode .score-chip,
-		.review-mode .mention-block .badge {
-			display: none !important;
-		}
-
+		.col-reviewer,
+		.col-hitl,
+		.review-mode .col-reviewer,
 		.review-mode .col-hitl {
 			display: table-cell !important;
 		}
 
+		.col-status,
+		.col-prob,
+		.review-mode .col-status,
+		.review-mode .col-prob {
+			display: none !important;
+		}
+
+		.reviewer-select,
 		.hitl-select {
 			padding: 3px 8px;
 			font-size: 11px;
@@ -343,22 +346,50 @@
 			transition: all 0.15s ease;
 		}
 
+		.reviewer-select.val-MATCHED,
 		.hitl-select.val-MATCHED {
 			background-color: #dcfce7;
 			color: #15803d;
 			border-color: #86efac;
 		}
 
+		.reviewer-select.val-MAYBE,
 		.hitl-select.val-MAYBE {
 			background-color: #fef3c7;
 			color: #b45309;
 			border-color: #fcd34d;
 		}
 
-		.hitl-select.val-UNMATCHED {
+		.reviewer-select.val-UN-MATCHED,
+		.hitl-select.val-UN-MATCHED {
 			background-color: #f1f5f9;
 			color: #64748b;
 			border-color: #cbd5e1;
+		}
+
+		.mention-why-btn {
+			background: #eff6ff;
+			color: #2563eb;
+			border: 1px solid #bfdbfe;
+			font-size: 10px;
+			font-weight: 700;
+			padding: 1px 7px;
+			border-radius: 4px;
+			cursor: pointer;
+			line-height: 1.3;
+			transition: all 0.15s ease;
+		}
+
+		.mention-why-btn:hover {
+			background: #2563eb;
+			color: #ffffff;
+			border-color: #2563eb;
+		}
+
+		.mention-why-btn.active {
+			background: #1d4ed8;
+			color: #ffffff;
+			border-color: #1d4ed8;
 		}
 
 		/* Stats Right Side Grid */
@@ -546,32 +577,7 @@
 			cursor: pointer;
 		}
 
-		.why-pill-btn {
-			background: #e0e7ff;
-			color: #3730a3;
-			border: 1px solid #c7d2fe;
-			padding: 2px 8px;
-			border-radius: 9999px;
-			font-size: 10px;
-			font-weight: 700;
-			cursor: pointer;
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-			transition: all 0.15s ease;
-			display: inline-block;
-		}
 
-		.why-pill-btn:hover {
-			background: #4f46e5;
-			color: #ffffff;
-			border-color: #4338ca;
-		}
-
-		.why-pill-btn.active {
-			background: #4338ca;
-			color: #ffffff;
-			border-color: #3730a3;
-		}
 
 		.mono {
 			font-family: 'JetBrains Mono', monospace;
@@ -835,10 +841,10 @@
 			<div class="header-title">
 				<h1>
 					Slave Schedule to Census Matcher
-					<span class="badge badge-primary">HITL Linkage</span>
+					<span class="badge badge-primary">FS+ Linkage</span>
 				</h1>
-				<p>Extract enslaver lists from Slave Schedules and match candidate entries against Census population
-					records.</p>
+				<p>Match enslavers from Slave Schedules to Census population records using FS+ probabilistic linkage.
+				</p>
 			</div>
 		</header>
 
@@ -865,12 +871,6 @@
 						<input type="number" id="thresholdInput" class="form-control" value="0" min="0" step="1">
 					</div>
 
-					<div class="form-group">
-						<label for="csvFileInput">Source CSV (Optional)</label>
-						<input type="file" id="csvFileInput" accept=".csv" class="form-control"
-							style="padding: 2px 4px;">
-					</div>
-
 					<div class="form-group"
 						style="display: flex; flex-direction: row; gap: 6px; grid-column: span 4; margin-top: 2px;">
 						<button id="runBtn" class="btn btn-primary" style="flex: 1;">
@@ -887,18 +887,18 @@
 								<path
 									d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
 							</svg>
-							Save CSV
+							Save enslavers.csv
 						</button>
-						<button id="loadHitlBtn" class="btn btn-secondary" style="flex: 1;">
+						<button id="loadReviewerBtn" class="btn btn-secondary" style="flex: 1;">
 							<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 								<path
 									d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
 								<path
 									d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
 							</svg>
-							Load HITL CSV
+							Load Reviewer CSV
 						</button>
-						<input type="file" id="hitlFileInput" accept=".csv" style="display: none;">
+						<input type="file" id="reviewerFileInput" accept=".csv" style="display: none;">
 					</div>
 				</div>
 
@@ -918,15 +918,15 @@
 			<div class="stats-panel-right">
 				<div class="stats-grid-right">
 					<div class="stat-card" style="--stat-accent: #2563eb;">
-						<div class="stat-title">Enslaver Heads (SS)</div>
+						<div class="stat-title">De-duped Enslavers (SS)</div>
 						<div class="stat-value" id="statEnslavers">0</div>
-						<div class="stat-sub" id="statTableTarget">Target: AUG-VP-SS-1850</div>
+						<div class="stat-sub" id="statTableTarget">Target: AUG-SS-1850</div>
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #7c3aed;">
 						<div class="stat-title">Census Pool (CN)</div>
 						<div class="stat-value" id="statCandidates">0</div>
-						<div class="stat-sub">Age ≥ 12 & Race = White</div>
+						<div class="stat-sub">Unblocked Population Pool</div>
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #059669;">
@@ -936,9 +936,9 @@
 					</div>
 
 					<div class="stat-card" style="--stat-accent: #d97706;">
-						<div class="stat-title">Total Mentions Linked</div>
+						<div class="stat-title">Assertions Emitted</div>
 						<div class="stat-value" id="statTotalMentions">0</div>
-						<div class="stat-sub">Confidence ≥ Threshold</div>
+						<div class="stat-sub">isSameAs (FS+)</div>
 					</div>
 				</div>
 			</div>
@@ -956,32 +956,21 @@
 						<button class="filter-tab active" data-filter="ALL">All</button>
 						<button class="filter-tab" data-filter="MATCH">Matches</button>
 						<button class="filter-tab" data-filter="UN-MATCHED">Un-Matched</button>
-						<span
-							style="width: 1px; height: 16px; background: #cbd5e1; margin: 0 3px; align-self: center;"></span>
-						<button id="reviewModeBtn" class="filter-tab review-tab-btn"
-							title="Toggle HITL Review Mode (hide status/score, show review dropdowns)">Review</button>
 					</div>
-					<label class="sample-checkbox-label"
-						title="Show 500 sampled rows using Neyman Stratified Allocation across 8 probability bins"
-						style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; user-select: none;">
-						<input type="checkbox" id="sampleCheckbox"
-							style="cursor: pointer; accent-color: var(--accent-purple);">
-						<span>Sample</span>
-					</label>
+
 					<input type="text" id="tableFilterInput" class="search-input"
 						placeholder="Filter by enslaver, matched name, district, ID...">
 				</div>
 			</div>
 
 			<div class="table-wrapper">
-				<table id="resultsTable">
+				<table id="resultsTable" class="review-mode">
 					<thead>
 						<tr>
 							<th class="col-num" style="width: 44px; text-align: right;">#</th>
 							<th>Candidate ID</th>
-							<th class="col-why">Why</th>
 							<th class="col-prob">Probability</th>
-							<th class="col-hitl">HITL Match</th>
+							<th class="col-reviewer">Reviewer</th>
 							<th>Enslaver Name</th>
 							<th>District</th>
 							<th>Line</th>
@@ -992,7 +981,7 @@
 					</thead>
 					<tbody id="tableBody">
 						<tr>
-							<td colspan="11">
+							<td colspan="10">
 								<div class="empty-state">
 									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1009,7 +998,8 @@
 		</div>
 
 		<!-- Resizable Drag Divider -->
-		<div id="dragDivider" class="panel-divider" title="Drag up/down to resize results and examine sources (Double-click to reset)">
+		<div id="dragDivider" class="panel-divider"
+			title="Drag up/down to resize results and examine sources (Double-click to reset)">
 			<div class="divider-handle"></div>
 		</div>
 
@@ -1248,9 +1238,6 @@
 		let currentTableName = '';
 		let currentFilteredResults = [];
 		let currentFilter = 'ALL';
-		let isReviewMode = false;
-		let isSampleMode = false;
-		let sampledResults = null;
 		let renderedEnslaverCount = 0;
 		let bgEnslaverRenderTimer = null;
 
@@ -1291,55 +1278,46 @@
 			}
 		}
 
-		// Compute enumerator & date bonus
-		function getEnumeratorDateBonus(enumA, dateA, enumB, dateB) {
-			if (!enumA || !enumB) return 0;
-			const ea = String(enumA).trim();
-			const eb = String(enumB).trim();
-			if (!ea || !eb || ea.toUpperCase() !== eb.toUpperCase()) return 0;
-
-			const dateDiffInfo = calculateDateDiff(dateA, dateB);
-			if (!dateDiffInfo) return 0;
-
-			const days = dateDiffInfo.dayDiff;
-			const numDiff = Math.round(dateDiffInfo.numDiff * 100) / 100;
-
-			if (days === 0 || numDiff === 0) {
-				return 0.5;
-			} else if (days <= 1 || numDiff <= 0.1001) {
-				return 0.4;
-			} else if (days <= 2 || numDiff <= 0.2001) {
-				return 0.3;
-			} else if (days <= 7 || numDiff <= 0.7001) {
-				return 0.2;
-			}
-			return 0;
-		}
-
-		function parseEnumeration(enumerationVal, fallbackEnumerator, fallbackDate) {
-			let enumerator = fallbackEnumerator || '';
-			let enumerator_date = fallbackDate || '';
-			if (enumerationVal !== undefined && enumerationVal !== null && String(enumerationVal).trim() !== '') {
-				const str = String(enumerationVal).trim();
-				const colonIdx = str.indexOf(':');
-				if (colonIdx !== -1) {
-					enumerator = str.slice(0, colonIdx).trim();
-					enumerator_date = str.slice(colonIdx + 1).trim();
-				} else {
-					enumerator = str;
-				}
-			}
-			return { enumerator, enumerator_date };
-		}
-
-		function parseOriginalData(orig) {
-			if (!orig) return {};
-			if (typeof orig === 'object') return orig;
+		function parseDataField(d) {
+			if (!d) return {};
+			if (typeof d === 'object') return d;
 			try {
-				return JSON.parse(orig);
+				return JSON.parse(d);
 			} catch (e) {
 				return {};
 			}
+		}
+
+		function isNonPerson(r) {
+			if (!r) return true;
+			const combined = `${r.full_name || ''} ${r.first_name || ''} ${r.last_name || ''}`.toLowerCase();
+			return /\bestate\b/i.test(combined) || combined.includes('estate');
+		}
+
+		function normEnslaverKey(r) {
+			const fn = (r.full_name || `${r.first_name || ''} ${r.last_name || ''}`).trim().toUpperCase().replace(/\s+/g, ' ');
+			return fn;
+		}
+
+		// Compute enumerator & date score (in log2 LR bits)
+		function scoreDateAndEnum(enumA, dateA, enumB, dateB) {
+			if (!enumA || !enumB) return 0;
+			const ea = String(enumA).trim().toUpperCase();
+			const eb = String(enumB).trim().toUpperCase();
+			if (ea !== '-' && eb !== '-' && ea !== eb) return -3.0; // different enumerators
+
+			const diff = calculateDateDiff(dateA, dateB);
+			if (!diff) return (ea === eb && ea !== '-') ? 1.0 : 0;
+			if (diff.dayDiff === 0) return 4.0;
+			if (diff.dayDiff <= 1) return 3.0;
+			if (diff.dayDiff <= 2) return 2.0;
+			if (diff.dayDiff <= 7) return 1.0;
+			if (diff.dayDiff > 21) return -1.0;
+			return 0;
+		}
+
+		function getEnumeratorDateBonus(enumA, dateA, enumB, dateB) {
+			return scoreDateAndEnum(enumA, dateA, enumB, dateB);
 		}
 
 		function isHeadTrue(val) {
@@ -1348,7 +1326,7 @@
 			return (s === 't' || s === 'true' || s === '1' || s === 'y' || s === 'yes');
 		}
 
-		let loadedHitlData = null;
+		let loadedReviewerData = null;
 
 		function updateProgress(pct, message) {
 			$('#statusPanel').show();
@@ -1359,55 +1337,31 @@
 
 		// Load CSV Data with multi-path fallbacks
 		async function loadCsvData() {
-			const fileInput = document.getElementById('csvFileInput');
-			if (fileInput.files && fileInput.files.length > 0) {
-				updateProgress(10, 'Reading selected local CSV file...');
-				return new Promise((resolve, reject) => {
-					Papa.parse(fileInput.files[0], {
-						header: true,
-						skipEmptyLines: true,
-						transformHeader: h => h.replace(/^\ufeff/, '').trim(),
-						complete: results => resolve(results.data),
-						error: err => reject(err)
-					});
-				});
-			} else {
-				updateProgress(10, 'Fetching mentions.csv from COMMON folder...');
-				// Multiple representations targeting COMMON/mentions.csv
-				const targetPaths = [
-					'../COMMON/mentions.csv',
-					'COMMON/mentions.csv',
-					'img/mentions.csv',
-					'../img/mentions.csv',
-					'../../Verite/img/mentions.csv',
-					'../Verite/img/mentions.csv',
-					'../AI/Verite/img/mentions.csv',
-					'/AI/Verite/img/mentions.csv',
-					'/Verite/img/mentions.csv',
-					'../../AI/Verite/img/mentions.csv',
-					'file:///C:/Bill/CC/js/AI/Verite/img/mentions.csv'
-				];
+			updateProgress(10, 'Fetching mentions.csv from COMMON folder...');
+			// Multiple representations targeting COMMON/mentions.csv
+			const targetPaths = [
+				'../COMMON/mentions.csv',
+			];
 
-				for (const path of targetPaths) {
-					try {
-						updateProgress(15, `Loading ${path}...`);
-						const data = await new Promise((resolve, reject) => {
-							Papa.parse(path, {
-								download: true,
-								header: true,
-								skipEmptyLines: true,
-								transformHeader: h => h.replace(/^\ufeff/, '').trim(),
-								complete: results => resolve(results.data),
-								error: err => reject(err)
-							});
+			for (const path of targetPaths) {
+				try {
+					updateProgress(15, `Loading ${path}...`);
+					const data = await new Promise((resolve, reject) => {
+						Papa.parse(path, {
+							download: true,
+							header: true,
+							skipEmptyLines: true,
+							transformHeader: h => h.replace(/^\ufeff/, '').trim(),
+							complete: results => resolve(results.data),
+							error: err => reject(err)
 						});
-						if (data && data.length > 0) {
-							console.log(`Successfully loaded mentions.csv from ${path}`);
-							return data;
-						}
-					} catch (e) {
-						// try next path representation
+					});
+					if (data && data.length > 0) {
+						console.log(`Successfully loaded mentions.csv from ${path}`);
+						return data;
 					}
+				} catch (e) {
+					// try next path representation
 				}
 			}
 		}
@@ -1424,110 +1378,6 @@
 			return 0.0;
 		}
 
-		// Neyman Stratified Allocation across 8 threshold-defined probability bins
-		function generateNeymanSample(targetSize = 500, floor = 35) {
-			if (!enslaverTable || enslaverTable.length === 0) return [];
-			if (enslaverTable.length <= targetSize) return [...enslaverTable];
-
-			// 1. Stratify candidates into 8 evaluation threshold bins
-			const BINS = [
-				{ id: 'A', name: '0.99+', min: 0.99, max: 1.01 },
-				{ id: 'B', name: '0.95-0.99', min: 0.95, max: 0.99 },
-				{ id: 'C', name: '0.90-0.95', min: 0.90, max: 0.95 },
-				{ id: 'D', name: '0.75-0.90', min: 0.75, max: 0.90 },
-				{ id: 'E', name: '0.50-0.75', min: 0.50, max: 0.75 },
-				{ id: 'F', name: '0.25-0.50', min: 0.25, max: 0.50 },
-				{ id: 'G', name: '0.10-0.25', min: 0.10, max: 0.25 },
-				{ id: 'H', name: '0.01-0.10', min: 0.00, max: 0.10 }
-			];
-
-			const strata = BINS.map(b => ({ ...b, items: [] }));
-
-			for (const row of enslaverTable) {
-				const p = getProb(row);
-				let placed = false;
-				for (const s of strata) {
-					if (p >= s.min && p < s.max) {
-						s.items.push(row);
-						placed = true;
-						break;
-					}
-				}
-				if (!placed) {
-					strata[strata.length - 1].items.push(row);
-				}
-			}
-
-			// 2. Allocate sample budget using Neyman optimal allocation:
-			// w_h = N_h * sqrt(pbar_h * (1 - pbar_h)) with minimum floor
-			let totalWeight = 0;
-			let allocatedTotal = 0;
-			for (const s of strata) {
-				const N_h = s.items.length;
-				s.N_h = N_h;
-				if (N_h === 0) {
-					s.pbar = 0;
-					s.sigma = 0;
-					s.weight = 0;
-					s.alloc = 0;
-					continue;
-				}
-				const sumP = s.items.reduce((acc, r) => acc + getProb(r), 0);
-				s.pbar = Math.max(0.01, Math.min(0.99, sumP / N_h));
-				s.sigma = Math.sqrt(s.pbar * (1 - s.pbar));
-				s.weight = N_h * s.sigma;
-				s.floor = Math.min(N_h, floor);
-				s.alloc = s.floor;
-				allocatedTotal += s.floor;
-				totalWeight += s.weight;
-			}
-
-			// Proportional distribution of remaining budget by Neyman weight
-			const remainingBudget = Math.max(0, targetSize - allocatedTotal);
-			if (totalWeight > 0 && remainingBudget > 0) {
-				let extraAllocated = 0;
-				for (const s of strata) {
-					if (s.N_h <= s.alloc || s.weight <= 0) continue;
-					const extra = Math.min(s.N_h - s.alloc, Math.round(remainingBudget * (s.weight / totalWeight)));
-					s.alloc += extra;
-					extraAllocated += extra;
-				}
-				let diff = targetSize - (allocatedTotal + extraAllocated);
-				if (diff !== 0) {
-					const available = strata.filter(s => s.alloc < s.N_h);
-					available.sort((a, b) => b.weight - a.weight);
-					for (let i = 0; i < Math.abs(diff) && available.length > 0; i++) {
-						const s = available[i % available.length];
-						if (diff > 0 && s.alloc < s.N_h) {
-							s.alloc += 1;
-						} else if (diff < 0 && s.alloc > s.floor) {
-							s.alloc -= 1;
-						}
-					}
-				}
-			}
-
-			// 3. Draw random samples within each bin without replacement
-			const sampled = [];
-			for (const s of strata) {
-				if (s.alloc <= 0 || s.items.length === 0) continue;
-				const pool = [...s.items];
-				for (let i = pool.length - 1; i > 0; i--) {
-					const j = Math.floor(Math.random() * (i + 1));
-					[pool[i], pool[j]] = [pool[j], pool[i]];
-				}
-				sampled.push(...pool.slice(0, s.alloc));
-			}
-
-			// Shuffle final combined sample
-			for (let i = sampled.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				[sampled[i], sampled[j]] = [sampled[j], sampled[i]];
-			}
-
-			return sampled;
-		}
-
 		// Main matching workflow
 		async function runMatching() {
 			const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
@@ -1537,11 +1387,7 @@
 			const rawThreshold = isNaN(parsedNum) ? 0 : parsedNum;
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
-			isSampleMode = false;
-			sampledResults = null;
-			$('#sampleCheckbox').prop('checked', false);
-
-			currentTableName = `${county}-VP-SS-${record_year}`;
+			currentTableName = `${county}-SS-${record_year}`;
 			$('#statTableTarget').text(`Target: ${currentTableName}`);
 
 			$('#runBtn').prop('disabled', true).html('<span class="spinner spinner-sm" style="width: 12px; height: 12px; border-width: 2px; border-top-color: #ffffff; border-color: rgba(255,255,255,0.3); margin-right: 6px;"></span> Matching...');
@@ -1550,11 +1396,11 @@
 
 			$('#tableBody').html(`
 				<tr>
-					<td colspan="11">
+					<td colspan="10">
 						<div class="empty-state" style="padding: 40px 20px;">
 							<div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border-width: 3px;"></div>
-							<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Matching in progress...</div>
-							<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Loading data and linking Slave Schedule enslavers to census records</div>
+							<div style="font-weight: 700; color: var(--text-primary); font-size: 13px;">FS+ Linkage in progress...</div>
+							<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Linking de-duped Slave Schedule enslavers to Population Census records</div>
 						</div>
 					</td>
 				</tr>
@@ -1571,9 +1417,8 @@
 				updateProgress(5, 'Loading CSV data...');
 				const rows = await loadCsvData();
 				rawMentions = rows;
-				updateProgress(35, `Loaded ${rows.length.toLocaleString()} rows. Extracting Slave Schedule & Census candidates...`);
+				updateProgress(25, `Loaded ${rows.length.toLocaleString()} rows. Extracting Slave Schedule & Census records...`);
 
-				// Step 1: Count household sizes for Slave Schedule
 				const ssSource = `${county}-SS-${record_year}`;
 				const cnSource = `${county}-CN-${record_year}`;
 				const householdCounts = {};
@@ -1581,28 +1426,33 @@
 				rawSsMentions = rows.filter(r => r.source === ssSource);
 				rawCnMentions = rows.filter(r => r.source === cnSource);
 
-				for (let i = 0; i < rows.length; i++) {
-					const r = rows[i];
-					if (r.source === ssSource) {
-						const hh = r.household_id;
-						if (hh) {
-							householdCounts[hh] = (householdCounts[hh] || 0) + 1;
-						}
+				// Naturally sort mentions by mention_id so order is deterministic and matches expected sequence (e.g. AUG-SS-1850-1 before -1001)
+				const natCompare = (a, b) => (a.mention_id || '').localeCompare(b.mention_id || '', undefined, { numeric: true, sensitivity: 'base' });
+				rawSsMentions.sort(natCompare);
+				rawCnMentions.sort(natCompare);
+
+				for (let i = 0; i < rawSsMentions.length; i++) {
+					const r = rawSsMentions[i];
+					const hh = r.household_id;
+					if (hh) {
+						householdCounts[hh] = (householdCounts[hh] || 0) + 1;
 					}
 				}
 
-				// Step 2: Extract Enslavers Table
-				enslaverTable = [];
-				for (let i = 0; i < rows.length; i++) {
-					const r = rows[i];
-					if (r.source === ssSource && isHeadTrue(r.head)) {
+				// Step 1: Extract Enslavers & Exclude Non-People (e.g. Estate)
+				const extractedEnslavers = [];
+				for (let i = 0; i < rawSsMentions.length; i++) {
+					const r = rawSsMentions[i];
+					if (isHeadTrue(r.head) && !isNonPerson(r)) {
 						const hh = r.household_id || '';
 						const cleanHh = hh.replace(/^HS\d*-?/i, '').replace(/^HS-?/i, '');
 						const totalInHousehold = householdCounts[hh] || 1;
 						const household_count = Math.max(0, totalInHousehold - 1);
-						const { enumerator, enumerator_date } = parseEnumeration(r.enumeration, r.enumerator, r.enumerator_date);
+						const dataObj = parseDataField(r.data);
+						const enumerator = dataObj.enum || r.enumerator || '';
+						const enumerator_date = dataObj.enum_date || r.enumerator_date || '';
 
-						const rowObj = {
+						extractedEnslavers.push({
 							candidate_id: `${county}-SS-${record_year}-${cleanHh}`,
 							household_id: hh,
 							mention_id: r.mention_id || '',
@@ -1625,104 +1475,111 @@
 							hitl_match: '-',
 							mention1: {},
 							mention2: {},
-							mention3: {}
-						};
-						enslaverTable.push(rowObj);
+							mention3: {},
+							all_mention_ids: [r.mention_id || '']
+						});
 					}
 				}
 
-				// Step 3: Extract Census Candidates Table
-				censusCandidates = [];
-				const yrNum = parseInt(record_year, 10);
-
-				for (let i = 0; i < rows.length; i++) {
-					const r = rows[i];
-					if (r.source === cnSource) {
-						const by = parseInt(r.birth_year, 10);
-						const race = (r.norm_race || r.race || '').trim().toUpperCase();
-						if (!isNaN(by) && (yrNum - by >= 12) && race === 'W') {
-							const { enumerator, enumerator_date } = parseEnumeration(r.enumeration, r.enumerator, r.enumerator_date);
-							censusCandidates.push({
-								mention_id: r.mention_id || '',
-								full_name: r.full_name || '',
-								first_name: r.first_name || '',
-								middle_name: r.middle_name || '',
-								last_name: r.last_name || '',
-								norm_first_name: r.norm_first_name || '',
-								nysiis_last_name: r.nysiis_last_name || '',
-								head: r.head || '',
-								metaphone_last_name: r.metaphone_last_name || '',
-								birth_year: by,
-								district: r.district || '',
-								original_line: r.original_line || '',
-								enumerator: enumerator,
-								enumerator_date: enumerator_date
-							});
-						}
+				// Step 2: De-dupe Duplicate Enslavers Before Matching
+				const enslaverMap = new Map();
+				for (const e of extractedEnslavers) {
+					const key = normEnslaverKey(e);
+					if (!enslaverMap.has(key)) {
+						enslaverMap.set(key, e);
+					} else {
+						const existing = enslaverMap.get(key);
+						existing.all_mention_ids.push(e.mention_id);
+						existing.household_count += e.household_count;
+						if (!existing.enumerator && e.enumerator) existing.enumerator = e.enumerator;
+						if (!existing.enumerator_date && e.enumerator_date) existing.enumerator_date = e.enumerator_date;
 					}
+				}
+				enslaverTable = Array.from(enslaverMap.values());
+
+				// Step 3: Extract Census Candidates Table (Don't block on race, age, or head!)
+				censusCandidates = [];
+				for (let i = 0; i < rawCnMentions.length; i++) {
+					const r = rawCnMentions[i];
+					const by = parseInt(r.birth_year, 10);
+					const dataObj = parseDataField(r.data);
+					const enumerator = dataObj.enum || r.enumerator || '';
+					const enumerator_date = dataObj.enum_date || r.enumerator_date || '';
+
+					censusCandidates.push({
+						mention_id: r.mention_id || '',
+						full_name: r.full_name || '',
+						first_name: r.first_name || '',
+						middle_name: r.middle_name || '',
+						last_name: r.last_name || '',
+						norm_first_name: r.norm_first_name || '',
+						nysiis_last_name: r.nysiis_last_name || '',
+						head: r.head || '',
+						race: r.race || '',
+						metaphone_last_name: r.metaphone_last_name || '',
+						birth_year: !isNaN(by) ? by : '',
+						district: r.district || '',
+						original_line: r.original_line || '',
+						enumerator: enumerator,
+						enumerator_date: enumerator_date
+					});
 				}
 
 				$('#statEnslavers').text(enslaverTable.length.toLocaleString());
 				$('#statCandidates').text(censusCandidates.length.toLocaleString());
 
-				updateProgress(50, `Building candidate phonetic index for ${censusCandidates.length.toLocaleString()} census records...`);
+				updateProgress(45, `Configuring FS+ engine with ${censusCandidates.length.toLocaleString()} census records...`);
 
-				// Build surname & phonetic index for census candidates
-				const surnameIndex = new Map();
-				function addIndex(key, cand) {
+				// Step 4: Configure Fellegi-Sunter & Match Engine
+				const matcher = (typeof Match !== 'undefined') ? new Match({ candidatePrior: 0.002 }) : new window.Match();
+				const fellegi = (typeof Fellegi !== 'undefined')
+					? new Fellegi({ match: matcher, prior: 0.002 })
+					: (matcher._getFellegi ? matcher._getFellegi() : null);
+
+				if (fellegi && censusCandidates.length) {
+					fellegi.usePool(censusCandidates);
+				}
+				if (matcher && fellegi) {
+					matcher._fellegi = fellegi;
+				}
+
+				const prior = 0.002;
+				const logitPrior = Math.log(prior / (1 - prior));
+
+				// Step 5: Multi-index for rapid unblocked candidate retrieval
+				const candidateIndex = new Map();
+				function addIdx(key, cand) {
 					if (!key) return;
 					key = String(key).trim().toUpperCase();
 					if (!key) return;
-					if (!surnameIndex.has(key)) surnameIndex.set(key, []);
-					surnameIndex.get(key).push(cand);
+					if (!candidateIndex.has(key)) candidateIndex.set(key, []);
+					candidateIndex.get(key).push(cand);
 				}
 
 				for (let c = 0; c < censusCandidates.length; c++) {
 					const cand = censusCandidates[c];
-					if (cand.last_name) addIndex('L:' + cand.last_name, cand);
-					if (cand.nysiis_last_name) addIndex('N:' + cand.nysiis_last_name, cand);
-					if (cand.full_name) addIndex('F:' + cand.full_name, cand);
+					if (cand.last_name) addIdx('L:' + cand.last_name, cand);
+					if (cand.nysiis_last_name) addIdx('N:' + cand.nysiis_last_name, cand);
+					if (cand.full_name) addIdx('F:' + cand.full_name, cand);
 					if (cand.metaphone_last_name) {
 						const parts = cand.metaphone_last_name.split(':');
-						if (parts[0]) addIndex('M:' + parts[0].trim().toUpperCase(), cand);
-						if (parts[1]) addIndex('M:' + parts[1].trim().toUpperCase(), cand);
+						if (parts[0]) addIdx('M:' + parts[0], cand);
+						if (parts[1]) addIdx('M:' + parts[1], cand);
+					}
+					if (cand.last_name && cand.last_name.length >= 2) {
+						addIdx('P2:' + cand.last_name.slice(0, 2), cand);
+					}
+					if (cand.enumerator && cand.enumerator_date && cand.enumerator !== '-') {
+						addIdx('ED:' + cand.enumerator + ':' + cand.enumerator_date, cand);
 					}
 				}
 
-				// Initialize candidate pool frequencies and calibration
-				if (nameMatcher && typeof nameMatcher.usePool === 'function') {
-					nameMatcher.usePool(censusCandidates);
-				}
-
-				if (nameMatcher && typeof nameMatcher.fitNameCalibration === 'function') {
-					try {
-						const hasLabeledRows = Array.isArray(rows) && rows.some(r => r && r.score !== undefined && r.label !== undefined);
-						const calibData = hasLabeledRows ? rows : [
-							{ score: 1.80, label: 1 },
-							{ score: 1.50, label: 1 },
-							{ score: 1.30, label: 1 },
-							{ score: 1.00, label: 1 },
-							{ score: 0.90, label: 1 },
-							{ score: 0.85, label: 1 },
-							{ score: 0.75, label: 1 },
-							{ score: 0.70, label: 0 },
-							{ score: 0.60, label: 0 },
-							{ score: 0.50, label: 0 },
-							{ score: 0.35, label: 0 },
-							{ score: 0.00, label: 0 }
-						];
-						nameMatcher.fitNameCalibration(calibData, { lr: 0.1, epochs: 2500, lambda: 0.01 });
-					} catch (e) {
-						console.warn('fitNameCalibration note:', e.message);
-					}
-				}
-
-				updateProgress(60, `Matching ${enslaverTable.length} enslavers using MatchName and context scoring...`);
+				updateProgress(55, `Running FS+ matching on ${enslaverTable.length} deduplicated enslavers...`);
 
 				let totalMentionsLinked = 0;
 				let matchedEnslaverCount = 0;
 				const totalEnslavers = enslaverTable.length;
-				const chunkSize = 100;
+				const chunkSize = 50;
 
 				for (let idx = 0; idx < totalEnslavers; idx += chunkSize) {
 					const endIdx = Math.min(idx + chunkSize, totalEnslavers);
@@ -1730,117 +1587,121 @@
 					for (let e = idx; e < endIdx; e++) {
 						const enslaver = enslaverTable[e];
 						const candidateMatches = [];
-
 						const candidateSet = new Set();
+
+						// Unblocked retrieval using multi-index keys
 						if (enslaver.last_name) {
-							const list = surnameIndex.get('L:' + enslaver.last_name.trim().toUpperCase());
+							const list = candidateIndex.get('L:' + enslaver.last_name.toUpperCase());
 							if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
+							if (enslaver.last_name.length >= 2) {
+								const lp = candidateIndex.get('P2:' + enslaver.last_name.slice(0, 2).toUpperCase());
+								if (lp) for (let k = 0; k < lp.length; k++) candidateSet.add(lp[k]);
+							}
 						}
 						if (enslaver.nysiis_last_name) {
-							const list = surnameIndex.get('N:' + enslaver.nysiis_last_name.trim().toUpperCase());
+							const list = candidateIndex.get('N:' + enslaver.nysiis_last_name.toUpperCase());
 							if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
 						}
 						if (enslaver.full_name) {
-							const list = surnameIndex.get('F:' + enslaver.full_name.trim().toUpperCase());
+							const list = candidateIndex.get('F:' + enslaver.full_name.toUpperCase());
 							if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
 						}
 						if (enslaver.metaphone_last_name) {
 							const parts = enslaver.metaphone_last_name.split(':');
 							if (parts[0]) {
-								const list = surnameIndex.get('M:' + parts[0].trim().toUpperCase());
+								const list = candidateIndex.get('M:' + parts[0].toUpperCase());
 								if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
 							}
 							if (parts[1]) {
-								const list = surnameIndex.get('M:' + parts[1].trim().toUpperCase());
+								const list = candidateIndex.get('M:' + parts[1].toUpperCase());
 								if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
 							}
 						}
-
-						for (const cand of candidateSet) {
-							const nameScore = MatchName(enslaver, cand);
-							if (nameScore >= 0) {
-								let districtBonus = 0;
-								let headBonus = 0;
-								let dateBonus = 0;
-
-								if (enslaver.district && cand.district && String(enslaver.district).trim().toUpperCase() === String(cand.district).trim().toUpperCase()) {
-									districtBonus = 0.3;
-								}
-
-								if (isHeadTrue(cand.head)) {
-									headBonus = 0.3;
-								}
-
-								dateBonus = getEnumeratorDateBonus(
-									enslaver.enumerator,
-									enslaver.enumerator_date,
-									cand.enumerator,
-									cand.enumerator_date
-								);
-
-								const totalScore = nameScore + districtBonus + headBonus + dateBonus;
-								const confidence = Number(totalScore.toFixed(3));
-
-								let prob = null;
-								if (nameMatcher && typeof nameMatcher.nameProbability === 'function') {
-									const calcProb = nameMatcher.nameProbability(confidence);
-									if (calcProb !== null && calcProb !== undefined && !isNaN(calcProb)) {
-										prob = Number(Number(calcProb).toFixed(3));
-									}
-								}
-
-								const evalVal = (prob !== null && prob !== undefined) ? prob : confidence;
-
-								// Always record candidate matches (including those below threshold)
-								candidateMatches.push({
-									mention_id: cand.mention_id,
-									matched_name: cand.full_name || `${cand.first_name} ${cand.last_name}`.trim(),
-									confidence: confidence,
-									probability: prob !== null ? prob : evalVal,
-									scores: {
-										name: Number(nameScore.toFixed(3)),
-										district: Number(districtBonus.toFixed(3)),
-										head: Number(headBonus.toFixed(3)),
-										date: Number(dateBonus.toFixed(3))
-									},
-									_candidate: cand
-								});
-							}
+						if (enslaver.enumerator && enslaver.enumerator_date && enslaver.enumerator !== '-') {
+							const list = candidateIndex.get('ED:' + enslaver.enumerator.toUpperCase() + ':' + enslaver.enumerator_date);
+							if (list) for (let k = 0; k < list.length; k++) candidateSet.add(list[k]);
 						}
 
-						// Sort candidate matches on probability (descending), with tie-breaker on confidence
+						for (const cand of candidateSet) {
+							const sm = matcher._surnameMatch(enslaver, cand);
+							const jwSurname = (enslaver.last_name && cand.last_name)
+								? ((typeof jaroWinkler === 'function') ? jaroWinkler(enslaver.last_name, cand.last_name) : (matcher.jaroWinkler ? matcher.jaroWinkler(enslaver.last_name, cand.last_name) : 0))
+								: 0;
+							const sameEnumDate = (enslaver.enumerator && cand.enumerator && enslaver.enumerator === cand.enumerator && enslaver.enumerator_date === cand.enumerator_date && enslaver.enumerator !== '-');
+
+							if (sm.strength === 0 && jwSurname < 0.70 && !sameEnumDate) continue;
+
+							// Fellegi-Sunter scoring
+							let fRes;
+							if (fellegi && typeof fellegi.MatchPerson === 'function') {
+								fRes = fellegi.MatchPerson(enslaver, cand, { prior });
+							} else {
+								const ns = matcher.MatchName(enslaver, cand);
+								fRes = { score: ns, bits: ns * 10, tier: ns > 0 ? 'MATCH' : 'KNOCKOUT', why: {} };
+							}
+							if (fRes.tier === 'KNOCKOUT') continue;
+
+							const dateBits = scoreDateAndEnum(enslaver.enumerator, enslaver.enumerator_date, cand.enumerator, cand.enumerator_date);
+							let distBits = 0;
+							if (enslaver.district && cand.district) {
+								distBits = (String(enslaver.district).trim() === String(cand.district).trim()) ? 1.0 : -1.0;
+							}
+							const headBits = isHeadTrue(cand.head) ? 1.0 : -0.5;
+
+							const nameBits = fRes.bits != null ? fRes.bits : 0;
+							const totalBits = nameBits + dateBits + distBits + headBits;
+							const logitP = logitPrior + Math.LN2 * totalBits;
+							const prob = 1 / (1 + Math.exp(-logitP));
+							const confidence = Number(Math.max(0, Math.min(1, prob)).toFixed(3));
+
+							candidateMatches.push({
+								mention_id: cand.mention_id,
+								matched_name: cand.full_name || `${cand.first_name} ${cand.last_name}`.trim(),
+								confidence: confidence,
+								probability: confidence,
+								scores: {
+									name: Number(nameBits.toFixed(1)),
+									district: Number(distBits.toFixed(1)),
+									head: Number(headBits.toFixed(1)),
+									date: Number(dateBits.toFixed(1)),
+									totalBits: Number(totalBits.toFixed(1))
+								},
+								why: Object.assign({}, fRes.why || {}, {
+									given: (fRes.why && fRes.why.given) || '',
+									surname: (fRes.why && fRes.why.surname) || '',
+									bits: totalBits
+								}),
+								fellegiFields: fRes.fields || [],
+								_candidate: cand
+							});
+						}
+
+						// Sort candidate matches on probability (descending), with tie-breaker on totalBits
 						candidateMatches.sort((a, b) => {
-							const pA = (a.probability !== null && a.probability !== undefined) ? a.probability : a.confidence;
-							const pB = (b.probability !== null && b.probability !== undefined) ? b.probability : b.confidence;
-							if (pB !== pA) return pB - pA;
-							return b.confidence - a.confidence;
+							if (b.probability !== a.probability) return b.probability - a.probability;
+							return b.scores.totalBits - a.scores.totalBits;
 						});
 
 						function formatMention(match) {
 							if (!match) return {};
-							let prob = match.probability;
-							if ((prob === undefined || prob === null) && nameMatcher && typeof nameMatcher.nameProbability === 'function') {
-								const evalScore = (match.confidence !== undefined && match.confidence !== null) ? match.confidence : (match.scores ? match.scores.name : 0);
-								const calcProb = nameMatcher.nameProbability(evalScore);
-								if (calcProb !== null && calcProb !== undefined && !isNaN(calcProb)) {
-									prob = Number(Number(calcProb).toFixed(3));
-								}
-							}
 							return {
 								full_name: match.matched_name || '',
 								mention_id: match.mention_id || '',
 								confidence: match.confidence,
-								probability: prob !== undefined && prob !== null ? prob : null,
+								probability: match.probability,
 								scores: {
 									name: match.scores.name,
 									district: match.scores.district,
 									head: match.scores.head,
-									date: match.scores.date
-								}
+									date: match.scores.date,
+									totalBits: match.scores.totalBits
+								},
+								why: match.why,
+								fellegiFields: match.fellegiFields || [],
+								_candidate: match._candidate
 							};
 						}
 
-						// Highest scoring in mention1, 2nd highest in mention2, 3rd highest in mention3
 						enslaver.mention1 = formatMention(candidateMatches[0]);
 						enslaver.mention2 = formatMention(candidateMatches[1]);
 						enslaver.mention3 = formatMention(candidateMatches[2]);
@@ -1851,22 +1712,18 @@
 							: '';
 						enslaver._fullMatches = candidateMatches;
 
-						const topProb = (candidateMatches.length > 0 && candidateMatches[0].probability !== undefined)
-							? candidateMatches[0].probability
-							: null;
+						const topProb = (candidateMatches.length > 0) ? candidateMatches[0].probability : null;
 						enslaver.probability = topProb;
 						enslaver.hitl_match = '-';
 
-						const linkedCount = [enslaver.mention1, enslaver.mention2, enslaver.mention3].filter(m => m && m.mention_id).length;
-						if (linkedCount > 0) {
+						if (candidateMatches.length > 0 && topProb >= threshold) {
 							matchedEnslaverCount++;
-							totalMentionsLinked += linkedCount;
+							totalMentionsLinked++;
 						}
 					}
 
-					const progressPct = 50 + (endIdx / totalEnslavers) * 45;
+					const progressPct = 55 + (endIdx / totalEnslavers) * 40;
 					updateProgress(progressPct, `Matching enslavers: ${endIdx} of ${totalEnslavers}...`);
-
 					await new Promise(r => setTimeout(r, 0));
 				}
 
@@ -1879,8 +1736,8 @@
 				$('#statTotalMentions').text(totalMentionsLinked.toLocaleString());
 
 				updateProgress(98, 'Displaying results...');
-				if (loadedHitlData) {
-					applyLoadedHitl(enslaverTable);
+				if (loadedReviewerData) {
+					applyLoadedReviewer(enslaverTable);
 				}
 				await renderResultsTable(enslaverTable);
 				$('#downloadBtn').prop('disabled', false);
@@ -1896,7 +1753,7 @@
 					<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
 						<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
 					</svg>
-					Run Matcher
+					Match Schedule
 				`);
 			}
 		}
@@ -2122,12 +1979,18 @@
 			const threshold = rawThreshold > 1 ? rawThreshold / 100 : rawThreshold;
 
 			let matchesCardsHtml = '';
-			if (row._fullMatches && row._fullMatches.length > 0) {
-				matchesCardsHtml = row._fullMatches.map((m, mIdx) => {
+			const topMatches = (row._fullMatches && row._fullMatches.length > 0)
+				? row._fullMatches.slice(0, 3)
+				: [row.mention1, row.mention2, row.mention3].filter(m => m && m.mention_id);
+
+			if (topMatches && topMatches.length > 0) {
+				matchesCardsHtml = topMatches.map((m, mIdx) => {
 					const ns = m.scores.name;
 					const ds = m.scores.district;
 					const hs = m.scores.head;
 					const dts = m.scores.date;
+					const totalBits = m.scores.totalBits != null ? m.scores.totalBits : (ns + ds + hs + dts);
+					const fellegiAgree = (m.why && (m.why.given || m.why.surname)) ? `${m.why.given || '-'} / ${m.why.surname || '-'}` : '';
 					const rankLabel = mIdx === 0 ? 'mention1 (Rank 1)' : (mIdx === 1 ? 'mention2 (Rank 2)' : (mIdx === 2 ? 'mention3 (Rank 3)' : `Rank ${mIdx + 1}`));
 
 					let cardProbBadge = '';
@@ -2143,42 +2006,51 @@
 						<div class="mention-card">
 							<div class="mention-card-header">
 								<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 12px;">
-									<span class="badge badge-purple" style="margin-right: 6px;">${rankLabel}</span> ${m.mention_id} &mdash; ${m.matched_name}
+									<span class="badge badge-purple" style="margin-right: 6px;">${rankLabel}</span> ${m.mention_id} &mdash; ${m.matched_name || m.full_name || ''}
 								</span>
 								<div style="display: flex; align-items: center; gap: 6px;">
-									<span class="scores-raw-array" style="font-size: 10px;">scores: [${ns}, ${ds}, ${hs}, ${dts}]</span>
+									<span class="scores-raw-array" style="font-size: 10px;">bits: [name: ${ns}, date: ${dts}, dist: ${ds}, head: ${hs}]</span>
 									${cardProbBadge}
 									<span class="badge badge-success">Conf: ${m.confidence}</span>
 								</div>
 							</div>
 							<div class="score-breakdown-grid">
 								<div class="score-box" style="border-left: 3px solid #2563eb;">
-									<div class="score-box-label">Name Score</div>
-									<div class="score-box-val">${ns}</div>
-								</div>
-								<div class="score-box" style="border-left: 3px solid #7c3aed;">
-									<div class="score-box-label">District Bonus</div>
-									<div class="score-box-val">+${ds}</div>
-								</div>
-								<div class="score-box" style="border-left: 3px solid #059669;">
-									<div class="score-box-label">Head Bonus</div>
-									<div class="score-box-val">+${hs}</div>
+									<div class="score-box-label">Name (Fellegi)</div>
+									<div class="score-box-val">${ns} bits</div>
 								</div>
 								<div class="score-box" style="border-left: 3px solid #d97706;">
-									<div class="score-box-label">Date Bonus</div>
-									<div class="score-box-val">+${dts}</div>
+									<div class="score-box-label">Enum & Date</div>
+									<div class="score-box-val">${dts >= 0 ? '+' : ''}${dts} bits</div>
 								</div>
+								<div class="score-box" style="border-left: 3px solid #7c3aed;">
+									<div class="score-box-label">District</div>
+									<div class="score-box-val">${ds >= 0 ? '+' : ''}${ds} bits</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #059669;">
+									<div class="score-box-label">Head</div>
+									<div class="score-box-val">${hs >= 0 ? '+' : ''}${hs} bits</div>
+								</div>
+								<div class="score-box" style="border-left: 3px solid #0284c7;">
+									<div class="score-box-label">Total FS+ Log-LR</div>
+									<div class="score-box-val" style="font-weight: 700;">${totalBits} bits</div>
+								</div>
+								${fellegiAgree ? `
 								<div class="score-box" style="border-left: 3px solid #6366f1;">
+									<div class="score-box-label">Fellegi Agreement</div>
+									<div class="score-box-val" style="font-size: 11px;">${fellegiAgree}</div>
+								</div>` : ''}
+								<div class="score-box">
 									<div class="score-box-label">Census Birth</div>
-									<div class="score-box-val">${m._candidate.birth_year || '-'}</div>
+									<div class="score-box-val">${m._candidate ? (m._candidate.birth_year || '-') : '-'}</div>
 								</div>
 								<div class="score-box">
 									<div class="score-box-label">District / Line</div>
-									<div class="score-box-val">${m._candidate.district || '-'} / ${m._candidate.original_line || '-'}</div>
+									<div class="score-box-val">${m._candidate ? (m._candidate.district || '-') : '-'} / ${m._candidate ? (m._candidate.original_line || '-') : '-'}</div>
 								</div>
 								<div class="score-box">
 									<div class="score-box-label">Enumerator / Date</div>
-									<div class="score-box-val" style="font-size: 10px;">${m._candidate.enumerator || '-'} / ${m._candidate.enumerator_date || '-'}</div>
+									<div class="score-box-val" style="font-size: 10px;">${m._candidate ? (m._candidate.enumerator || '-') : '-'} / ${m._candidate ? (m._candidate.enumerator_date || '-') : '-'}</div>
 								</div>
 							</div>
 						</div>
@@ -2190,7 +2062,7 @@
 				<div class="details-content">
 					${matchesCardsHtml ? `
 						<h4 style="font-size: 11px; color: var(--text-secondary); margin: 0 0 4px 0; text-transform: uppercase; font-weight: 700;">
-							Scored Candidate Matches for ${row.full_name} (${row.candidate_id})
+							Top 3 Scored Candidate Matches for ${row.full_name} (${row.candidate_id})
 						</h4>
 						${matchesCardsHtml}
 					` : ''}
@@ -2231,13 +2103,22 @@
 			if (activeMentions.length === 0) {
 				mentionsHtml = '<span style="color: var(--text-muted); font-size: 11px;">No candidate matches</span>';
 			} else {
-				mentionsHtml = activeMentions.map((m) => {
+				mentionsHtml = activeMentions.map((m, mIdx) => {
 					const confClass = m.confidence >= 0.85 ? 'conf-high' : (m.confidence >= 0.7 ? 'conf-med' : '');
 					const ns = m.scores && m.scores.name !== undefined ? m.scores.name : 0;
 					const ds = m.scores && m.scores.district !== undefined ? m.scores.district : 0;
 					const hs = m.scores && m.scores.head !== undefined ? m.scores.head : 0;
 					const dts = m.scores && m.scores.date !== undefined ? m.scores.date : 0;
+					const totalB = m.scores && m.scores.totalBits !== undefined ? m.scores.totalBits : (ns + ds + hs + dts);
 					const matchedName = m.full_name || '';
+					const mentionUid = `${i}_${mIdx}`;
+
+					// Build per-field FS+ breakdown rows if stored
+					const fellegiRows = (m.fellegiFields && m.fellegiFields.length > 0)
+						? m.fellegiFields.filter(f => f.bits !== 0)
+							.sort((a, b) => Math.abs(b.bits) - Math.abs(a.bits))
+							.map(f => `<div style="display:flex;justify-content:space-between;gap:8px;"><span style="color:#475569;">${f.field}</span><span style="color:#94a3b8;font-size:9px;">${f.level}</span><span style="font-weight:700;color:${f.bits > 0 ? '#15803d' : '#b91c1c'};">${f.bits > 0 ? '+' : ''}${f.bits}b</span></div>`).join('')
+						: '';
 
 					let probBadge = '';
 					if (m.probability !== null && m.probability !== undefined) {
@@ -2248,20 +2129,42 @@
 						probBadge = `<span class="badge" style="background:${pillBg};color:${pillColor};border:1px solid ${pillBorder};font-size:10px;font-weight:700;margin-left:4px;border-radius:9999px;">Prob: ${m.probability}</span>`;
 					}
 
+					const whyGiven = (m.why && m.why.given) || '-';
+					const whySurname = (m.why && m.why.surname) || '-';
+					const mProb = m.probability != null ? m.probability : m.confidence;
+					const probColor = (mProb >= threshold) ? '#15803d' : '#b91c1c';
+
 					return `
 						<div class="mention-block" style="padding: 4px 6px; margin-bottom: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
 							<div style="display: flex; justify-content: space-between; align-items: center;">
 								<span class="mono" style="font-weight: 700; color: #1e40af; font-size: 11px;">${m.label}: ${m.mention_id} ${matchedName ? `<span>(${matchedName})</span>` : ''}</span>
-								<div>
+								<div style="display:flex;align-items:center;gap:4px;">
+									<button class="mention-why-btn" data-mention-uid="${mentionUid}" title="Why this census mention was chosen">Why</button>
 									<span class="badge badge-success">Conf: ${m.confidence}</span>
 									${probBadge}
 								</div>
 							</div>
 							<div style="display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap;">
-								<span class="score-chip chip-name" style="font-size: 10px;">Name: ${ns}</span>
-								<span class="score-chip chip-dist" style="font-size: 10px;">Dist: +${ds}</span>
-								<span class="score-chip chip-head" style="font-size: 10px;">Head: +${hs}</span>
-								<span class="score-chip chip-date" style="font-size: 10px;">Date: +${dts}</span>
+								<span class="score-chip chip-name" style="font-size: 10px;">Name: ${ns}b</span>
+								<span class="score-chip chip-date" style="font-size: 10px;">Date: ${dts >= 0 ? '+' : ''}${dts}b</span>
+								<span class="score-chip chip-dist" style="font-size: 10px;">Dist: ${ds >= 0 ? '+' : ''}${ds}b</span>
+								<span class="score-chip chip-head" style="font-size: 10px;">Head: ${hs >= 0 ? '+' : ''}${hs}b</span>
+							</div>
+							<div class="mention-why-card" id="mwhy-${mentionUid}" style="display:none; margin-top:5px; padding:6px 8px; background:#f0f7ff; border:1px solid #bfdbfe; border-radius:4px; font-size:10px; line-height:1.6;">
+								<div style="font-weight:700; color:#1e3a8a; margin-bottom:4px; font-size:10px;">&#x1F50D; FS+ Match Explanation &mdash; ${m.mention_id}</div>
+								${fellegiRows
+							? `<div style="margin-bottom:4px;border-bottom:1px solid #bfdbfe;padding-bottom:3px;"><div style="font-weight:600;color:#475569;margin-bottom:2px;">Fellegi-Sunter Fields</div>${fellegiRows}</div>`
+							: `<div style="margin-bottom:4px;border-bottom:1px solid #bfdbfe;padding-bottom:3px;"><div style="display:flex;justify-content:space-between;gap:8px;"><span style="color:#475569;">Given name</span><span style="color:#94a3b8;">${whyGiven}</span><span style="font-weight:700;color:#0284c7;">${ns}b (FS+)</span></div><div style="display:flex;justify-content:space-between;gap:8px;"><span style="color:#475569;">Surname</span><span style="color:#94a3b8;">${whySurname}</span></div></div>`
+						}
+								<div style="display:grid;grid-template-columns:auto 1fr;gap:1px 10px;">
+									<span style="color:#475569;">Date/Enum</span><span style="font-weight:700;color:${dts >= 0 ? '#15803d' : '#b91c1c'}">${dts >= 0 ? '+' : ''}${dts}b</span>
+									<span style="color:#475569;">District</span><span style="font-weight:700;color:${ds >= 0 ? '#15803d' : '#b91c1c'}">${ds >= 0 ? '+' : ''}${ds}b</span>
+									<span style="color:#475569;">Head of HH</span><span style="font-weight:700;color:${hs >= 0 ? '#15803d' : '#b91c1c'}">${hs >= 0 ? '+' : ''}${hs}b</span>
+								</div>
+								<div style="margin-top:4px;padding-top:3px;border-top:1px solid #bfdbfe;display:flex;justify-content:space-between;">
+									<span style="font-weight:700;color:#1e3a8a;">Total Log-LR: ${totalB}b</span>
+									<span style="font-weight:700;color:${probColor};">P&thinsp;=&thinsp;${mProb}</span>
+								</div>
 							</div>
 						</div>
 					`;
@@ -2288,12 +2191,12 @@
 			const hitlVal = row.hitl_match || '-';
 			row.hitl_match = hitlVal;
 			const valClass = hitlVal !== '-' ? `val-${hitlVal}` : '';
-			const hitlSelectHtml = `
-				<select class="hitl-select ${valClass}" data-index="${i}" title="Select HITL review decision">
+			const reviewerSelectHtml = `
+				<select class="reviewer-select hitl-select ${valClass}" data-index="${i}" title="Select Reviewer decision">
 					<option value="-" ${hitlVal === '-' ? 'selected' : ''}>-</option>
 					<option value="MATCHED" ${hitlVal === 'MATCHED' ? 'selected' : ''}>MATCHED</option>
 					<option value="MAYBE" ${hitlVal === 'MAYBE' ? 'selected' : ''}>MAYBE</option>
-					<option value="UNMATCHED" ${hitlVal === 'UNMATCHED' ? 'selected' : ''}>UNMATCHED</option>
+					<option value="UN-MATCHED" ${hitlVal === 'UN-MATCHED' ? 'selected' : ''}>UN-MATCHED</option>
 				</select>
 			`;
 
@@ -2301,9 +2204,8 @@
 				<tr class="row-clickable" data-index="${i}">
 					<td class="col-num mono" style="color: var(--text-muted); font-size: 11px; text-align: right; font-weight: 600; width: 44px;">${i + 1}</td>
 					<td class="mono" style="font-weight: 700; color: #2563eb;">${row.candidate_id}</td>
-					<td class="col-why"><button class="why-pill-btn" data-index="${i}" title="Toggle Why scoring breakdown">Why</button></td>
 					<td class="col-prob" style="text-align: center;">${probPillHtml}</td>
-					<td class="col-hitl">${hitlSelectHtml}</td>
+					<td class="col-reviewer col-hitl">${reviewerSelectHtml}</td>
 					<td>
 						<strong>${row.full_name || `${row.first_name} ${row.last_name}`.trim()}</strong>
 						${row.matched_name ? `<div style="font-size: 10px; color: #059669; font-weight: 600;">Top Match: ${row.matched_name}${row.birth_year ? ` (b. ${row.birth_year})` : ''}</div>` : ''}
@@ -2357,10 +2259,10 @@
 			if (bgEnslaverRenderTimer) cancelAnimationFrame(bgEnslaverRenderTimer);
 			const $tbody = $('#tableBody');
 
-			const activeData = data || ((isSampleMode && sampledResults) ? sampledResults : enslaverTable);
+			const activeData = data || enslaverTable;
 
 			if (!activeData || activeData.length === 0) {
-				$tbody.html('<tr><td colspan="11" class="empty-state">No matching enslaver records found.</td></tr>');
+				$tbody.html('<tr><td colspan="10" class="empty-state">No matching enslaver records found.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
 				currentFilteredResults = [];
 				renderedEnslaverCount = 0;
@@ -2395,14 +2297,13 @@
 			currentFilteredResults = filtered;
 
 			if (filtered.length === 0) {
-				$tbody.html('<tr><td colspan="11" class="empty-state">No matching records found for active filters.</td></tr>');
+				$tbody.html('<tr><td colspan="10" class="empty-state">No matching records found for active filters.</td></tr>');
 				$('#resultCountBadge').text('0 Rows');
 				renderedEnslaverCount = 0;
 				return;
 			}
 
-			const sampleSuffix = isSampleMode ? ' (Neyman 500 Sample)' : '';
-			$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows${sampleSuffix}`);
+			$('#resultCountBadge').text(`${filtered.length.toLocaleString()} Rows`);
 
 			// Render initial 100 rows immediately for instant display
 			const initialCount = Math.min(100, filtered.length);
@@ -2426,34 +2327,53 @@
 		}
 
 		function exportToCsv() {
-			const dataset = (isSampleMode && sampledResults) ? sampledResults : enslaverTable;
+			const dataset = enslaverTable;
 			if (!dataset || dataset.length === 0) {
 				alert('No data to export. Please run matching first.');
 				return;
 			}
 
 			const county = ($('#countyInput').val() || 'AUG').trim().toUpperCase();
-			const record_year = $('#yearSelect').val() || '1850';
-			const filename = isSampleMode ? `${county}-VP-SS-${record_year}_Sample500.csv` : `${county}-VP-SS-${record_year}.csv`;
+			const record_year = parseInt($('#yearSelect').val() || '1850', 10);
+			const filename = 'enslavers.csv';
 
-			const exportData = dataset.map(row => {
-				const censusMentionId = (row.mention1 && row.mention1.mention_id)
-					? row.mention1.mention_id
-					: ((row._fullMatches && row._fullMatches[0]) ? row._fullMatches[0].mention_id : '');
-				const hitlMatch = row.hitl_match || '-';
-				const matchedName = row.matched_name || ((row._fullMatches && row._fullMatches[0]) ? row._fullMatches[0].matched_name : '');
-				const hasMatch = (row.mention1 && row.mention1.mention_id) || (row._fullMatches && row._fullMatches.length > 0);
-				const status = row.status || (hasMatch ? 'MATCH' : 'UNMATCHED');
+			// Assertions format:
+			// assertion_id, subject_id, predicate, object_id, start_year, end_year, who, confidence, county, reviewer_status
+			const exportData = [];
+			for (const row of dataset) {
+				const topMatch = (row.mention1 && row.mention1.mention_id)
+					? row.mention1
+					: ((row._fullMatches && row._fullMatches[0]) ? row._fullMatches[0] : null);
 
-				return {
-					hitl_match: hitlMatch,
-					status: status,
-					person_id: row.candidate_id || row.mention_id || '',
-					mention_id: censusMentionId || '',
-					person_full_name: row.full_name || `${row.first_name || ''} ${row.last_name || ''}`.trim(),
-					mention_full_name: matchedName || ''
-				};
-			});
+				if (!topMatch || !topMatch.mention_id) continue;
+
+
+				const prob = (topMatch.probability != null)
+					? topMatch.probability
+					: ((row.probability != null) ? row.probability : topMatch.confidence);
+
+				const assertionId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+					? crypto.randomUUID()
+					: ('A-' + Math.random().toString(36).substring(2, 10));
+
+				exportData.push({
+					assertion_id: assertionId,
+					subject_id: row.mention_id || row.candidate_id || '',
+					predicate: 'isSameAs',
+					object_id: topMatch.mention_id,
+					start_year: record_year,
+					end_year: record_year,
+					who: 'FS+',
+					confidence: (prob != null && !isNaN(prob)) ? Number(Number(prob).toFixed(3)) : '',
+					county: county,
+					reviewer_status: (row.hitl_match && row.hitl_match !== '-') ? row.hitl_match : ''
+				});
+			}
+
+			if (exportData.length === 0) {
+				alert('No matched enslaver assertions to export.');
+				return;
+			}
 
 			const csvString = Papa.unparse(exportData);
 			const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
@@ -2466,10 +2386,10 @@
 			document.body.removeChild(link);
 		}
 
-		// Apply loaded HITL decisions to dataset
-		function applyLoadedHitl(dataset) {
-			if (!dataset || !loadedHitlData) return 0;
-			const { mapExact, mapPerson, mapMention } = loadedHitlData;
+		// Apply loaded Reviewer decisions to dataset
+		function applyLoadedReviewer(dataset) {
+			if (!dataset || !loadedReviewerData) return 0;
+			const { mapExact, mapPerson, mapMention } = loadedReviewerData;
 			let count = 0;
 			for (const r of dataset) {
 				const pId = String(r.candidate_id || r.mention_id || '').trim();
@@ -2493,8 +2413,8 @@
 			return count;
 		}
 
-		// Load HITL CSV from file and update current verified census list
-		async function loadHitlCsv(file) {
+		// Load Reviewer CSV from file and update current verified census list
+		async function loadReviewerCsv(file) {
 			if (!file) return;
 			try {
 				const results = await new Promise((resolve, reject) => {
@@ -2513,59 +2433,40 @@
 				const mapMention = new Map();
 
 				for (const row of rows) {
-					const rawHitl = String(row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
+					// Read reviewer decision — supports enslavers.csv (reviewer_status),
+					// and older formats (reviewer_match, hitl_match, etc.)
+					const rawHitl = String(row.reviewer_status || row.reviewer_match || row.hitl_match || row.HITL_Match || row.HITL_MATCH || row.hitl || '').trim().toUpperCase();
 					if (!rawHitl || rawHitl === '-') continue;
 					const validHitl = (rawHitl === 'MATCHED' || rawHitl === 'MATCH') ? 'MATCHED'
 						: (rawHitl === 'MAYBE' ? 'MAYBE'
-						: (rawHitl === 'UNMATCHED' || rawHitl === 'UN-MATCHED' ? 'UNMATCHED' : rawHitl));
+							: (rawHitl === 'UN-MATCHED' || rawHitl === 'UNMATCHED' ? 'UN-MATCHED' : rawHitl));
 
-					const pId = String(row.person_id || row.candidate_id || row.enslaver_id || row.id || '').trim();
-					const mId = String(row.mention_id || row.census_mention_id || '').trim();
+					// subject_id = enslaver mention (SS), object_id = census mention (CN)
+					// Also support older column names for backward compatibility
+					const pId = String(row.subject_id || row.person_id || row.candidate_id || row.enslaver_id || row.id || '').trim();
+					const mId = String(row.object_id || row.mention_id || row.census_mention_id || '').trim();
 
 					if (pId && mId) mapExact.set(`${pId}|${mId}`, validHitl);
 					if (pId) mapPerson.set(pId, validHitl);
 					if (mId) mapMention.set(mId, validHitl);
 				}
 
-				loadedHitlData = { mapExact, mapPerson, mapMention };
+				loadedReviewerData = { mapExact, mapPerson, mapMention };
 
 				let updated = 0;
 				if (enslaverTable && enslaverTable.length > 0) {
-					updated = applyLoadedHitl(enslaverTable) || 0;
-					if (sampledResults) applyLoadedHitl(sampledResults);
+					updated = applyLoadedReviewer(enslaverTable) || 0;
 					renderResultsTable();
-					alert(`Loaded HITL file: ${file.name}\nUpdated ${updated.toLocaleString()} records with HITL decisions.`);
+					alert(`Loaded Reviewer file: ${file.name}\nUpdated ${updated.toLocaleString()} records with Reviewer decisions.`);
 				} else {
-					alert(`Loaded HITL file: ${file.name} (${rows.length.toLocaleString()} rows).\nHITL decisions will be automatically set when you run matching.`);
+					alert(`Loaded Reviewer file: ${file.name} (${rows.length.toLocaleString()} rows).\nReviewer decisions will be automatically set when you run matching.`);
 				}
 			} catch (err) {
-				console.error('Error loading HITL CSV:', err);
-				alert(`Failed to load HITL CSV: ${err.message}`);
+				console.error('Error loading Reviewer CSV:', err);
+				alert(`Failed to load Reviewer CSV: ${err.message}`);
 			}
 		}
 
-		// Event Handlers
-		$('#reviewModeBtn').on('click', function (e) {
-			isReviewMode = !isReviewMode;
-			$(this).toggleClass('active', isReviewMode);
-			$('#resultsTable').toggleClass('review-mode', isReviewMode);
-		});
-
-		$('#sampleCheckbox').on('change', function (e) {
-			isSampleMode = this.checked;
-			if (isSampleMode) {
-				if (!enslaverTable || enslaverTable.length === 0) {
-					alert('Please run matching first to generate results to sample.');
-					$(this).prop('checked', false);
-					isSampleMode = false;
-					return;
-				}
-				sampledResults = generateNeymanSample(500, 35);
-			} else {
-				sampledResults = null;
-			}
-			renderResultsTable();
-		});
 
 		$('.filter-tab[data-filter]').on('click', function (e) {
 			$('.filter-tab[data-filter]').removeClass('active');
@@ -2574,10 +2475,10 @@
 			renderResultsTable();
 		});
 
-		$(document).on('change', '.hitl-select', function (e) {
+		$(document).on('change', '.reviewer-select', function (e) {
 			const idx = $(this).data('index');
 			const newVal = this.value;
-			$(this).removeClass('val-MATCHED val-MAYBE val-UNMATCHED');
+			$(this).removeClass('val-MATCHED val-MAYBE val-UN-MATCHED');
 			if (newVal !== '-') {
 				$(this).addClass(`val-${newVal}`);
 			}
@@ -2586,7 +2487,7 @@
 			}
 		});
 
-		$(document).on('click', '.hitl-select', function (e) {
+		$(document).on('click', '.reviewer-select', function (e) {
 			e.stopPropagation();
 		});
 
@@ -2609,7 +2510,7 @@
 		});
 
 		$(document).on('click', '.row-clickable', function (e) {
-			if ($(e.target).closest('.why-pill-btn, .hitl-select').length > 0) return;
+			if ($(e.target).closest('.reviewer-select, .mention-why-btn').length > 0) return;
 
 			const idx = $(this).data('index');
 			$('#tableBody tr.row-clickable').removeClass('selected-row');
@@ -2621,46 +2522,23 @@
 			}
 		});
 
-		$(document).on('click', '.why-pill-btn', function (e) {
+
+
+		$(document).on('click', '.mention-why-btn', function (e) {
 			e.stopPropagation();
-			const idx = $(this).data('index');
-			const $row = $(`tr.row-clickable[data-index="${idx}"]`);
-			let $detail = $(`#detail-${idx}`);
-
-			if ($detail.length === 0) {
-				$detail = $(`<tr class="details-row" id="detail-${idx}"><td colspan="11" style="padding: 8px 12px;" id="detail-content-${idx}"></td></tr>`);
-				$row.after($detail);
-			}
-
-			const $content = $(`#detail-content-${idx}`);
-			const row = currentFilteredResults[idx] || enslaverTable[idx];
-
-			$('#tableBody tr.row-clickable').removeClass('selected-row');
-			$row.addClass('selected-row');
-			if (row) {
-				updateExamineSourcesSection(row, idx);
-			}
-
-			if (row) {
-				$content.html(renderEnslaverDetailHtml(row, idx));
-			}
-
-			const wasOpen = $detail.hasClass('open');
-			if (wasOpen) {
-				$detail.removeClass('open').hide();
-				$(this).removeClass('active');
-			} else {
-				$detail.addClass('open').show();
-				$(this).addClass('active');
-			}
+			const uid = $(this).data('mention-uid');
+			const $card = $('#mwhy-' + uid);
+			const isOpen = $card.is(':visible');
+			$card.toggle(!isOpen);
+			$(this).toggleClass('active', !isOpen);
 		});
 
 		$('#runBtn').on('click', runMatching);
 		$('#downloadBtn').on('click', exportToCsv);
-		$('#loadHitlBtn').on('click', function () { $('#hitlFileInput').trigger('click'); });
-		$('#hitlFileInput').on('change', function (e) {
+		$('#loadReviewerBtn').on('click', function () { $('#reviewerFileInput').trigger('click'); });
+		$('#reviewerFileInput').on('change', function (e) {
 			if (e.target.files && e.target.files.length > 0) {
-				loadHitlCsv(e.target.files[0]);
+				loadReviewerCsv(e.target.files[0]);
 				e.target.value = '';
 			}
 		});

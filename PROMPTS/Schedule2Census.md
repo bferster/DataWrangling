@@ -1,9 +1,11 @@
 **TASK: MATCH SLAVE SCHEDULE TO CENSUS **
 
+	Knowing who was an enslaver is critical to our goal of identifying the enslaved, so we need to flag any verified census mentions of that person as an enslaver. 
+
 	I want to create a list of enslavers from the Slave Schedule for the current county and record_year. Then match each enslaver to their listing in the census of the same year. If multiple people match beyond a threshold, add them to the mentions field. 
 	county variable holds current county.
 	record_year variable hold the record’s year.
-	Save as a CSV file using papaparse when done for HITL verification.
+	Save as a CSV file using papaparse when done for review.
 
 *Code*
 
@@ -17,7 +19,7 @@
 	Add a pulldown to select between 1850 and 1860. 
 
 	Use light them with light red background
-	Raw data exists in a CSV file called mentions.csv in the ../AI/Verite/img folder
+	Raw data exists in a CSV file called mentions.csv in the ..\AI\DataWrangling\COMMON folder
 	Use MatchName in the ../Verite/match.js file
 
 *Extract enslaver table*
@@ -98,38 +100,28 @@
 		Extract enumerator and enumerator_date from enumeration (e.g. "JL:6.23") and add a row to censusCandidates using the fields mentioned above 
 		}
 
-*Find top schedule to census matches*
+*Find top schedule to census matches using FS+*
 
-	For each row in table {
-		find matches {
-			- Score name using MatchName(). Returns 0.0 to 1.0
-			- After matching by name {
-				- Add a bonus of 0.2 if the districts are the same in both tables.
-				- Add a bonus of 0.3 if the matched person is a head in the candidate table.
-				- Add bonus if enumerator AND enumerator_date are close in both tables {
-				- 0.1 is one day
-				- ADD 0.5 if they are 0 apart
-			 		OR: Add 0.4, if they are 0.1 apart from one another
-				    OR: Add 0.3 for 0.2 apart
-				    OR: Add 0.2 for 0.7 apart
-				}
-				Set confidence of score + bonus.
-		}
-		Add mentions that exceed the threshold to mentions field in enslavers table {
-			The highest scoring in mention1
-			The 2nd highest scoring in mention2
-			The 3rd highest scoring in mention3
-		}
-	}
+	- Use FS+ based matching techniques (Fellegi-Sunter probabilistic record linkage extended with enumerator and domain context).
+	- Exclude non-people (i.e. have "estate" in their name).
+	- De-dupe duplicate enslavers before matching so each unique enslaver is linked once.
+	- Don't block on anything (do not restrict census candidates by race, age, or head of household).
+	- Use the enum and enum_date fields in the data JSON field to link.
+	- For each candidate pair:
+		- Fellegi-Sunter name comparison (surname, given name, nicknames, phonetics) yields base log-LR bits.
+		- Enumerator & date agreement: +4.0 bits for same enumerator & identical date; +3.0 bits for <= 1 day diff; +2.0 bits for <= 2 days diff; +1.0 bit for <= 7 days; -3.0 bits for conflicting enumerators.
+		- District agreement: +1.0 bit; conflict: -1.0 bit.
+		- Head of household: +1.0 bit if candidate is head; -0.5 bit if not.
+		- Compute calibrated posterior probability: logit(p) = logit(prior) + ln(2) * totalBits.
+	- Top 3 candidates populate mention1, mention2, and mention3.
 
-*Corroborate with other data*
-	- TBD
+*Save as CSV file (enslavers.csv)*
 
-*Save as CSV file*
-
-	- Columns to save: hitl_match, enslaver_id, full_name, birth_year, first_name, middle_name, last_name, mention_id, probability, mention1, mention2, mention3, original_line
-	- When saving mention1, mention2, and mention3 fields, encode each object as JSON (e.g. {} if no match).
-	- Save enslavers table to disc as county + “-VP-SS-“ + year + “.csv” (i.e “AUG-VP-SS-1850.csv”) or “..._Sample500.csv” if sample mode is active.
+	- Output file name: enslavers.csv
+	- Format is the standard Assertions format:
+		assertion_id,subject_id,predicate,object_id,start_year,end_year,who,confidence,county
+	- Both mention_ids are connected by an isSameAs predicate, and who field set to "FS+":
+		AUG-SS-1850-123   isSameAs    AUG-CN-1850-456   FS+
 
 **Review view mode**
 

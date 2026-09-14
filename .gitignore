@@ -1,11 +1,5 @@
-# Ignore COMMON data folder
 COMMON/
 scratch/
 cache/
-# SQL files and large dumps
 *.sql
-crosswalk.csv
-
-# Node modules
 node_modules/
-**/node_modules/
