@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>EnslaverReview — Verité</title>
+	<link rel="stylesheet" href="enslaver.css" />
+</head>
+
+<body>
+	<div id="app">
+
+		<header class="bar">
+			<h1>EnslaverReview</h1>
+			<nav class="steps">
+				<button data-pane="setup" aria-selected="true">Set up</button>
+				<button data-pane="review" aria-selected="false">Review</button>
+			</nav>
+			<span class="spacer"></span>
+			<span class="counter" id="counter"></span>
+			<button id="autoAccept" disabled title="Accept the unambiguous matches in this block">Accept clear
+				matches</button>
+			<button id="exportAssertions" disabled>Export assertions</button>
+			<button id="exportSession" disabled>Export session</button>
+			<button id="exportHoldings" disabled>Export holdings</button>
+		</header>
+
+		<main>
+			<section class="pane active" id="setup">
+				<div class="wrap">
+					<h2>Load the sources</h2>
+					<p>Matching enslavers named on the 1850 and 1860 slave schedules to their records in
+						the population census. Work 1850 first: it carries almost no bare initials and it
+						has recorded property, both of which 1860 lacks.</p>
+
+					<div class="filerow">
+						<span class="label">mentions.csv</span>
+						<span class="status" id="mentionsStatus">waiting</span>
+						<span></span>
+					</div>
+					<div class="filerow">
+						<span class="label">eps1850.csv</span>
+						<span class="status" id="eps1850Status">waiting</span>
+						<span></span>
+					</div>
+					<div class="filerow">
+						<span class="label">eps1860.csv</span>
+						<span class="status" id="eps1860Status">waiting</span>
+						<span></span>
+					</div>
+					<div class="filerow">
+						<span class="label">Earlier session</span>
+						<input type="file" id="sessionFile" accept=".json" />
+						<span class="status" id="sessionStatus">optional</span>
+					</div>
+
+					<div class="controls">
+						<label class="small dim">County
+							<select id="county"></select>
+						</label>
+						<label class="small dim">Year
+							<select id="year">
+								<option value="1850" selected>1850</option>
+								<option value="1860">1860</option>
+							</select>
+						</label>
+						<label class="small dim">Reviewer
+							<input type="text" id="reviewer" placeholder="your name" size="16" />
+						</label>
+						<button id="reload">Reload files</button>
+						<button id="runDiag" disabled>Run diagnostics</button>
+						<button id="prepare" class="primary" disabled>Prepare</button>
+					</div>
+
+					<div id="notices"></div>
+					<pre class="report" id="report">Loading.</pre>
+				</div>
+			</section>
+
+			<section class="pane" id="review"></section>
+		</main>
+	</div>
+
+	<script src="../COMMON/match.js"></script>
+	<script src="../COMMON/fellegi.js"></script>
+	<script src="csv.js"></script>
+	<script src="data.js"></script>
+	<script src="holdings.js"></script>
+	<script src="candidates.js"></script>
+	<script src="aligner.js"></script>
+	<script src="review.js"></script>
+	<script src="diagnostics.js"></script>
+	<script src="ui.js"></script>
+	<script src="app.js"></script>
+	<script src="boot.js"></script>
+</body>
+
+</html>
