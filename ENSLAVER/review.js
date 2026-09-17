@@ -142,7 +142,7 @@ class ReviewStore {
 	// signal that makes it computable.
 	assertionRows(opts = {}) {
 		const version = opts.version || 'FS+v1';
-		const includeNegatives = opts.includeNegatives !== false;
+		const includeNegatives = opts.includeNegatives === true;
 		const rows = [];
 		for (const d of this.decisions.values()) {
 			if (d.outcome === 'matched' && d.census_id) {
@@ -185,6 +185,12 @@ class ReviewStore {
 
 	// The audit record. Everything the reviewer saw, not just what they chose.
 	toSessionJson(extra = {}) {
+		const maxCandidates = extra.maxCandidates != null ? extra.maxCandidates : 3;
+		const { maxCandidates: _mc, ...restExtra } = extra;
+		const decisions = [...this.decisions.values()].map((d) => ({
+			...d,
+			presented: (d.presented || []).slice(0, maxCandidates),
+		}));
 		return JSON.stringify({
 			kind: 'verite-schedule2census-session',
 			version: 1,
@@ -193,8 +199,8 @@ class ReviewStore {
 			started: this.started,
 			exported: new Date().toISOString(),
 			stats: this.stats(),
-			decisions: [...this.decisions.values()],
-			...extra,
+			decisions,
+			...restExtra,
 		}, null, 2);
 	}
 

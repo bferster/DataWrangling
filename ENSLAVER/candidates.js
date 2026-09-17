@@ -205,6 +205,7 @@ class CandidateEngine {
 				deltaDays: (owner._date != null && rec._date != null) ? (rec._date - owner._date) : null,
 				fellegi: res,
 				why: res.why,
+				anchored: !!(est.anchored && candRank === est.expected),
 			});
 		}
 

@@ -3,6 +3,8 @@
 Matching the enslavers named on the 1850 and 1860 slave schedules to their
 records in the population census. Browser-based, vanilla JS, no build step.
 
+> For a complete, step-by-step guide to using the interface and review workflows, see the **[User Manual](MANUAL.md)**.
+
 ## Running it
 
 Put these five files in the folder with `index.html`:

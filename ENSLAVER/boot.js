@@ -26,9 +26,10 @@
 	const runDiagBtn     = $('runDiag');
 	const prepareBtn     = $('prepare');
 	const autoAcceptBtn  = $('autoAccept');
+	const loadSBtn       = $('loadSession');
+	const loadSessionFileEl = $('loadSessionFile');
 	const exportABtn     = $('exportAssertions');
 	const exportSBtn     = $('exportSession');
-	const exportHBtn     = $('exportHoldings');
 	const counterEl      = $('counter');
 	const sessionFileEl  = $('sessionFile');
 
@@ -97,11 +98,29 @@
 		return ' ' + Math.round(100 * loaded / total) + '%';
 	}
 
+	function setProgress(pct, msg) {
+		const bar = $('progressBar');
+		const headerBar = $('headerProgress');
+		const pctEl = $('progressPct');
+		const msgEl = $('progressMsg');
+		const p = Math.min(100, Math.max(0, Math.round(pct)));
+		if (bar) bar.style.width = p + '%';
+		if (headerBar) {
+			headerBar.style.width = p + '%';
+			headerBar.style.opacity = p === 100 ? '0' : '1';
+		}
+		if (pctEl) pctEl.textContent = p + '%';
+		if (msgEl && msg) msgEl.textContent = msg;
+	}
+
 	// ---- load files --------------------------------------------------------
 	async function loadMentions() {
 		setStatus(mentionsStatus, 'loading\u2026');
+		setProgress(5, 'Downloading mentions.csv\u2026');
 		const text = await fetchText('../COMMON/mentions.csv', (l, t) => {
+			const pct = t ? Math.round(5 + (l / t) * 30) : 15;
 			setStatus(mentionsStatus, 'loading\u2026' + fmtPct(l, t));
+			setProgress(pct, 'Downloading mentions.csv\u2026' + fmtPct(l, t));
 		});
 		if (text === null) {
 			if (location.protocol === 'file:') {
@@ -122,8 +141,11 @@
 			return false;
 		}
 		try {
+			setProgress(35, 'Parsing mentions.csv\u2026');
 			const r = await app.loadMentions(text, (l, t) => {
+				const pct = t ? Math.round(35 + (l / t) * 35) : 50;
 				setStatus(mentionsStatus, 'parsing\u2026' + fmtPct(l, t));
+				setProgress(pct, 'Parsing mentions.csv\u2026' + fmtPct(l, t));
 			});
 			setStatus(mentionsStatus, fmtRows(r.rows), 'ok');
 			populateCounties(r.counties);
@@ -166,15 +188,19 @@
 		app.county = countyEl.value || counties[0] || null;
 	}
 
-	countyEl.addEventListener('change', () => {
-		app.county = countyEl.value;
-		updateDiagnostics();
-	});
+	if (countyEl) {
+		countyEl.addEventListener('change', () => {
+			app.county = countyEl.value;
+			updateDiagnostics();
+		});
+	}
 
-	yearEl.addEventListener('change', () => {
-		app.year = parseInt(yearEl.value, 10);
-		updateDiagnostics();
-	});
+	if (yearEl) {
+		yearEl.addEventListener('change', () => {
+			app.year = parseInt(yearEl.value, 10);
+			updateDiagnostics();
+		});
+	}
 
 	// ---- diagnostics -------------------------------------------------------
 	function updateDiagnostics() {
@@ -185,33 +211,76 @@
 		} catch (e) {
 			setReport('Diagnostics error: ' + e.message);
 		}
-		runDiagBtn.disabled = false;
-		prepareBtn.disabled = false;
+		if (runDiagBtn) runDiagBtn.disabled = false;
+		if (prepareBtn) prepareBtn.disabled = false;
 	}
 
-	runDiagBtn.addEventListener('click', () => updateDiagnostics());
+	if (runDiagBtn) runDiagBtn.addEventListener('click', () => updateDiagnostics());
 
-	// ---- session file ------------------------------------------------------
-	sessionFileEl.addEventListener('change', () => {
-		const f = sessionFileEl.files[0];
-		if (!f) return;
-		const fr = new FileReader();
-		fr.onload = () => {
-			try {
-				app.store.loadSessionJson(String(fr.result));
-				app.store.reviewer = reviewerEl.value.trim() || app.store.reviewer;
-				app.store.county   = app.county;
-				const sessionStatus = $('sessionStatus');
-				if (sessionStatus) sessionStatus.textContent = 'loaded';
-			} catch (e) {
-				notice('Session file: ' + e.message);
+	// ---- session file loading ----------------------------------------------
+	async function loadSessionFromFile(file) {
+		if (!file) return;
+		try {
+			const text = await file.text();
+			const o = JSON.parse(text);
+			if (!o || o.kind !== 'verite-schedule2census-session') {
+				throw new Error('Not a schedule2census session file');
 			}
-		};
-		fr.readAsText(f);
-	});
+			app.store.loadSessionJson(text);
+
+			if (o.county) {
+				app.county = o.county;
+				if (countyEl) countyEl.value = o.county;
+			}
+			if (o.reviewer) {
+				if (reviewerEl) reviewerEl.value = o.reviewer;
+				app.store.reviewer = o.reviewer;
+			}
+			const firstDecWithYear = (o.decisions || []).find((d) => d.year);
+			if (firstDecWithYear && firstDecWithYear.year) {
+				app.year = parseInt(firstDecWithYear.year, 10);
+				if (yearEl) yearEl.value = String(app.year);
+			}
+
+			const sessionStatus = $('sessionStatus');
+			const nDecisions = o.decisions ? o.decisions.length : 0;
+			if (sessionStatus) sessionStatus.textContent = `${nDecisions} loaded`;
+
+			if (app.data && app.data.mentions && app.data.mentions.length) {
+				runPrepare();
+				notice(`Loaded session file with ${nDecisions} decisions.`);
+			} else {
+				notice(`Session loaded (${nDecisions} decisions). Will apply when you Prepare.`);
+			}
+		} catch (e) {
+			notice('Session file: ' + e.message);
+			console.error(e);
+		}
+	}
+
+	if (sessionFileEl) {
+		sessionFileEl.addEventListener('change', () => {
+			loadSessionFromFile(sessionFileEl.files[0]);
+		});
+	}
+
+	if (loadSBtn) {
+		loadSBtn.addEventListener('click', () => {
+			if (loadSessionFileEl) {
+				loadSessionFileEl.value = '';
+				loadSessionFileEl.click();
+			}
+		});
+	}
+
+	if (loadSessionFileEl) {
+		loadSessionFileEl.addEventListener('change', () => {
+			loadSessionFromFile(loadSessionFileEl.files[0]);
+		});
+	}
 
 	// ---- prepare -----------------------------------------------------------
-	prepareBtn.addEventListener('click', () => {
+	function runPrepare() {
 		prepareBtn.disabled = true;
 		clearNotices();
 		app.store.reviewer = reviewerEl.value.trim();
@@ -220,6 +289,7 @@
 		app.county         = countyEl.value;
 
 		try {
+			setProgress(95, 'Preparing blocks and anchors\u2026');
 			const r = app.prepare();
 			let msg = 'Prepared: ' + r.blocks + ' blocks, ' + r.owners + ' enslavers';
 			if (r.epsAnchors) msg += ', ' + r.epsAnchors + ' EPS anchors';
@@ -236,44 +306,52 @@
 			autoAcceptBtn.disabled = false;
 			exportABtn.disabled    = false;
 			exportSBtn.disabled    = false;
-			exportHBtn.disabled    = !app.holdingAlignment;
 
 			showPane('review');
 			updateCounter();
+			setProgress(100, 'Ready');
+			return true;
 		} catch (e) {
 			prepareBtn.disabled = false;
 			notice('Prepare failed: ' + e.message);
 			console.error(e);
+			return false;
 		}
-	});
+	}
+
+	if (prepareBtn) prepareBtn.addEventListener('click', () => runPrepare());
 
 	// ---- auto-accept -------------------------------------------------------
-	autoAcceptBtn.addEventListener('click', () => {
-		const key = app.ui ? app.ui.blockKey : null;
-		if (!key) return;
-		const n = app.acceptAuto(key);
-		notice('Auto-accepted ' + n + ' match' + (n === 1 ? '' : 'es') + '.');
-		updateCounter();
-	});
+	if (autoAcceptBtn) {
+		autoAcceptBtn.addEventListener('click', () => {
+			const n = app.acceptAuto();
+			notice('Auto-accepted ' + n + ' match' + (n === 1 ? '' : 'es') + '.');
+			updateCounter();
+		});
+	}
 
 	// ---- exports -----------------------------------------------------------
-	exportABtn.addEventListener('click', () => { app.exportAssertions(); });
-	exportSBtn.addEventListener('click', () => { app.exportSession(); });
-	exportHBtn.addEventListener('click', () => { app.exportHoldingReport(); });
+	if (exportABtn) exportABtn.addEventListener('click', () => { app.exportAssertions(); });
+	if (exportSBtn) exportSBtn.addEventListener('click', () => { app.exportSession(); });
 
 	// ---- counter -----------------------------------------------------------
 	function updateCounter() {
 		const s = app.store.stats();
-		counterEl.textContent = s.total ? (s.matched + ' matched \u00b7 ' + s.total + ' decided') : '';
+		if (!counterEl) return;
+		if (!s.total) { counterEl.textContent = ''; return; }
+		let txt = s.matched + ' matched';
+		if (s.anchored) txt += ' (' + s.anchored + ' via EPS)';
+		txt += ' \u00b7 ' + s.total + ' decided';
+		counterEl.textContent = txt;
 	}
 	document.addEventListener('verite:decision', () => updateCounter());
 
 	// ---- reload button -----------------------------------------------------
 	function setReloadEnabled(on) {
-		reloadBtn.disabled = !on;
+		if (reloadBtn) reloadBtn.disabled = !on;
 	}
 
-	reloadBtn.addEventListener('click', () => autoLoad());
+	if (reloadBtn) reloadBtn.addEventListener('click', () => autoLoad());
 
 	// ---- auto-load on startup ---------------------------------------------
 	async function autoLoad() {
@@ -283,20 +361,39 @@
 		setStatus(eps1850Status,  'waiting');
 		setStatus(eps1860Status,  'waiting');
 		setReport('Loading\u2026');
+		setProgress(0, 'Connecting to data sources\u2026');
 
 		const ok = await loadMentions();
-		if (!ok) return;
+		if (!ok) {
+			setProgress(0, 'Failed to load mentions.csv');
+			return;
+		}
 
-		// Both EPS years load up-front so switching year never goes back to the network.
-		await Promise.all([
-			loadEps(1850, eps1850Status),
-			loadEps(1860, eps1860Status),
-		]);
+		setProgress(70, 'Loading 1850 slave schedule (eps1850.csv)\u2026');
+		await new Promise((r) => setTimeout(r, 10));
+		await loadEps(1850, eps1850Status);
+
+		setProgress(76, 'Loading 1860 slave schedule (eps1860.csv)\u2026');
+		await new Promise((r) => setTimeout(r, 10));
+		await loadEps(1860, eps1860Status);
 
 		app.year   = parseInt(yearEl.value, 10);
 		app.county = countyEl.value;
 
+		setProgress(82, 'Running diagnostics\u2026');
+		await new Promise((r) => setTimeout(r, 20));
 		updateDiagnostics();
+
+		setProgress(90, 'Preparing blocks and anchors\u2026');
+		await new Promise((r) => setTimeout(r, 20));
+		const prepOk = runPrepare();
+
+		if (prepOk) {
+			setProgress(100, 'Ready');
+		} else {
+			setProgress(90, 'Prepare paused. Ready to retry.');
+		}
+
 		setReloadEnabled(true);
 	}
 

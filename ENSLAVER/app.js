@@ -106,18 +106,6 @@ class App {
 
 		this.engine = new CandidateEngine(this.fellegi, opts.engine || {});
 
-		// Seed the EPS anchors into the store as machine decisions so they show
-		// as anchors immediately and are exported with who = EPS.
-		for (const [ownerId, a] of this.epsAnchors.entries()) {
-			if (this.store.get(ownerId)) continue;
-			if (a.ambiguous) continue;        // merged holding: the second holder is
-			                                  // an employer or co-owner, not a safe
-			                                  // automatic assignment
-			this.store.record(a.owner, a.census, [], {
-				outcome: 'matched', anchored: true, machine: true, method: 'EPS',
-				note: 'EPS holding ' + a.holdnum,
-			});
-		}
 
 		return {
 			blocks: this.blocks.length,
@@ -136,12 +124,11 @@ class App {
 	// anchors and for nobody else.
 
 	blockState(key) {
-		const k = String(key);
+		const block = (key != null ? this.blocks.find((b) => String(b.key) === String(key)) : null) || this.blocks[0];
+		if (!block) return null;
+		const k = String(block.key);
 		let state = this._blockCache.get(k);
 		if (state) { this._refresh(state); return state; }
-
-		const block = this.blocks.find((b) => String(b.key) === k);
-		if (!block) return null;
 
 		const index = this.engine.buildIndex(block.candidates);
 		const seeds = this.engine.seedAnchors(block);
@@ -165,8 +152,8 @@ class App {
 			rowKey: new Array(block.owners.length).fill(null),
 			anchorIndex: [],
 		};
+		state.anchorIndex = this._anchorIndex(state);
 		this._blockCache.set(k, state);
-		this._refresh(state, true);
 		return state;
 	}
 
@@ -188,33 +175,37 @@ class App {
 		return [...out.values()].sort((a, b) => a.ownerRank - b.ownerRank);
 	}
 
-	_refresh(state, force = false) {
-		const anchors = this._anchorIndex(state);
+	_refresh(state) {
+		state.anchorIndex = this._anchorIndex(state);
+	}
+
+	rowFor(owner) {
+		if (!owner) return null;
+		const state = this.blockState();
+		if (!state) return null;
+
+		const i = owner._blockRank != null ? owner._blockRank : state.block.owners.indexOf(owner);
+		if (i < 0) return null;
+
+		const anchors = state.anchorIndex || this._anchorIndex(state);
 		state.anchorIndex = anchors;
-		const ranks = anchors.map((a) => a.ownerRank);
-		// The cache key for an enslaver is the pair of anchors bracketing it.
-		// Same bracket, same estimate, same ranking.
-		const bracketKey = (r) => {
-			let lo = -1, hi = -1;
-			for (const a of anchors) {
-				if (a.ownerRank < r) lo = a.ownerRank;
-				else if (a.ownerRank > r) { hi = a.ownerRank; break; }
-				else { lo = a.ownerRank; hi = a.ownerRank; break; }
-			}
-			return lo + ':' + hi;
-		};
-		void ranks;
-		let n = 0;
-		for (let i = 0; i < state.block.owners.length; i++) {
-			const o = state.block.owners[i];
-			const key = bracketKey(o._blockRank);
-			if (!force && state.rowKey[i] === key && state.rows[i]) continue;
-			state.rows[i] = this.engine.rankOwner(o, state.block, state.index, anchors, { prior: this.prior });
-			state.rowKey[i] = key;
-			n++;
+
+		let lo = -1, hi = -1;
+		for (const a of anchors) {
+			if (a.ownerRank < i) lo = a.ownerRank;
+			else if (a.ownerRank > i) { hi = a.ownerRank; break; }
+			else { lo = a.ownerRank; hi = a.ownerRank; break; }
 		}
-		state.lastRecomputed = n;
-		return n;
+		const key = lo + ':' + hi;
+
+		if (state.rowKey[i] === key && state.rows[i]) {
+			return state.rows[i];
+		}
+
+		const row = this.engine.rankOwner(owner, state.block, state.index, anchors, { prior: this.prior });
+		state.rows[i] = row;
+		state.rowKey[i] = key;
+		return row;
 	}
 
 	// Sequence alignment + triage for one block. Separate from blockState so the
@@ -223,6 +214,9 @@ class App {
 	alignBlock(key, opts = {}) {
 		const s = this.blockState(key);
 		if (!s) return null;
+		for (let i = 0; i < s.block.owners.length; i++) {
+			if (!s.rows[i]) s.rows[i] = this.rowFor(s.block.owners[i]);
+		}
 		const anchors = new Map();
 		for (const o of s.block.owners) {
 			const d = this.store.get(o.mention_id);
@@ -241,16 +235,19 @@ class App {
 	// as machine decisions so the auto-accepted rows can be audited later and
 	// sampled for an error rate.
 	acceptAuto(key, opts = {}) {
-		const res = this.alignBlock(key, opts);
-		if (!res) return 0;
+		const keys = key != null ? [String(key)] : this.blocks.map((b) => String(b.key));
 		let n = 0;
-		for (const a of res.triage.auto) {
-			if (this.store.get(a.owner.mention_id)) continue;
-			this.store.record(a.owner, a.candidate, a.row.candidates, {
-				outcome: 'matched', machine: true, method: 'FS+v1',
-				note: `alignment ${a.bits} bits, margin ${a.marginBits}`,
-			});
-			n++;
+		for (const k of keys) {
+			const res = this.alignBlock(k, opts);
+			if (!res) continue;
+			for (const a of res.triage.auto) {
+				if (this.store.get(a.owner.mention_id)) continue;
+				this.store.record(a.owner, a.candidate, a.row.candidates, {
+					outcome: 'matched', machine: true, method: 'FS+v1',
+					note: `alignment ${a.bits} bits, margin ${a.marginBits}`,
+				});
+				n++;
+			}
 		}
 		this.onDecision();
 		return n;
@@ -269,7 +266,7 @@ class App {
 
 	exportAssertions() {
 		const name = `enslavers-${this.county}-${this.year}-${App.stamp()}.csv`;
-		ReviewStore.download(name, this.store.toAssertionCsv({ version: 'FS+v1' }), 'text/csv');
+		ReviewStore.download(name, this.store.toAssertionCsv({ version: 'FS+v1', includeNegatives: false }), 'text/csv');
 		return name;
 	}
 
@@ -280,31 +277,6 @@ class App {
 			fellegiParams: this.fellegi.exportParams(),
 			holdingReport: this.holdingAlignment ? this.holdingAlignment.report : null,
 		}), 'application/json');
-		return name;
-	}
-
-	exportHoldingReport() {
-		if (!this.holdingAlignment) return null;
-		const rows = [];
-		for (const p of this.holdingAlignment.result.pairs) {
-			const ourSize = p.ours.reduce((a, x) => a + x.size, 0);
-			rows.push({
-				eps_holdnum: p.eps.holdnum,
-				eps_size: p.eps.size,
-				our_holdings: p.ours.map((x) => x.household_id).join(' '),
-				our_owner_ids: p.ours.map((x) => x.owner ? x.owner.mention_id : '').join(' '),
-				our_owner_names: p.ours.map((x) => x.owner ? x.owner.full_name : '').join(' | '),
-				our_size: ourSize,
-				span: p.span,
-				suspected_split: p.span > 1 ? 'yes' : '',
-				size_difference: ourSize - p.eps.size,
-				composition_score: p.score.toFixed(3),
-				eps_histid: p.eps.histid,
-				eps_nholders: p.eps.nholders == null ? '' : p.eps.nholders,
-			});
-		}
-		const name = `holdings-${this.county}-${this.year}-${App.stamp()}.csv`;
-		ReviewStore.download(name, CSV.stringify(rows), 'text/csv');
 		return name;
 	}
 

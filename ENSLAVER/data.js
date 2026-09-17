@@ -127,6 +127,7 @@ class VeriteData {
 	sourceName(county, type, year) { return county + '-' + type + '-' + year; }
 
 	census(county, year) { return this.bySource.get(this.sourceName(county, 'CN', year)) || []; }
+	heads(county, year) { return this.census(county, year).filter((m) => m._head); }
 	schedule(county, year) { return this.bySource.get(this.sourceName(county, 'SS', year)) || []; }
 
 	// Enslaver rows on a slave schedule. legal_status 'H' is set at ingest.
@@ -175,49 +176,28 @@ class VeriteData {
 		return pool;
 	}
 
-	// Enumerator blocks. `enum` and `district` partition this data identically,
-	// so only one of them is used; enum wins because the district strings do not
-	// normalize consistently across sources ("2 5" on the schedule vs "2.5" on
-	// the census). A null enum means "unknown", not "its own block" — those rows
-	// have to compare against everything or they are stranded.
+	// Without blocking: the entire county is compared as a single unified pool
+	// rather than partitioning into separate enumerator blocks.
 	blocks(county, year) {
 		const owners = this.owners(county, year);
 		const pool = this.censusPool(county, year);
-		const keys = new Set();
-		for (const o of owners) if (o._enum) keys.add(o._enum);
-		for (const c of pool) if (c._enum) keys.add(c._enum);
-
-		const map = new Map();
-		for (const k of keys) map.set(k, { key: k, owners: [], candidates: [] });
-		map.set(null, { key: null, owners: [], candidates: [], unblocked: true });
-
-		for (const o of owners) map.get(o._enum || null).owners.push(o);
-		for (const c of pool) if (c._enum) map.get(c._enum).candidates.push(c);
-
-		// Unknown-enum owners get the whole county as their pool.
-		map.get(null).candidates = pool.slice();
-
-		const out = [];
-		for (const b of map.values()) {
-			if (!b.owners.length) continue;
-			b.owners.sort((a, c) => (a._line || 0) - (c._line || 0));
-			b.candidates.sort((a, c) => (a._line || 0) - (c._line || 0));
-			// An owner belongs to exactly one block, so its rank can sit on the
-			// record. A census mention does NOT: it appears in its own enum block
-			// and again in the unblocked pool used by owners whose enumerator is
-			// unrecorded. Writing the rank onto the mention lets the second pass
-			// overwrite the first, which silently puts every candidate rank in
-			// the wrong coordinate space. The rank is per block and lives here.
-			b.owners.forEach((o, i) => { o._blockRank = i; });
-			b.rankOf = new Map();
-			b.candidates.forEach((c, i) => { b.rankOf.set(c.mention_id, i); });
-			b.rank = (c) => (c ? b.rankOf.get(c.mention_id != null ? c.mention_id : c) : undefined);
-			b.nOwners = b.owners.length;
-			b.nCandidates = b.candidates.length;
-			out.push(b);
-		}
-		out.sort((a, b) => String(a.key).localeCompare(String(b.key)));
-		return out;
+		owners.sort((a, c) => (a._line || 0) - (c._line || 0));
+		pool.sort((a, c) => (a._line || 0) - (c._line || 0));
+		owners.forEach((o, i) => { o._blockRank = i; });
+		const rankOf = new Map();
+		pool.forEach((c, i) => { rankOf.set(c.mention_id, i); });
+		const b = {
+			key: 'county',
+			owners,
+			candidates: pool,
+			nOwners: owners.length,
+			nCandidates: pool.length,
+			rankOf,
+			rank: (c) => (c ? rankOf.get(c.mention_id != null ? c.mention_id : c) : undefined),
+			unblocked: true,
+			year,
+		};
+		return [b];
 	}
 
 	householdOf(mention) {
@@ -303,11 +283,13 @@ class EpsSource {
 				this.holdings.push(h);
 			}
 			const age = EpsSource.num(r.age);
+			const sex = EpsSource.SEX[String(r.sex).trim()] || (r.gender ? String(r.gender).trim().toUpperCase() : '');
+			const race = EpsSource.RACE[String(r.race).trim()] || (r.norm_race ? String(r.norm_race).trim().toUpperCase() : '');
 			h.people.push({
 				slavenum: EpsSource.num(r.slavenum),
 				age,
-				sex: EpsSource.SEX[String(r.sex).trim()] || '',
-				race: EpsSource.RACE[String(r.race).trim()] || '',
+				sex,
+				race,
 				histid_slave: EpsSource.id(r.histid_slave),
 			});
 			if (h.histid) { idSeen++; if (EpsSource.isGuid(h.histid)) guidSeen++; }

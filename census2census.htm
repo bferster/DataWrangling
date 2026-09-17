@@ -900,7 +900,8 @@
 					Census to Census Matcher
 					<span class="badge badge-primary">Fellegi-Sunter Linkage</span>
 				</h1>
-				<p>Match source person list against target Census mentions with Fellegi-Sunter probabilistic record linkage and default search method.</p>
+				<p>Match source person list against target Census mentions with Fellegi-Sunter probabilistic record
+					linkage and default search method.</p>
 			</div>
 		</header>
 
@@ -1149,7 +1150,7 @@
 
 		var app = null;
 
-		class CensusMatcherApp {
+		class erApp {
 			constructor() {
 				app = this;
 				this.matchedResults = [];
@@ -2681,7 +2682,7 @@
 						probability: prob,
 						raw_fellegi_score: (r.rawFellegiScore != null && !isNaN(r.rawFellegiScore)) ? Number(r.rawFellegiScore)
 							: ((r.why && r.why.raw_fellegi_score != null) ? Number(r.why.raw_fellegi_score)
-							: ((r.why && r.why.base != null) ? Number(r.why.base) : '')),
+								: ((r.why && r.why.base != null) ? Number(r.why.base) : '')),
 						source_id: vp.person_id || vp.mention_id || '',
 						target_id: cand.mention_id || '',
 						source_full_name: vp.full_name || '',
