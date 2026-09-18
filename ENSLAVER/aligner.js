@@ -38,7 +38,8 @@ class SequenceAligner {
 		this.anchorBits = opts.anchorBits != null ? opts.anchorBits : 40;
 	}
 
-	// rows: output of CandidateEngine.rankBlock — [{ owner, ownerRank, candidates:[...] }]
+	// rows: one CandidateEngine.rankOwner() result per block owner, in owner order
+	// (see App.alignBlock) — [{ owner, ownerRank, candidates:[...] }]
 	// anchors: Map ownerMentionId -> candidate mention record (forced assignment)
 	//
 	// Returns { assignments, totalBits, skipped }.
@@ -237,6 +238,15 @@ class SequenceAligner {
 		const out = { auto: [], review: [], likelyAbsent: [], anchored: [] };
 		for (const a of assignments) {
 			if (a.anchored) { out.anchored.push(a); continue; }
+
+			// If owner is an estate/deceased with no agent, flag as likely absent
+			if (a.owner && a.owner._isEstate && !a.owner._agentName) {
+				a.absentHint = true;
+				a.estateAbsent = true;
+				out.likelyAbsent.push(a);
+				continue;
+			}
+
 			// No assignment is NOT the same claim as "not in the census". The
 			// alignment may simply have had nowhere to put this enslaver without
 			// breaking order. That belongs in front of a reviewer with its

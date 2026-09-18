@@ -5,20 +5,20 @@
 2. [Getting Started & Setup](#2-getting-started--setup)
 3. [Interface Tour](#3-interface-tour)
    - [Header Bar & Navigation](#header-bar--navigation)
-   - [Left Rail: Enumerator Blocks & Enslaver Queue](#left-rail-enumerator-blocks--enslaver-queue)
+   - [Left Rail: Enslaver Queue](#left-rail-enslaver-queue)
    - [Center Panel: Subject Information](#center-panel-subject-information)
-   - [Center Panel: Top Census Pane (Ranked Candidates & Bracket)](#center-panel-top-census-pane-ranked-candidates--bracket)
+   - [Center Panel: Match Candidates (Top Pane)](#center-panel-match-candidates-top-pane)
    - [Draggable Split Resizer](#draggable-split-resizer)
-   - [Center Panel: Bottom Census Pane (Full Census Browser)](#center-panel-bottom-census-pane-full-census-browser)
+   - [Center Panel: Full Census Browser (Bottom Pane)](#center-panel-full-census-browser-bottom-pane)
    - [Right Rail: Evidence Inspector](#right-rail-evidence-inspector)
    - [Bottom Toolbar: Decisions](#bottom-toolbar-decisions)
 4. [Step-by-Step Review Workflows](#4-step-by-step-review-workflows)
-   - [Workflow A: Confirming a High-Ranked Machine Candidate](#workflow-a-confirming-a-high-ranked-machine-candidate)
+   - [Workflow A: Confirming a Candidate](#workflow-a-confirming-a-candidate)
    - [Workflow B: Verifying & Auditing EPS Anchors](#workflow-b-verifying--auditing-eps-anchors)
    - [Workflow C: Manual Search & Arbitrary Record Linkage](#workflow-c-manual-search--arbitrary-record-linkage)
    - [Workflow D: Handling Clashes & Conflicting Claims](#workflow-d-handling-clashes--conflicting-claims)
-   - [Workflow E: Marking as Absent or Deferring](#workflow-e-marking-as-absent-or-deferring)
-5. [Keyboard Shortcuts Reference](#5-keyboard-shortcuts-reference)
+   - [Workflow E: Marking as Absent](#workflow-e-marking-as-absent)
+5. [Search Navigation Reference](#5-search-navigation-reference)
 6. [Exports & Session Management](#6-exports--session-management)
 7. [Troubleshooting & Best Practices](#7-troubleshooting--best-practices)
 
@@ -31,294 +31,252 @@
 ### The Challenge of Linking Slave Schedules
 An enslaver mention on a slave schedule is an extremely sparse record:
 - It typically contains **only a surname and a given name** (or initials).
-- Age, race, birthplace, occupation, and household relationships were not collected for enslavers on the slave schedule.
-- In traditional Fellegi-Sunter probabilistic record linkage, missing fields contribute zero evidence bits. The attribute evidence ceiling is approximately **17.5 bits**, while confident linkage ($p \ge 0.9$) requires **18.8 bits**.
+- Age, race, birthplace, occupation, and household relationships were not collected for enslavers on the slave schedule — the ingest discards them for owner rows.
+- In traditional Fellegi-Sunter probabilistic record linkage, missing fields contribute zero evidence bits. For a typical county the attribute evidence ceiling is around **17.5 bits**, while confident linkage ($p \ge 0.9$) needs about **18.8 bits**. The Set up tab's diagnostics report computes the real numbers for whatever county and year you loaded.
 
 ### The Hybrid Solution
 EnslaverReview bridges this evidence gap through three complementary mechanisms:
-1. **Positional Alignment (Walk Order)**: Both the slave schedule and the population census were recorded sequentially by enumerators walking door-to-door. Enumeration dates correlate monotonically with line numbers. The app treats matching as an order-preserving partial sequence alignment.
-2. **IPUMS EPS Holding Anchors**: Enslaved Population Schedule (EPS) holding compositions (counts, ages, and genders of enslaved individuals) are aligned with local holdings. Confirmed matches serve as fixed **anchors**, narrowing the positional uncertainty window ($\sigma$) for neighboring enslavers.
-3. **Human Review & Active Learning**: Machine-generated candidate brackets guide the reviewer, but reviewers can audit anchors, manually locate unranked census records, and mark confidence levels. Every choice captures the full candidate pool and negative rejections for downstream model training.
+1. **Positional Alignment (Walk Order)**: Both the slave schedule and the population census were recorded sequentially by enumerators walking door-to-door. Enumeration dates correlate monotonically with line numbers on both sides. The app treats matching as an order-preserving partial sequence alignment (`SequenceAligner`) rather than scoring each enslaver in isolation.
+2. **IPUMS EPS Holding Anchors**: Enslaved Population Schedule (EPS) holding compositions (counts, ages, and genders of enslaved individuals) are aligned to local holdings on composition alone — no names, since EPS has none (`HoldingAligner`). This also catches holdings the local ingest split in two. Holdings that resolve to a census person via IPUMS's own HISTID become fixed **anchors** that narrow the positional uncertainty window ($\sigma$) for neighboring enslavers.
+3. **Human Review**: Machine-generated candidates are shown ranked and in their place in the census sequence — not in a separate list — so a reviewer can see at a glance whether the top-scoring name sits far out of position while a weaker one sits neatly between two confirmed anchors. Confirmations become anchors themselves, shrinking the window for everyone still undecided.
 
 > [!TIP]
-> **Recommended Workflow Strategy**: Always work **1850 before 1860**. 
-> The 1850 census has recorded real estate property values and fewer bare initials (only ~4% vs. ~30% in 1860). Completed 1850 linkages establish confirmed household anchors that dramatically improve 1860 accuracy.
+> **Recommended Workflow Strategy**: Always work **1850 before 1860**.
+> The 1850 census has recorded real estate property values and far fewer bare initials than 1860. Confirmed 1850 matches are cross-checked automatically against 1860 candidates ("Confirmed in 1850" in the Evidence Inspector), which is often the deciding evidence when 1860 names alone cannot settle it.
 
 ---
 
 ## 2. Getting Started & Setup
 
 ### Requirements
-The application runs as a lightweight, browser-based vanilla JavaScript application without any build steps or external dependencies.
+The application runs as a lightweight, browser-based vanilla JavaScript application with no build step. It loads its data over HTTP, from two locations relative to `index.html`:
 
-Required data files located in the project directory:
-- `mentions.csv` — Ingested mention records for both slave schedules and population census.
-- `eps1850.csv` — IPUMS Enslaved Population Schedule data for 1850.
-- `eps1860.csv` — IPUMS Enslaved Population Schedule data for 1860.
-- `match.js` & `fellegi.js` — Core linkage and probabilistic scoring engines.
+- `../COMMON/mentions.csv` — ingested mention records for both slave schedules and population census, across all counties.
+- `../COMMON/match.js` and `../COMMON/fellegi.js` — the shared name-matching and Fellegi-Sunter scoring library.
+- `./eps1850.csv` and `./eps1860.csv` — IPUMS Enslaved Population Schedule files for this project, one per year. These are optional: the tool still runs without them, using only name and position evidence, and the Set up screen reports which ones are missing.
 
 ### Launching the Application
 Due to browser security constraints on local `file://` access, the app must be served over HTTP:
 
 ```bash
-# In the project directory:
-python -m http.server 8000
+python3 -m http.server 8000
 ```
-Then navigate to: `http://localhost:8000/ENSLAVER/`
+Then navigate to `http://localhost:8000/ENSLAVER/`. Opening `index.html` directly from the filesystem will not work — the setup pane explains why instead of sitting blank.
 
-### The Setup Screen
-When you open the application, you begin on the **Set up** tab:
+### What Happens on Load
+The app does **not** wait for you to click anything. As soon as the page opens it:
+1. Downloads and parses `mentions.csv`, then both EPS files (showing row/holding counts or "not in this folder" for each).
+2. Picks the first county found in `mentions.csv` and year **1850**.
+3. Runs diagnostics automatically and shows the report in the Set up pane.
+4. Runs **Prepare** automatically — aligning EPS holdings, seeding anchors, and building the review blocks — and switches straight to the **Review** tab.
 
-1. **File Status Indicators**: Shows whether `mentions.csv`, `eps1850.csv`, and `eps1860.csv` loaded successfully.
-2. **Select County & Year**:
-   - **County**: Defaults to the first county detected in `mentions.csv` (e.g., `AUG` for Augusta County).
-   - **Year**: Select `1850` or `1860`.
-3. **Reviewer Name**: Enter your name or initials. This identifier is saved in the session audit trail and assertion outputs.
-4. **Run Diagnostics**: Click to compute source capability, attribute evidence ceilings, monotone sequence checks, and seed counts.
-5. **Click "Prepare"**:
-   - Aligns EPS holdings to local holdings.
-   - Extracts and pre-seeds high-confidence anchors.
-   - Builds surname and sequence indexes.
-   - Transitions directly to the **Review** screen.
+You only need the Set up tab afterward to change something:
+- **County / Year**: Pick a different county or year from the dropdowns. Doing so refreshes the diagnostics report and re-enables **Run diagnostics** and **Prepare**; click **Prepare** to actually rebuild the review blocks for the new selection and jump back to Review. Your existing decisions are kept — the review store is never cleared by Prepare.
+- **Reviewer**: Type your name or initials here, then click **Prepare** so it is recorded on every decision going forward. The very first automatic pass runs before you have had a chance to type anything, so if you plan to review, set your name and re-run Prepare before recording matches.
+- **Run diagnostics**: Recomputes and reprints the report (evidence ceiling, monotonicity checks, name uniqueness, EPS join health) for the current county/year without rebuilding the review blocks.
+- **Reload files**: Re-downloads `mentions.csv` and both EPS files and re-prepares — useful after editing the source CSVs. Decisions already recorded are preserved.
+- **Earlier session**: Loads a previously exported `session-*.json` to merge its decisions in (see [Resuming Work](#resuming-work)).
 
 ---
 
 ## 3. Interface Tour
 
-The review interface is divided into functional zones designed for efficient triage and inspection:
-
 ```
 +----------------------------------------------------------------------------------------------------+
-|  EnslaverReview   [Set up] [Review]  |  Decisions: 342/530  |  [Accept clear] [Export Assertions] |
+|  EnslaverReview   [Set up] [Review]  |  342 matched (58 via EPS) · 530 decided · 9% manual find  ⓘ  |
 +-----------------------+------------------------------------------------------+---------------------+
-| ENUMERATOR BLOCK      | SUBJECT ENSLAVER                                     | EVIDENCE INSPECTOR  |
-| Enslavers (979)       | William Wise — Line 412, July 9, 1850                 | Why this candidate: |
-|                       | Held 5 people: 32m 28f 12m 8f 2m                     | - Surname (exact)   |
-|-----------------------+------------------------------------------------------| - Given name        |
-| ENSLAVER QUEUE        | TOP PANE: CANDIDATE BRACKET                          | - Position (+2.4b)  |
-| 410 John Smith   EPS  | [Census records 390–435 of 10,277]  [Find candidates] | Total: 19.8 bits    |
-| 412 William Wise      | ( ) Ln 410 John Smith [anchor · EPS] [Reopen]        |---------------------|
-| 415 Mary Jones   auto | (*) Ln 414 William H. Wise [1 · 19.8 bits]           | Position:           |
-| 418 David Bell   none | ( ) Ln 418 William Wise [2 · 16.2 bits · +6 pos]     | Expected rank: 413  |
-| 422 Thos. Brown       | ( ) Not in this census                               | Sigma: ±8           |
-|                       |=================[ Draggable Resizer ]================| Runner-up gap: 3.6b |
-|                       | BOTTOM PANE: FULL CENSUS BROWSER                     |                     |
-|                       | Census (10,277) [Search... (Enter)] [x] Heads only   |                     |
-|                       | ( ) 413 Martha Wise  · birth: 1822 · F · W · head: no|                     |
-|                       | (*) 414 William H. Wise · birth: 1818 · M · W · head |                     |
-|                       | [Add as match: William H. Wise]                      |                     |
+| Enslavers (979) [All▾]| William Wise                                         | Why this candidate  |
+|-----------------------| ENS-AUG-1850-412 · line 412 · Jul 9 · gender: M      | Surname ▓▓▓▓  +4.2  |
+| 410 John Smith    EPS | enslaver 88 of 979                                   | Given   ▓▓▓░  +3.1  |
+| 412 William Wise      | held 5 people: 32m 28f 12m 8f 2m                     | position▓▓░░  +2.4  |
+| 415 Mary Jones   auto | EPS holding 77 → William H. Wise                     | total: 19.8 bits    |
+| 418 David Bell   none |-------------------------------------------------------|----------------------|
+| 422 Thos. Brown  clash| MATCH CANDIDATES     Double-click to match  [search] | Position             |
+|                       | ( ) 410 John Smith        anchor · matched to ...    | expected rank: 413   |
+|                       | (•) 414 William H. Wise   1 · 19.8 bits              | sigma: ±8            |
+|                       | ( ) 418 William Wise      2 · 16.2 bits  outside     | this candidate: 414  |
+|                       | ( ) Not in this census                               | anchors used: 2      |
+|                       |============== [ Draggable Resizer ] ==================|----------------------|
+|                       | RAW CENSUS (10,277)  [ ] Heads only [ ] Men only [search]| Margin over next  |
+|                       | 413 Martha Wise   · birth: 1822 · F · W · head: no    | runner-up: 16.2      |
+|                       | 414 William H. Wise · birth: 1818 · M · W · head: yes | gap: 3.6              |
 +-----------------------+------------------------------------------------------+---------------------+
-|                       | DECIDE: [Clear this decision]   Click candidate or 1–9 to match · n next   |
+|                       | Clear this decision        Click to inspect · Double-click to match          |
 +-----------------------+----------------------------------------------------------------------------+
 ```
 
 ---
 
 ### Header Bar & Navigation
-- **Progress Track**: A subtle green progress bar at the very top indicates your review completion percentage across the county.
-- **Tab Switcher**: Toggle between **Set up** (configuration, diagnostics, loading files) and **Review**.
-- **Counter**: Displays `matched / total decisions (conflicts)` in real time.
-- **Accept Clear Matches**: Automatically accepts unambiguous, high-margin machine proposals across the dataset without manual clicking.
-- **Load Session**: Upload a previously exported `session-*.json` file to resume where you left off.
-- **Export Assertions**: Generates a standardized `enslavers-COUNTY-YEAR-*.csv` assertion file.
-- **Export Session**: Generates a full `session-COUNTY-YEAR-*.json` audit file containing candidate pools and scores.
-- **Help Icon (`#helpTop`)**: Prominently located on the top line of the page. Clicking it opens the full Google Docs user documentation in read-only preview mode in a new browser tab.
+- **Progress Track**: A thin green bar at the very top that fills as `matched/total decisions` climbs; it fades out at 100%.
+- **Tab Switcher**: Toggle between **Set up** and **Review**.
+- **Counter**: `N matched (M via EPS) · N decided · P% manual find`. Hover it for a tooltip explaining "manual find rate" — the share of human-confirmed matches the machine did not itself propose, a rough recall estimate for the candidate generator.
+- **Accept clear matches**: Runs the sequence aligner across every block and auto-records its high-confidence, high-margin tail as machine decisions (flagged `auto` so they can be audited later). Enabled once Prepare has run.
+- **Load session**: Opens a file picker for a `session-*.json` export; its decisions are merged into the current session.
+- **Export assertions** / **Export session**: See [Exports & Session Management](#6-exports--session-management). Both stay disabled until Prepare has run.
+- **Help icon (ⓘ)**: Opens the full documentation (this manual, hosted on Google Docs) in a new tab.
 
 ---
 
 ### Left Rail: Enslaver Queue
-- **Queue Title & Filter Pulldown**:
-  - Displays visible vs total count (e.g. `Enslavers (979)` or `Enslavers (12 of 979)`).
-  - **Status Filter Pulldown**: Filter the list instantly by decision status:
-    - **All**: Show all enslavers across the county.
-    - **Blank**: Show only undecided enslavers without any recorded match or absence.
-    - **Auto**: Show only matches accepted via automated triage (`auto`).
-    - **Set**: Show only matches confirmed manually by a human reviewer (`set`).
-    - **Clash**: Show only records with conflicting/duplicate claims (`clash`).
-- **Enslaver List**: Lists all enslavers matching the active filter in schedule line order.
-  - **Line Number**: Slave schedule line.
-  - **Name**: Enslaver full name.
-  - **Status Badges**:
-    - `EPS`: Confirmed anchor imported from IPUMS EPS linkage.
-    - `set`: Confirmed by a human reviewer.
-    - `auto`: Accepted via automated high-confidence triage.
-    - `none`: Marked as "Not in this census".
-    - `clash`: Conflicted; this census individual has been claimed by multiple enslavers.
+- **Title & count**: `Enslavers (979)`, or `(12 of 979)` when a filter is narrowing the list.
+- **Status filter dropdown**, with a live count on each option:
+  - **All** — everyone.
+  - **Blank** — no decision recorded yet.
+  - **EPS pending** — an EPS/HISTID linkage proposed a candidate but a human has not confirmed it.
+  - **Auto** — accepted by **Accept clear matches** without individual review.
+  - **Set** — confirmed by hand.
+  - **Clash** — claimed by more than one enslaver (see [Workflow D](#workflow-d-handling-clashes--conflicting-claims)).
+- **Enslaver rows**, in slave-schedule line order, each showing the line number, the name, and a status badge:
+  - `EPS` (green) — confirmed via an IPUMS EPS/HISTID anchor.
+  - `EPS?` (grey) — an unambiguous EPS proposal, not yet confirmed by a reviewer.
+  - `EPS±` (amber) — an EPS proposal from a holding that was *merged* from more than one of ours; EPS names only the first holder, so this is deliberately not pre-selected and needs a manual look.
+  - `set` — confirmed by a human reviewer.
+  - `auto` — accepted via **Accept clear matches**.
+  - `none` — marked "Not in this census".
+  - `clash` (red) — this enslaver's match is claimed by another enslaver too.
+- Clicking a row selects that enslaver and loads their candidates, holding, and evidence in the center and right panels.
 
 ---
 
 ### Center Panel: Subject Information
-The header of the center workspace displays:
-- **Enslaver Name & Mention ID**: Primary identifier.
-- **Schedule Metadata**: Enumerator block, line number, and enumeration date (formatted as Month Day, e.g., "Jul 9").
-- **Holding Information**: Number of enslaved persons held, followed by their individual demographic profiles (e.g., `45m 32f 12m 4f` representing age and gender).
-- **EPS Holding Badge**: Indicates if IPUMS identified this holding and whether it involved merged holdings.
+The strip above the candidate list shows the enslaver currently being reviewed:
+- **Name**, with an **Estate / Deceased — Likely absent** badge when the schedule row looks like an estate, heirs, or administrator entry rather than a living person.
+- **Agent**, when the schedule recorded a separate agent/administrator name for the holding.
+- **Mention ID · line number · enumeration date · gender** (or *inferred gender* when the schedule didn't record one but the name implies it), and "enslaver *N* of *M*" for the current county/year.
+- **Holding**: how many people were held, followed by their ages and genders (e.g. `32m 28f 12m 8f 2m`).
+- **EPS status line**, one of:
+  - *Matched via EPS* — to the confirmed census person, with the line number.
+  - *EPS holding #N* → *proposed person* — not yet confirmed, or flagged with a "merged from N holdings" note if ambiguous.
+  - *Suspect EPS Anchor* (amber) — IPUMS's own census join disagrees with the enslaver's surname; this anchor does **not** pin the sequence alignment until a human confirms it.
 
 ---
 
-### Center Panel: Top Census Pane (Ranked Candidates & Bracket)
-Displays census individuals located within the estimated positional bracket around the subject enslaver:
-- **Bracket Window**: Header displays the census line range (e.g., `Records 380–425 of 5,500`) and whether the bracket is constrained by confirmed anchors.
-- **Find in Block**: Instant filter to search for any individual within the current block's candidate window.
-- **Candidate Rows**:
-  - **Selection Dot**: Radio button showing the selected candidate.
-  - **Rank & Score Badge**: Displays candidate rank and total evidence bits (e.g., `1 · 21.4 bits`).
-  - **Method Badges**: `EPS`, `manual pick`, `census head`, `position only`, `name only`.
-  - **Out-of-Bracket Warnings**: Displays distance (e.g., `14 outside the bracket`) if a high name match is far from expected walk order.
-  - **Confirmed Anchors**: Rendered in soft green. Anchors cannot be accidentally selected, but include a **Reopen** button if you need to revise an earlier decision.
-- **"Not in this census" Option (`0`)**: Located at the bottom of the list for enslavers who were non-residents, deceased, estate holdings, or omitted.
+### Center Panel: Match Candidates (Top Pane)
+Census individuals are shown **in their place inside the census sequence**, not as a detached top-N list, so an out-of-position top score and an in-position runner-up are visible at a glance.
+
+- **Toolbar**: "MATCH CANDIDATES", the reminder *Double-click to match enslaver to census listing*, and a search box (see [Search Navigation Reference](#5-search-navigation-reference)) that searches this block's candidates first and falls back to the full census by name if nothing in the block matches.
+- **Rows**, ordered: the current match (if any) first, then the machine-ranked candidates, then any other census records that fall inside the positional bracket, with the EPS proposal (if any) pinned near the top:
+  - **Rank & score badge**: e.g. `1 · 21.4 bits`.
+  - **Method badges**: `position only`, `name only`, `manual pick`, `census head`, `EPS`/`EPS proposal`, `Confirmed in 1850`, `gender clash`, `Suspect EPS Anchor`.
+  - **Claimed by …** (red) if another enslaver already holds this same census person.
+  - Candidates whose rank falls outside the current positional bracket are visually dimmed (`outside`); if the record isn't in this enumerator block at all, its block name is shown instead of a rank.
+  - **Confirmed anchors** — other enslavers' already-matched census people that sit inside this window — render as quiet, unselectable rows tagged `anchor`. Clicking one jumps you straight to *that* enslaver's record (handy for auditing or fixing an earlier decision) rather than reassigning the current one.
+- **"Not in this census"** is always the last row, for enslavers who were non-residents, deceased, an estate holding, or simply missed by the enumerator.
+- **Click** a row to inspect it — it updates the Evidence Inspector and the highlight in the bottom census browser, but records nothing yet.
+- **Double-click** a row (or "Not in this census") to commit the decision immediately, with a soft confirmation chime.
 
 ---
 
 ### Draggable Split Resizer
-Between the top candidate pane and bottom census pane is a horizontal divider (`.split-resizer`):
-- Click and drag up or down to adjust pane heights to your preference.
-- Hovering or dragging highlights the divider in accent blue.
+The horizontal bar between the candidate pane and the full census browser can be dragged up or down to change how much space each gets. It highlights blue while dragging.
 
 ---
 
-### Center Panel: Bottom Census Pane (Full Census Browser)
-A comprehensive viewer of the entire census population for the county and year:
-- **Title & Counter**: Shows total records loaded (e.g., `Census (19,551)`).
-- **Search Box & Search Icon (`#censusSearch`, `#censusSearchBtn`)**:
-  - Search by full name, line number, enumeration block, race, or gender.
-  - **Search from this point on**: Clicking the magnifying glass search icon (or pressing **Enter**) searches forward from the currently selected person or scroll position downward through the census sequence.
-  - Clicking search again (or pressing Enter again) continues stepping forward to subsequent matches.
-  - Wraps around to the top if the end of the census is reached, updating status with line number and match count.
-- **Filter Checkboxes**:
-  - `Heads only`: Restricts the list to heads of household.
-  - `This block only`: Restricts the list to the active enumerator block.
-- **Add as Match Button**: Prominently displays the name of any highlighted census person (e.g., `Add as match: William H. Wise`). Clicking it assigns the match and commits immediately.
-- **Person Rows**:
-  - Displays: `Line Number`, `Full Name`, `birth: YYYY`, `gender: M/F`, `race: W/B/Mu`, `head: yes/no`, property value, block, and enumeration date.
-  - **Two-Way Highlight Sync**: When you click or select a candidate in the top pane, the bottom pane automatically highlights the person's name in bold yellow (`#ffe58f` in light mode / gold in dark mode) and smoothly scrolls the record into view.
-  - **Infinite Scroll**: Dynamically loads rows in 80-item increments for fluid 60fps scrolling.
+### Center Panel: Full Census Browser (Bottom Pane)
+The complete census population for the active county and year, for finding anyone the machine didn't rank.
+
+- **Title**: `RAW CENSUS (10,277)`, or `(240 of 10,277)` while a filter or search narrows it.
+- **Filter checkboxes**: `Heads only` (household heads) and `Men only`.
+- **Search box**: matches full name, line number, race, or gender; press **Enter** to jump to the next match or **Shift+Enter** for the previous one, with wraparound and a "match *N* of *M*" status.
+- **Infinite scroll** loads records in chunks of 80 as you scroll, with explicit "▲ Load earlier records" / "▼ Load more records" links at each edge as a manual alternative.
+- **Rows** show line number, full name, `birth:`, `gender:`, `race:`, `head: yes/no`, birthplace, recorded property value, and enumeration date. A row is tagged `in bracket` when it falls inside the current enslaver's positional window, `claimed by …` (red) if another enslaver already has it, and `current match` / `closest match` / `selected` depending on why it's highlighted.
+- **Two-way sync**: selecting a candidate in the top pane highlights and scrolls to the matching row here, and vice versa.
+- **Double-click** any row to commit it as the match for the current enslaver, immediately, with the confirmation chime. This is the manual-find channel — matches made this way are flagged `foundManually: true` in the exported session, which is how the model's real recall is measured.
 
 ---
 
 ### Right Rail: Evidence Inspector
-Provides complete transparency into why a candidate was ranked:
-1. **EPS Match Card** (if applicable):
-   - IPUMS EPS holding number and composition match score.
-   - Merged holding counts and IPUMS `HISTID`.
-2. **Why This Candidate (Evidence Breakdown)**:
-   - Fellegi-Sunter attribute weights: Surname, given name, nicknames, soundex, and phonetic agreement/disagreement with visual bar indicators.
-   - Positional log-likelihood bits based on distance from expected walk order.
-   - Contextual bits (household head status, recorded real estate property).
-   - **Total Bits**: Overall log-likelihood ratio.
-3. **Position Diagnostics**:
-   - **Expected Rank**: Predicted census line position along the enumerator's walk.
-   - **Sigma ($\sigma$)**: Positional standard deviation / margin of error. As you confirm anchors, $\sigma$ shrinks.
-   - **Candidate Rank**: Actual position of the candidate.
-   - **Anchors Used**: Count of bounding anchors constraining this prediction.
-4. **Margin Over the Next**:
+Explains why the currently inspected candidate is ranked the way it is:
+1. **EPS match card** (when relevant) — the linked IPUMS holding number, whether it was merged from several of ours, and a *Suspect EPS Anchor* warning if IPUMS's own census join disagrees with the surname.
+2. **Confirmed in 1850 card** (1860 only) — when this same person was already matched in the 1850 pass, cross-census agreement is shown as extra corroborating evidence.
+3. **Why this candidate** — a bit-by-bit breakdown with proportional bars: Fellegi-Sunter surname/given-name/nickname/phonetic agreement, the positional log-likelihood term, head-of-household/property context bits, the 1850 cross-census bonus, a gender-clash penalty when the inferred enslaver gender conflicts with the census record, and the **total**.
+4. **Position** — expected rank, sigma ($\sigma$, the positional margin of error — it shrinks as more anchors around this enslaver are confirmed), this candidate's actual rank, and how many anchors bound the estimate.
+5. **Margin over the next** — the runner-up's score, the gap between #1 and #2 in bits (a gap over ~3 bits is a strong separation), and how many candidates were considered in total.
+
+---
+
 ### Bottom Toolbar: Decisions
-- **Clear This Decision Button**: When an enslaver has already been matched or marked absent, this button removes the decision, restoring the enslaver to undecided.
-- **Matched via EPS Badge**: Indicates an automated or confirmed link originating from the IPUMS EPS schedule join.
-- **Keyboard & Click Hints**: Quick reminder of the primary shortcut keys (`1–9` to match, `0` not present, `n` next).
+- **Clear this decision**: appears only once the current enslaver has a recorded decision; removes it and returns them to undecided.
+- **Matched via EPS** badge: shown when the current decision came from an EPS/HISTID anchor.
+- A constant reminder: *Click to inspect · Double-click to match*. There is no separate "confirm" step — double-clicking a candidate row or census row *is* the confirmation.
 
 ---
 
 ## 4. Step-by-Step Review Workflows
 
 ### Workflow A: Confirming a Candidate
-1. Press `n` or click an undecided enslaver in the queue.
-2. Review the top-ranked candidate in the top pane.
-3. Check the **Evidence Inspector** on the right:
-   - Is the total score $\ge 18$ bits?
-   - Is the positional difference small (within $\pm \sigma$)?
-4. **Click the candidate row** (or press `1`–`9` on the keyboard).
-5. The match is saved instantly, and you remain on the current enslaver. When you are ready, press `n` or use the arrow keys to advance to another enslaver.
+1. Click an enslaver in the left rail.
+2. Single-click the top-ranked candidate to inspect it.
+3. Check the **Evidence Inspector**: is the total score comfortably high, is the positional difference small relative to $\sigma$, and is the gap to the runner-up wide?
+4. **Double-click** the same row to commit it. The chime confirms the save, and you stay on the current enslaver — click another row in the left rail when you're ready to move on.
 
 ---
 
 ### Workflow B: Verifying & Auditing EPS Anchors
-1. Enslavers with verified IPUMS EPS links are automatically badged with green `EPS` tags and pre-seeded as anchors.
-2. Click any `EPS` row in the queue.
-3. The subject header and evidence card will display the linked IPUMS holding number, holding size agreement, and census person.
-4. If the link is correct, no action is required.
-5. If the link is incorrect:
-   - Click **Clear this decision** in the bottom toolbar.
-   - Select the true candidate from the candidate list or bottom census browser, or select **Not in this census**.
-   - Click **Confirm**.
+1. Enslavers linked via IPUMS EPS/HISTID are pre-seeded as anchors and badged `EPS` (confirmed) or `EPS?` / `EPS±` (proposed, not yet confirmed) in the queue. A surname mismatch against IPUMS's own census join instead shows a `Suspect EPS Anchor` warning and is not used to pin the alignment.
+2. Click the row to see the linked holding number, composition-match quality, and proposed census person.
+3. If it's correct and only proposed (not yet confirmed), double-click it to confirm.
+4. If it's wrong: click **Clear this decision**, then pick the true candidate or **Not in this census** and double-click to confirm.
+5. To audit an anchor from a *different* enslaver's screen: any confirmed match that lands inside your current window shows up as a quiet `anchor` row. Clicking it jumps you to that enslaver so you can inspect or correct it directly.
 
 ---
 
 ### Workflow C: Manual Search & Arbitrary Record Linkage
-When the machine's top candidates do not match (e.g., due to severe transcription errors or wide sequence displacement):
-1. Navigate to the **bottom Census pane**.
-2. Type the person's name or census line number into the search box and press **Enter**.
-3. (Optional) Check or uncheck **Heads only** or **This block only** depending on your search scope.
-4. Click on the intended census record in the list.
-   - The row turns active blue with a green "selected" badge.
-   - The top pane automatically mirrors this selection as a `manual pick`.
-   - The Evidence Inspector updates to calculate Fellegi-Sunter name bits and positional distance for this person.
-   - The toolbar button displays `Add as match: [Person Name]`.
-5. Click **Add as match** or press **Enter** to confirm.
-   - *Note*: The system flags this match as `foundManually: true` in the session file to help measure model recall.
+When the ranked candidates don't include the right person (heavy transcription error, or the enumerators' walks drifted far apart):
+1. Use the search box in the bottom **Raw census** pane — type a name or line number and press **Enter** (or **Shift+Enter** to go backward).
+2. Optionally check **Heads only** or **Men only** to narrow the list. Records inside the estimated walk bracket are marked `in bracket`.
+3. Single-click the record to preview it in the Evidence Inspector.
+4. **Double-click** it to confirm the match immediately.
+   - The session file records this as `foundManually: true`, which is what lets you measure the matcher's real recall over time.
 
 ---
 
 ### Workflow D: Handling Clashes & Conflicting Claims
-If two different enslavers are matched to the same census individual:
-1. The queue marks both enslavers with a red `clash` badge.
-2. The candidate rows and census rows display a red warning: `claimed by [Other Enslaver Name]`.
-3. Selecting a claimed candidate prompts a confirmation modal:
-   > *"[Person] is already matched to [Other Enslaver]. Record this match anyway? Both will be flagged so you can settle it."*
-4. Inspect both enslavers' holding dates and line numbers. Reopen or clear the incorrect enslaver's match to resolve the conflict.
+If two different enslavers end up matched to the same census person:
+1. Both rows in the left rail get a red `clash` badge.
+2. Wherever that census person appears — in the candidate list or the raw census browser — it's flagged `claimed by [other enslaver's name]`.
+3. Double-clicking a claimed record to assign it anyway opens a confirmation:
+   > *"[Person] is already matched to [Other Enslaver]. Record this match anyway? Both will be flagged so you can settle it, and the earlier decision stays until you change it."*
+4. Open the other enslaver (click the flagged name, or find them in the queue), compare holding sizes and line numbers, and use **Clear this decision** on whichever one is wrong.
 
 ---
 
-### Workflow E: Marking as Absent or Deferring
-- **Enslaver not in census**:
-  - If an enslaver died, was an out-of-county owner, an estate holding, or missed by the census enumerator, select **Not in this census** (or press `0`) and press `Enter`.
-- **Uncertain / Need to return later**:
-  - Click **Decide later**. The queue will badge the row as `later`, allowing you to continue reviewing without blocking sequence alignment.
+### Workflow E: Marking as Absent
+- If an enslaver died, lived outside the county, is an estate/heirs entry, or simply wasn't enumerated in the population census, double-click **Not in this census** at the bottom of the candidate list. Rows that already look like an estate or deceased owner are pre-flagged with an **Estate / Deceased — Likely absent** badge as a hint, not an automatic decision.
 
 ---
 
-## 5. Keyboard Shortcuts Reference
+## 5. Search Navigation Reference
 
-The review interface is fully operational via keyboard shortcuts for rapid review:
+Review decisions are made with clicks (single to inspect, double to commit). The two search boxes — candidate search and raw-census search — share the same keys:
 
 | Key | Action | Description |
 |---|---|---|
-| `1` – `9` | Select Candidate | Selects candidate #1 through #9 from the top candidate pane |
-| `0` | Not in Census | Selects "Not in this census" |
-| `Enter` | Confirm Decision | Commits the current selection and advances to next undecided |
-| `n` | Next Undecided | Jumps to the next undecided enslaver in the active block |
-| `ArrowDown` / `j` | Next Enslaver | Moves down to the adjacent enslaver in the queue |
-| `ArrowUp` / `k` | Previous Enslaver | Moves up to the adjacent enslaver in the queue |
-| `/` | Focus Block Search | Jumps cursor into the "Find anyone in this block" search field |
-| `Escape` | Unfocus Input | Blurs search boxes so single-key shortcuts resume functioning |
+| `Enter` | Search forward | Jump to the next match |
+| `Shift` + `Enter` | Search backward | Jump to the previous match |
+| `Escape` | Unfocus | Clears focus from the search box |
 
 ---
 
 ## 6. Exports & Session Management
 
 ### Exporting Assertions (`enslavers-COUNTY-YEAR-*.csv`)
-Click **Export assertions** in the header bar. 
-
-The exported CSV conforms to the project's entity assertion schema:
-- **`isSameAs`**: Positive links confirmed by the reviewer.
-  - `who`: Identified as `EPS` (IPUMS anchor), `human` (manual find), or `FS+v1` (probabilistic alignment model).
-  - `confidence`: `0.95` (certain) or `0.75` (marked as probable).
-  - Negative (`isNotSameAs`) assertions are excluded from the export.
+Click **Export assertions** in the header bar. The CSV conforms to the project's entity assertion schema and contains only positive links:
+- **`isSameAs`** rows for every matched enslaver, with `who` set to `EPS` (confirmed anchor), `human` (found by manual search), or `FS+v1` (accepted from the ranked machine candidates), and `confidence` of `0.95` (certain) or `0.75` (probable).
+- Rejected candidates (`isNotSameAs`) are **not** included in this export — they are preserved instead inside the session file described below.
 
 ### Exporting Sessions (`session-COUNTY-YEAR-*.json`)
-Click **Export session** in the header bar.
-
-Generates a complete, reproducible JSON audit trail:
-- Reviewer username, start timestamp, and export timestamp.
-- Full statistics: total decisions, matches, absences, manual-find rate, conflict counts.
-- **Candidate snapshots**: Captures the exact top candidates presented to the reviewer, their calculated bits, and the chosen candidate.
-- Enables refitting of Fellegi-Sunter $m/u$ frequency parameters without losing historic context.
+Click **Export session** in the header bar. This is the full, reproducible audit trail:
+- Reviewer name, start timestamp, and export timestamp.
+- Aggregate stats: total decisions, matches, absences, conflicts, and the manual-find rate.
+- Every decision, with the top candidates as they were actually shown (name, line, score breakdown) and which one — if any — was chosen. This is what lets you tell later whether a decision was easy or lucky, and it doubles as labelled training data for refitting the Fellegi-Sunter weights.
+- The current Fellegi-Sunter parameters and the EPS/holding-alignment report, so the run is fully reproducible.
 
 ### Resuming Work
-To restore a previous session:
-1. Open the app and prepare your county/year.
-2. Click **Load session** in the header bar (or use the session file picker on the Set up screen).
-3. Select your saved `session-*.json` file. All confirmed decisions, absences, and notes will be restored immediately.
+1. Open the app — it loads and prepares automatically.
+2. Click **Load session** in the header bar (or use the **Earlier session** file field on the Set up tab).
+3. Pick your saved `session-*.json`. Its decisions are merged into the current session by enslaver ID (a decision in the file overwrites one for the same enslaver already in memory; everything else is left alone), and its county, reviewer, and year are applied if present.
 
 ---
 
@@ -326,9 +284,11 @@ To restore a previous session:
 
 | Issue | Cause | Solution |
 |---|---|---|
-| **Cannot load files / Page stays blank** | Opened via `file://` protocol | Run a local web server (e.g. `python -m http.server 8000`) and access over `http://localhost:8000`. |
-| **Search in bottom pane doesn't filter** | Query typed without pressing Enter | Press the **Enter** key to execute the census search query. Click the `✕` button to reset. |
-| **Candidate outside bracket warning** | Name matches, but walk order is distant | Check if there is another person with the same name closer in line order. If not, inspect property and age before confirming. |
-| **Census match button is disabled** | No person selected in bottom pane | Click a person row in the bottom census pane to select them first; the button will activate with their name. |
-| **Accidentally confirmed wrong candidate** | Misclick or typo | Select the enslaver in the queue, click **Clear this decision**, select the correct person, and confirm. |
-| **Red "clash" badge in queue** | Multiple enslavers matched to same census person | Click the clashing records, review their holding sizes and neighbors, and reassign the incorrect match. |
+| **Setup pane says "needs http.server" / stays on Set up** | Opened via `file://` protocol | Serve the folder (`python3 -m http.server 8000`) and open `http://localhost:8000/ENSLAVER/` instead. |
+| **eps1850.csv / eps1860.csv status says "not in this folder"** | The EPS file isn't present next to `index.html` | Non-fatal — the tool runs on name and position evidence alone. Add the file and click **Reload files** to pick it up. |
+| **Prepare button is disabled** | Nothing has changed since the last successful Prepare | Change the county or year (or click **Run diagnostics**) to re-enable it, then click **Prepare** again. |
+| **Search in a pane doesn't filter as you type** | The query hasn't been submitted yet | Press **Enter** to run the search; the search icon does the same thing. |
+| **Candidate is dimmed / marked "outside"** | Name matches, but its rank falls outside the current positional bracket | Check whether another candidate with the same name sits closer to the expected line. If not, weigh the name evidence against the positional distance before confirming. |
+| **Double-clicking doesn't seem to do anything** | The click landed outside a row, or on an anchor row (which navigates instead of committing) | Double-click the highlighted name/line text itself; anchor rows (soft green, "anchor" badge) belong to another enslaver and only jump you to their record. |
+| **Accidentally confirmed the wrong candidate** | Misclick | Select the enslaver, click **Clear this decision**, then double-click the correct record. |
+| **Red "clash" badge in the queue** | Two enslavers matched to the same census person | Open both, compare holding sizes and line order, and clear the incorrect one. |

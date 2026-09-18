@@ -67,6 +67,72 @@ class VeriteData {
 		return s === 't' || s === 'true' || s === 'y' || s === 'yes' || s === '1';
 	}
 
+	static LEGAL_QUALIFIERS = new Set([
+		'EST', 'ESTATE', 'ESTS', 'DECD', 'DECEASED', 'EXEC', 'EXR', 'EXRS', 'EXECUTOR', 'EXECUTRIX',
+		'ADM', 'ADMR', 'ADMINISTRATOR', 'ADMINISTRATRIX', 'AGT', 'AGENT', 'AGTS', 'TRUSTEE', 'TR',
+		'GDN', 'GUARDIAN', 'COL', 'COLONEL', 'CAPT', 'CAPTAIN', 'MAJ', 'MAJOR', 'GEN', 'GENERAL',
+		'DR', 'REV', 'HON', 'ESQ', 'JUDGE'
+	]);
+
+	static ESTATE_MARKERS = new Set([
+		'EST', 'ESTATE', 'ESTS', 'DECD', 'DECEASED', 'EXEC', 'EXR', 'EXRS', 'EXECUTOR', 'EXECUTRIX',
+		'ADM', 'ADMR', 'ADMINISTRATOR', 'ADMINISTRATRIX'
+	]);
+
+	static GENDER_FEMALE_NAMES = new Set([
+		'MARY', 'MARTHA', 'SARAH', 'ELIZABETH', 'ANN', 'ANNA', 'ANNE', 'NANCY', 'MARGARET', 'JANE',
+		'CATHERINE', 'CATHARINE', 'KATHARINE', 'FRANCES', 'SUSAN', 'SUSANNAH', 'SUSANNA', 'ELLEN',
+		'REBECCA', 'ELIZA', 'LUCY', 'RACHEL', 'EMILY', 'LOUISA', 'HARRIET', 'CAROLINE', 'AMANDA',
+		'HANNAH', 'MARIA', 'JULIA', 'POLLY', 'SALLY', 'FANNIE', 'FANNY', 'BETTIE', 'BETSY', 'BETTE',
+		'LIZZIE', 'LUCINDA', 'VIRGINIA', 'MILDRED', 'HESTER', 'HENRIETTA', 'ELEANOR', 'DELILAH',
+		'PRISCILLA', 'CHARLOTTE', 'SOPHONISBA', 'SOPHIA', 'JUDITH', 'EVELINA', 'AGNES', 'EVALINE',
+		'CYNTHIA', 'CLARA', 'MALINDA', 'MELINDA', 'RHODA', 'ISABELLA', 'ROSA', 'ROSE', 'PERMELIA',
+		'PARMELIA', 'PATSY', 'PEGGY', 'TEMPERANCE', 'TABITHA', 'ALICE', 'CELIA', 'MAHALA'
+	]);
+
+	static GENDER_MALE_NAMES = new Set([
+		'WILLIAM', 'JOHN', 'JAMES', 'GEORGE', 'THOMAS', 'ROBERT', 'CHARLES', 'JOSEPH', 'DAVID',
+		'SAMUEL', 'HENRY', 'BENJAMIN', 'DANIEL', 'JACOB', 'ALEXANDER', 'ISAAC', 'PETER', 'ANDREW',
+		'EDWARD', 'RICHARD', 'MICHAEL', 'ABRAHAM', 'JESSE', 'NATHAN', 'NATHANIEL', 'LEWIS', 'LOUIS',
+		'MARTIN', 'HARVEY', 'PHILIP', 'ARCHIBALD', 'AUGUSTUS', 'CHRISTOPHER', 'MATTHEW', 'STEPHEN',
+		'STEVEN', 'NICHOLAS', 'PATRICK', 'SOLOMON', 'EZEKIEL', 'JEREMIAH', 'CORNELIUS', 'BARTHOLOMEW',
+		'EDMUND', 'AMBROSE', 'ZACHARIAH', 'ZACHARY', 'ABSALOM', 'HIRAM', 'LEVI', 'JOSHUA', 'CALEB',
+		'REUBEN', 'SIMEON', 'ELIJAH', 'MOSES', 'AARON', 'FREDERICK', 'ADAM', 'CHRISTIAN', 'ANTHONY',
+		'ELISHA', 'JONATHAN', 'HUGH', 'GABRIEL', 'ELI', 'ALLEN', 'ALFRED', 'FRANKLIN', 'HARRISON',
+		'PRESTON', 'MADISON', 'JEFFERSON', 'JACKSON', 'WASHINGTON', 'ADDISON', 'GRANVILLE', 'COLUMBUS'
+	]);
+
+	static inferGender(firstName) {
+		if (!firstName) return null;
+		const token = String(firstName).trim().toUpperCase().replace(/[^A-Z]/g, '');
+		if (VeriteData.GENDER_FEMALE_NAMES.has(token)) return 'F';
+		if (VeriteData.GENDER_MALE_NAMES.has(token)) return 'M';
+		return null;
+	}
+
+	static cleanLegalQualifiers(rawName) {
+		if (!rawName) return { clean: '', isEstate: false, qualifiers: [] };
+		const s = String(rawName).trim();
+		const tokens = s.split(/[\s,.;:()\/]+/);
+		const kept = [];
+		const qualifiers = [];
+		let isEstate = false;
+		for (const t of tokens) {
+			const u = t.toUpperCase().replace(/[^A-Z]/g, '');
+			if (!u) continue;
+			if (VeriteData.LEGAL_QUALIFIERS.has(u)) {
+				qualifiers.push(u);
+				if (VeriteData.ESTATE_MARKERS.has(u)) isEstate = true;
+			} else {
+				kept.push(t);
+			}
+		}
+		if (/\bESTATE\s+OF\b/i.test(s) || /\bEST\.?\b/i.test(s) || /\bDEC['’]?D\b/i.test(s)) {
+			isEstate = true;
+		}
+		return { clean: kept.join(' '), isEstate, qualifiers };
+	}
+
 	// Build one working record from a raw mentions.csv row.
 	static shape(raw) {
 		const rec = raw;
@@ -86,6 +152,31 @@ class VeriteData {
 		rec._head = VeriteData.truthy(rec.head);
 		rec._county = VeriteData.countyOf(rec.mention_id);
 		rec._year = parseInt(rec.source_year, 10) || null;
+
+		// Clean legal qualifiers and titles (Est, Estate, Agt, Col, etc.)
+		const cleanLast = VeriteData.cleanLegalQualifiers(rec.last_name);
+		const cleanFirst = VeriteData.cleanLegalQualifiers(rec.first_name);
+		const cleanFull = VeriteData.cleanLegalQualifiers(rec.full_name);
+		rec._isEstate = cleanLast.isEstate || cleanFirst.isEstate || cleanFull.isEstate;
+		rec._cleanLastName = cleanLast.clean || rec.last_name || '';
+		rec._cleanFirstName = cleanFirst.clean || rec.first_name || '';
+		rec._cleanFullName = cleanFull.clean || rec.full_name || '';
+		rec._qualifiers = [...new Set([...cleanLast.qualifiers, ...cleanFirst.qualifiers, ...cleanFull.qualifiers])];
+
+		// Check for agent designation (e.g. "by Wm Bell Agt")
+		const agentMatch = String(rec.full_name || '').match(/\bBY\s+([A-Za-z.\s]+?)(?:\s+AGT|\s+AGENT)?$/i);
+		if (agentMatch && agentMatch[1]) {
+			rec._agentName = agentMatch[1].trim();
+		}
+
+		// Gender inference for enslaver if blank
+		const rawG = String(rec.gender || '').trim().toUpperCase();
+		if (rawG === 'M' || rawG === 'F') {
+			rec._inferredGender = rawG;
+		} else {
+			rec._inferredGender = VeriteData.inferGender(rec._cleanFirstName || rec.first_name);
+		}
+
 		return rec;
 	}
 
@@ -309,15 +400,21 @@ class EpsSource {
 	// How many holdings carry a usable slaveholder identifier, and how many of
 	// those identifiers actually appear in the census we hold. These are two
 	// different numbers and the second is the one that matters.
+	//
+	// A holding can carry up to three holder ids (histid/histid2/histid3) for
+	// co-owned property. `linked` counts a holding as soon as any of the three
+	// is populated, so resolution has to try all of them too — checking only
+	// the primary silently drops holdings whose sole identifier is histid2 or
+	// histid3, which is not rare: roughly 1% of 1860 holdings in this county.
 	joinReport(data) {
 		let linked = 0, resolvable = 0;
 		const missing = [];
 		for (const h of this.holdings) {
 			if (!h.linked) continue;
 			linked++;
-			const hit = data.byIpums.get(h.histid);
+			const hit = h.holderIds.map((id) => data.byIpums.get(id)).find(Boolean);
 			if (hit) { h._censusMention = hit; resolvable++; }
-			else if (missing.length < 25) missing.push(h.histid);
+			else if (missing.length < 25) missing.push(h.holderIds[0]);
 		}
 		return {
 			holdings: this.holdings.length,

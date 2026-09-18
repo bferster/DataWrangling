@@ -221,14 +221,22 @@ class HoldingAligner {
 	}
 
 	// Anchors for the census pass: our owner mention -> census mention, by way of
-	// the EPS holding's HISTID. These are links IPUMS already made; we are only
-	// carrying them across the holding correspondence.
+	// one of the EPS holding's holder ids. These are links IPUMS already made;
+	// we are only carrying them across the holding correspondence.
+	//
+	// A co-owned holding can have its only usable id in histid2 or histid3 while
+	// histid itself is blank, so all three are tried, in order, rather than just
+	// the primary — the same fallback joinReport() applies when counting how many
+	// holdings resolve.
 	anchors(result, data) {
 		const out = [];
 		for (const p of result.pairs) {
-			const id = p.eps.histid;
-			if (!id) continue;
-			const census = data.byIpums.get(id);
+			const ids = p.eps.holderIds || [];
+			let census = null, usedId = null;
+			for (const id of ids) {
+				const hit = data.byIpums.get(id);
+				if (hit) { census = hit; usedId = id; break; }
+			}
 			if (!census) continue;
 			// A merged pair covers several of our owner rows and EPS names only
 			// the first holder, so the anchor goes to the first fragment. The
@@ -236,11 +244,29 @@ class HoldingAligner {
 			// resolved by hand, not assumed.
 			const owner = p.ours[0].owner;
 			if (!owner) continue;
+
+			// Validate surname agreement between schedule owner and EPS census person
+			const oLast = Match.normUpper(owner._cleanLastName || owner.last_name);
+			const cLast = Match.normUpper(census._cleanLastName || census.last_name);
+			let suspect = false;
+			let suspectReason = null;
+			if (oLast && cLast) {
+				const jw = (typeof Match !== 'undefined' && Match.jaroWinkler) ? Match.jaroWinkler(oLast, cLast) : 1;
+				const nyO = Match.normUpper(owner.nysiis_last_name || '');
+				const nyC = Match.normUpper(census.nysiis_last_name || '');
+				if (jw < 0.70 && (!nyO || !nyC || nyO !== nyC) && oLast !== cLast) {
+					suspect = true;
+					suspectReason = `Surname mismatch: owner "${owner._cleanLastName || owner.last_name}" vs EPS census "${census._cleanLastName || census.last_name}"`;
+				}
+			}
+
 			out.push({
 				owner, census, holdnum: p.eps.holdnum,
 				span: p.span, compositionScore: p.score,
-				extraHolderIds: [p.eps.histid2, p.eps.histid3].filter(Boolean),
+				extraHolderIds: ids.filter((id) => id !== usedId),
 				ambiguous: p.span > 1,
+				suspect,
+				suspectReason,
 			});
 		}
 		return out;

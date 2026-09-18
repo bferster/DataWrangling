@@ -43,6 +43,8 @@ class CandidateEngine {
 		this.usePosition = opts.usePosition !== false;
 		this.headBonusBits = opts.headBonusBits != null ? opts.headBonusBits : 1.5;
 		this.propBonusBits = opts.propBonusBits != null ? opts.propBonusBits : 0.6;
+		this.genderPenaltyBits = opts.genderPenaltyBits != null ? opts.genderPenaltyBits : -10.0;
+		this.crossCensusBits = opts.crossCensusBits != null ? opts.crossCensusBits : 5.0;
 	}
 
 	// ---- surname index over one candidate pool ----------------------------
@@ -55,7 +57,7 @@ class CandidateEngine {
 			a.push(rec);
 		};
 		for (const c of pool) {
-			const last = Match.normUpper(c.last_name);
+			const last = Match.normUpper(c._cleanLastName || c.last_name);
 			add('L:' + last, c);
 			if (last.length >= 4) add('P:' + last.slice(0, 4), c);
 			const ny = Match.normUpper(c.nysiis_last_name);
@@ -72,12 +74,29 @@ class CandidateEngine {
 			if (!arr) return;
 			for (const c of arr) { if (!seen.has(c.mention_id)) { seen.add(c.mention_id); out.push(c); } }
 		};
-		const last = Match.normUpper(owner.last_name);
+		const lastName = owner._cleanLastName || owner.last_name;
+		const last = Match.normUpper(lastName);
 		push(index.get('L:' + last));
 		if (last.length >= 4) push(index.get('P:' + last.slice(0, 4)));
 		push(index.get('N:' + Match.normUpper(owner.nysiis_last_name)));
 		const mp = String(owner.metaphone_last_name || '').split(':')[0].replace(/[^A-Za-z]/g, '').toUpperCase();
 		push(index.get('M:' + mp));
+
+		// If owner was raw with legal suffix (e.g. "Smith Est"), also index clean version
+		if (owner.last_name && owner._cleanLastName && owner.last_name !== owner._cleanLastName) {
+			const cleanLast = Match.normUpper(owner._cleanLastName);
+			push(index.get('L:' + cleanLast));
+			if (cleanLast.length >= 4) push(index.get('P:' + cleanLast.slice(0, 4)));
+		}
+		// If owner named an agent (e.g. "Sarah Bell by Wm Bell Agt"), also check agent's name
+		if (owner._agentName) {
+			const agentTokens = owner._agentName.trim().split(/\s+/);
+			const agentLast = Match.normUpper(agentTokens[agentTokens.length - 1]);
+			if (agentLast) {
+				push(index.get('L:' + agentLast));
+				if (agentLast.length >= 4) push(index.get('P:' + agentLast.slice(0, 4)));
+			}
+		}
 		return out;
 	}
 
@@ -160,6 +179,83 @@ class CandidateEngine {
 		return b;
 	}
 
+	// Check if an 1860 owner-candidate pair matches a confirmed 1850 link
+	_check1850CrossLink(owner, cand, matches1850, data) {
+		if (!matches1850 || !matches1850.length) return null;
+		const ownerLast = Match.normUpper(owner._cleanLastName || owner.last_name);
+		const candLast = Match.normUpper(cand._cleanLastName || cand.last_name);
+		if (!ownerLast || ownerLast !== candLast) return null;
+
+		const ownerFirst = Match.normUpper(owner._cleanFirstName || owner.first_name);
+		const candFirst = Match.normUpper(cand._cleanFirstName || cand.first_name);
+		const candBY = parseInt(cand.birth_year, 10);
+
+		for (const m of matches1850) {
+			const mCensus = m.census;
+			if (!mCensus) continue;
+			const mCensusLast = Match.normUpper(mCensus._cleanLastName || mCensus.last_name);
+			if (mCensusLast !== ownerLast) continue;
+
+			// Birth year check (should be approximately identical in 1850 and 1860 censuses)
+			const mBY = parseInt(mCensus.birth_year, 10);
+			if (Number.isFinite(candBY) && Number.isFinite(mBY) && Math.abs(candBY - mBY) > 2) {
+				continue;
+			}
+
+			// Name consistency: 1850 full name vs 1860 candidate and owner
+			const mFirst = Match.normUpper(mCensus._cleanFirstName || mCensus.first_name);
+			const ownerTokens = (owner._cleanFullName || owner.full_name || '').toUpperCase().split(/[\s,.]+/).filter(Boolean);
+			const candTokens = (cand._cleanFullName || cand.full_name || '').toUpperCase().split(/[\s,.]+/).filter(Boolean);
+			const mTokens = (mCensus._cleanFullName || mCensus.full_name || '').toUpperCase().split(/[\s,.]+/).filter(Boolean);
+
+			// Check if given name initials / tokens agree
+			const firstInitial = (s) => (s && s.length ? s[0] : '');
+			const ownerInitial = firstInitial(ownerFirst);
+			const candInitial = firstInitial(candFirst);
+			const mInitial = firstInitial(mFirst);
+
+			const initialMatch = (ownerInitial === mInitial || !ownerInitial) && (candInitial === mInitial);
+			const nickMatch = Match.DEFAULT_NICKNAMES[ownerFirst] === mFirst || Match.DEFAULT_NICKNAMES[mFirst] === ownerFirst ||
+				Match.DEFAULT_NICKNAMES[candFirst] === mFirst || Match.DEFAULT_NICKNAMES[mFirst] === candFirst;
+
+			if (!initialMatch && !nickMatch && ownerFirst !== mFirst && candFirst !== mFirst) {
+				continue;
+			}
+
+			// Check household members if available
+			let sharedFamily = false;
+			if (data && cand.household_id && mCensus.household_id) {
+				const candHH = data.householdOf(cand);
+				const mHH = m.household || data.householdOf(mCensus);
+				for (const p60 of candHH) {
+					const p60Name = Match.normUpper(p60.first_name);
+					const p60BY = parseInt(p60.birth_year, 10);
+					if (!p60Name || p60Name.length < 2) continue;
+					for (const p50 of mHH) {
+						const p50Name = Match.normUpper(p50.first_name);
+						const p50BY = parseInt(p50.birth_year, 10);
+						if (p60Name === p50Name || Match.DEFAULT_NICKNAMES[p60Name] === p50Name || Match.DEFAULT_NICKNAMES[p50Name] === p60Name) {
+							if (Number.isFinite(p60BY) && Number.isFinite(p50BY) && Math.abs(p60BY - p50BY) <= 3) {
+								sharedFamily = true;
+								break;
+							}
+						}
+					}
+					if (sharedFamily) break;
+				}
+			}
+
+			// If name agrees + birth year agrees (and optionally shared family), this is a solid cross-census match!
+			return {
+				census1850: mCensus,
+				owner1850: m.owner,
+				sharedFamily,
+				note: `Confirmed in 1850 as ${mCensus.full_name || mCensus.mention_id}${Number.isFinite(mBY) ? ' (b. ' + mBY + ')' : ''}${sharedFamily ? ' with matching family' : ''}`
+			};
+		}
+		return null;
+	}
+
 	// ---- main entry --------------------------------------------------------
 	// Returns, for one owner, a ranked array of candidate records.
 	rankOwner(owner, block, index, anchorIndex, opts = {}) {
@@ -182,16 +278,50 @@ class CandidateEngine {
 			}
 		}
 
+		// Use clean names for Fellegi matching
+		const cleanOwner = (owner._cleanLastName || owner._cleanFirstName) ? {
+			...owner,
+			last_name: owner._cleanLastName || owner.last_name,
+			first_name: owner._cleanFirstName || owner.first_name,
+			full_name: owner._cleanFullName || owner.full_name,
+		} : owner;
+
+		const ownerGender = owner.gender ? String(owner.gender).trim().toUpperCase() : (owner._inferredGender || null);
+
 		const out = [];
 		for (const { rec, via } of byId.values()) {
-			const res = this.f.MatchPerson(owner, rec, {
+			const res = this.f.MatchPerson(cleanOwner, rec, {
 				censusYear: block.year || rec._year,
 				prior: opts.prior,
 			});
 			if (res.tier === 'KNOCKOUT') continue;
+
+			// Gender inference check and cross-gender penalty
+			const candGender = rec.gender ? String(rec.gender).trim().toUpperCase() : null;
+			let genderBits = 0;
+			let genderClash = false;
+			if (ownerGender && candGender && (ownerGender === 'M' || ownerGender === 'F') && (candGender === 'M' || candGender === 'F')) {
+				if (ownerGender !== candGender) {
+					genderBits = this.genderPenaltyBits;
+					genderClash = true;
+				}
+			}
+
+			// 1850 cross-referencing for 1860 reviews
+			let cross1850 = null;
+			let crossBits = 0;
+			if ((block.year === 1860 || opts.year === 1860) && opts.matches1850) {
+				cross1850 = this._check1850CrossLink(owner, rec, opts.matches1850, opts.data);
+				if (cross1850) {
+					crossBits = this.crossCensusBits;
+				}
+			}
+
 			const candRank = block.rankOf.get(rec.mention_id);
 			const pBits = this.positionBits(candRank, est, block.nCandidates);
 			const cBits = this.contextBits(rec);
+			const totalBits = +(res.bits + pBits + cBits + genderBits + crossBits).toFixed(3);
+
 			out.push({
 				owner,
 				candidate: rec,
@@ -200,7 +330,11 @@ class CandidateEngine {
 				nameBits: res.bits,
 				positionBits: +pBits.toFixed(3),
 				contextBits: +cBits.toFixed(3),
-				totalBits: +(res.bits + pBits + cBits).toFixed(3),
+				genderBits: +genderBits.toFixed(3),
+				genderClash,
+				crossCensusBits: +crossBits.toFixed(3),
+				confirmed1850: cross1850,
+				totalBits,
 				deltaRank: candRank - Math.round(est.expected),
 				deltaDays: (owner._date != null && rec._date != null) ? (rec._date - owner._date) : null,
 				fellegi: res,
@@ -215,17 +349,6 @@ class CandidateEngine {
 			kept[0].marginBits = +(kept[0].totalBits - (kept[1] ? kept[1].totalBits : kept[0].totalBits - 99)).toFixed(3);
 		}
 		return { owner, ownerRank, estimate: est, candidates: kept, consideredCount: byId.size };
-	}
-
-	// Rank every owner in a block. `anchorIndex` is an array of
-	// { ownerRank, candRank } fixed points, from EPS or from confirmed reviews.
-	rankBlock(block, anchorIndex = [], opts = {}) {
-		const index = opts.index || this.buildIndex(block.candidates);
-		const rows = [];
-		for (const owner of block.owners) {
-			rows.push(this.rankOwner(owner, block, index, anchorIndex, opts));
-		}
-		return rows;
 	}
 
 	// ---- seeding -----------------------------------------------------------
@@ -251,7 +374,9 @@ class CandidateEngine {
 
 		const candByName = new Map();
 		for (const c of block.candidates) {
-			const k = firstToken(c.first_name) + '|' + Match.normUpper(c.last_name);
+			const cleanFirst = c._cleanFirstName || c.first_name;
+			const cleanLast = c._cleanLastName || c.last_name;
+			const k = firstToken(cleanFirst) + '|' + Match.normUpper(cleanLast);
 			if (!k || k === '|') continue;
 			let a = candByName.get(k);
 			if (!a) { a = []; candByName.set(k, a); }
@@ -259,13 +384,17 @@ class CandidateEngine {
 		}
 		const ownerCount = new Map();
 		for (const o of block.owners) {
-			const k = firstToken(o.first_name) + '|' + Match.normUpper(o.last_name);
+			const cleanFirst = o._cleanFirstName || o.first_name;
+			const cleanLast = o._cleanLastName || o.last_name;
+			const k = firstToken(cleanFirst) + '|' + Match.normUpper(cleanLast);
 			ownerCount.set(k, (ownerCount.get(k) || 0) + 1);
 		}
 
 		const raw = [];
 		for (const o of block.owners) {
-			const fn = firstToken(o.first_name), ln = Match.normUpper(o.last_name);
+			const cleanFirst = o._cleanFirstName || o.first_name;
+			const cleanLast = o._cleanLastName || o.last_name;
+			const fn = firstToken(cleanFirst), ln = Match.normUpper(cleanLast);
 			if (fn.length < 2 || !ln) continue;                 // a bare initial is not a seed
 			const k = fn + '|' + ln;
 			if (ownerCount.get(k) !== 1) continue;

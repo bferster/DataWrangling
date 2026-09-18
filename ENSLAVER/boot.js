@@ -338,11 +338,18 @@
 	function updateCounter() {
 		const s = app.store.stats();
 		if (!counterEl) return;
-		if (!s.total) { counterEl.textContent = ''; return; }
+		if (!s.total) { counterEl.textContent = ''; counterEl.title = ''; return; }
 		let txt = s.matched + ' matched';
 		if (s.anchored) txt += ' (' + s.anchored + ' via EPS)';
 		txt += ' \u00b7 ' + s.total + ' decided';
+		if (s.manualFindRate != null) {
+			txt += ' \u00b7 ' + Math.round(s.manualFindRate * 100) + '% manual find';
+		}
 		counterEl.textContent = txt;
+		counterEl.title = 'Manual find rate: the share of human-confirmed matches '
+			+ 'that the matcher did not propose. A rough recall estimate for the '
+			+ 'candidate generator \u2014 rising steadily is a sign the matcher, not '
+			+ 'just the reviewer, needs attention.';
 	}
 	document.addEventListener('verite:decision', () => updateCounter());
 

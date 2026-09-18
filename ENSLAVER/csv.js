@@ -138,15 +138,6 @@ class CSV {
 		return lines.join('\n') + '\n';
 	}
 
-	static readFile(file, onProgress) {
-		return new Promise((resolve, reject) => {
-			const fr = new FileReader();
-			fr.onerror = () => reject(new Error('Could not read ' + file.name));
-			if (onProgress) fr.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded, e.total); };
-			fr.onload = () => resolve(String(fr.result));
-			fr.readAsText(file);
-		});
-	}
 }
 
 if (typeof window !== 'undefined') window.CSV = CSV;

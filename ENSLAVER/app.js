@@ -157,12 +157,18 @@ class App {
 		return state;
 	}
 
-	// Anchors that steer the estimate. Confirmed decisions first; seeds fill the
-	// gaps until they are confirmed or overturned. A confirmed decision always
-	// wins over the seed for the same enslaver.
+	// Anchors that steer the estimate, lowest to highest priority: name-unique
+	// seeds, then EPS/HISTID links carried across from the holding alignment,
+	// then confirmed decisions. A confirmed decision always wins over both,
+	// including overturning or clearing an EPS anchor the reviewer rejected.
 	_anchorIndex(state) {
 		const out = new Map();
 		for (const s of state.seeds) out.set(s.owner.mention_id, { ownerRank: s.ownerRank, candRank: s.candRank, kind: 'seed' });
+		for (const [ownerId, a] of state.epsByOwner) {
+			if (!a.census || a.suspect) continue; // Do not let suspect EPS anchors pin the DP sequence
+			const rank = state.block.rankOf.get(a.census.mention_id);
+			if (rank != null) out.set(ownerId, { ownerRank: a.owner._blockRank, candRank: rank, kind: 'eps' });
+		}
 		for (const o of state.block.owners) {
 			const d = this.store.get(o.mention_id);
 			if (!d) continue;
@@ -177,6 +183,25 @@ class App {
 
 	_refresh(state) {
 		state.anchorIndex = this._anchorIndex(state);
+	}
+
+	getMatches1850() {
+		const matches = [];
+		for (const d of this.store.decisions.values()) {
+			if (d.outcome === 'matched' && d.census_id && (d.year === 1850 || (!d.year && String(d.owner_id).includes('1850')))) {
+				const o = this.data.byId.get(d.owner_id);
+				const c = this.data.byId.get(d.census_id);
+				if (c) {
+					matches.push({
+						owner: o,
+						census: c,
+						decision: d,
+						household: c.household_id ? this.data.householdOf(c) : [],
+					});
+				}
+			}
+		}
+		return matches;
 	}
 
 	rowFor(owner) {
@@ -202,7 +227,13 @@ class App {
 			return state.rows[i];
 		}
 
-		const row = this.engine.rankOwner(owner, state.block, state.index, anchors, { prior: this.prior });
+		const matches1850 = this.year === 1860 ? this.getMatches1850() : null;
+		const row = this.engine.rankOwner(owner, state.block, state.index, anchors, {
+			prior: this.prior,
+			matches1850,
+			data: this.data,
+			year: this.year,
+		});
 		state.rows[i] = row;
 		state.rowKey[i] = key;
 		return row;
@@ -221,6 +252,8 @@ class App {
 		for (const o of s.block.owners) {
 			const d = this.store.get(o.mention_id);
 			if (d && d.census_id && (d.anchored || d.machine)) {
+				const epsA = s.epsByOwner && s.epsByOwner.get(o.mention_id);
+				if (epsA && epsA.suspect) continue; // Skip suspect EPS anchors from forced DP alignment
 				const c = this.data.byId.get(d.census_id);
 				if (c) anchors.set(o.mention_id, c);
 			}
